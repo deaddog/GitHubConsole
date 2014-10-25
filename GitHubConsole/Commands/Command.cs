@@ -116,16 +116,22 @@ namespace GitHubConsole.Commands
             else
                 return new Credentials(c.Username, c.Password);
         }
-        protected GitHubClient CreateClient(Credentials cred)
+        protected GitHubClient CreateClient(out string username, out string project)
         {
-            return new GitHubClient(new ProductHeaderValue(clientHeader)) { Credentials = cred };
+            Credentials cred;
+            if (validateGitDirectory(out cred, out username, out project))
+                return new GitHubClient(new ProductHeaderValue(clientHeader)) { Credentials = cred };
+            else
+                return null;
         }
 
-        protected bool ValidateGitDirectory(out Credentials cred)
+        private bool validateGitDirectory(out Credentials cred, out string username, out string project)
         {
             string gitDirectory = FindRepo();
 
             cred = null;
+            username = null;
+            project = null;
 
             if (gitDirectory == null)
             {
@@ -134,10 +140,7 @@ namespace GitHubConsole.Commands
                 return false;
             }
 
-            string user;
-            string project;
-
-            if (!FindGitHubRemote(gitDirectory, out user, out project))
+            if (!FindGitHubRemote(gitDirectory, out username, out project))
             {
                 Console.WriteLine("Unable to find GitHub project.");
                 return false;
