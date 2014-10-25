@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.Text.RegularExpressions;
+using CredentialManagement;
 
 namespace GitHubConsole
 {
@@ -34,6 +35,12 @@ namespace GitHubConsole
                 return;
             }
 
+            Credentials cred = loadCredentials();
+            if (cred == null)
+            {
+                Console.WriteLine("Unable to load GitHub credentials.");
+                return;
+            }
 #if DEBUG
             Console.ReadKey(true);
 #endif
@@ -108,6 +115,33 @@ namespace GitHubConsole
             }
 
             return lines.ToArray();
+        }
+
+        private static Credentials loadCredentials()
+        {
+            Credential c = new Credential()
+            {
+                Target = "github"
+            };
+            if (!c.Load())
+            {
+                Console.Write("Username: ");
+                string username = Console.ReadLine();
+
+                Console.Write("Password: ");
+                string password = Console.ReadLine();
+
+                c = new CredentialManagement.Credential(username, password, "github");
+                if (!c.Save())
+                {
+                    Console.WriteLine("Unable to store credentials.");
+                    return null;
+                }
+                else
+                    return new Credentials(c.Username, c.Password);
+            }
+            else
+                return new Credentials(c.Username, c.Password);
         }
     }
 }
