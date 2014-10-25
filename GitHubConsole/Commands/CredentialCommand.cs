@@ -8,5 +8,9 @@ namespace GitHubConsole.Commands
 {
     public class CredentialCommand : Command
     {
+        public override void Run(ArgumentDictionary args)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
