@@ -16,7 +16,15 @@ namespace GitHubConsole.Commands
             if (client == null)
                 return;
 
-            listIssues(client, username, project, new RepositoryIssueRequest() { State = ItemState.All });
+            RepositoryIssueRequest request = new RepositoryIssueRequest();
+
+            bool open = args.Contains("-open");
+            bool closed = args.Contains("-closed");
+            bool all = args.Contains("-all") || open && closed;
+
+            request.State = all ? ItemState.All : (closed ? ItemState.Closed : ItemState.Open);
+
+            listIssues(client, username, project, request);
         }
 
         private void listIssues(GitHubClient client, string username, string project, RepositoryIssueRequest req)
