@@ -9,7 +9,7 @@ namespace GitHubConsole.Commands
 {
     public abstract class Command
     {
-        private static readonly string credentialsKey = "githubconsole_managedkeyw";
+        protected static readonly string credentialsKey = "githubconsole_managedkeyw";
         private static readonly string clientHeader = "GitHubC#Console";
 
         public abstract void Run(ArgumentDictionary args);
