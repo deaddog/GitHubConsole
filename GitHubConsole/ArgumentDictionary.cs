@@ -15,7 +15,7 @@ namespace GitHubConsole
 
             public Argument(string key, IEnumerable<string> values)
             {
-                this.key = key;
+                this.key = key.ToLower();
                 this.values = values.ToArray();
             }
 
@@ -73,11 +73,17 @@ namespace GitHubConsole
 
         public Argument this[string key]
         {
-            get { return arguments.FirstOrDefault(x => x.Key == key); }
+            get { key = key.ToLower(); return arguments.FirstOrDefault(x => x.Key == key); }
         }
         public Argument this[int index]
         {
             get { return arguments[index]; }
+        }
+
+        public bool Contains(string key)
+        {
+            key = key.ToLower(); 
+            return arguments.Any(x => x.Key == key);
         }
 
         public int Count
