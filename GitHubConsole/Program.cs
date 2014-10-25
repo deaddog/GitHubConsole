@@ -45,6 +45,8 @@ namespace GitHubConsole
             {
                 case "cred":
                     return new CredentialCommand();
+                case "issues":
+                    return new IssuesCommand();
                 default:
                     return null;
             }
