@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.IO;
-using System.Text.RegularExpressions;
-using CredentialManagement;
-using GitHubConsole.Commands;
+﻿using GitHubConsole.Commands;
+using System;
 
 namespace GitHubConsole
 {
@@ -35,6 +28,7 @@ namespace GitHubConsole
             else
                 command.Run(arguments);
 #if DEBUG
+            Console.WriteLine("Done.");
             Console.ReadKey(true);
 #endif
         }
