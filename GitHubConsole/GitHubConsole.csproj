@@ -51,6 +51,8 @@
   <ItemGroup>
     <Compile Include="ArgumentDictionary.cs" />
     <Compile Include="ColorResolver.cs" />
+    <Compile Include="Commands\Command.cs" />
+    <Compile Include="Commands\CredentialCommand.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
