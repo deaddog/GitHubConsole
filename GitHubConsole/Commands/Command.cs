@@ -120,5 +120,35 @@ namespace GitHubConsole.Commands
         {
             return new GitHubClient(new ProductHeaderValue(clientHeader)) { Credentials = cred };
         }
+
+        protected bool ValidateGitDirectory(out Credentials cred)
+        {
+            string gitDirectory = FindRepo();
+
+            if (gitDirectory == null)
+            {
+                Console.WriteLine("The current directory is not part of a Git repository.");
+                Console.WriteLine("GitHub commands cannot be executed.");
+                return false;
+            }
+
+            string user;
+            string project;
+
+            if (!FindGitHubRemote(gitDirectory, out user, out project))
+            {
+                Console.WriteLine("Unable to find GitHub project.");
+                return false;
+            }
+
+            cred = LoadCredentials();
+            if (cred == null)
+            {
+                Console.WriteLine("Unable to load GitHub credentials.");
+                return false;
+            }
+
+            return true;
+        }
     }
 }

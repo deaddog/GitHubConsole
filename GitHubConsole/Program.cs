@@ -16,28 +16,6 @@ namespace GitHubConsole
         {
             ArgumentDictionary arguments = new ArgumentDictionary(args);
 
-            if (gitDirectory == null)
-            {
-                Console.WriteLine("The current directory is not part of a Git repository.");
-                Console.WriteLine("GitHub commands cannot be executed.");
-                return;
-            }
-
-            string user;
-            string project;
-
-            if (!findGitHubRemote(out user, out project))
-            {
-                Console.WriteLine("Unable to find GitHub project.");
-                return;
-            }
-
-            Credentials cred = loadCredentials();
-            if (cred == null)
-            {
-                Console.WriteLine("Unable to load GitHub credentials.");
-                return;
-            }
 #if DEBUG
             Console.ReadKey(true);
 #endif
