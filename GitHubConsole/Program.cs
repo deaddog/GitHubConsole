@@ -19,6 +19,8 @@ namespace GitHubConsole
 
         static void Main(string[] args)
         {
+            ArgumentDictionary arguments = new ArgumentDictionary(args);
+
             if (gitDirectory == null)
             {
                 Console.WriteLine("The current directory is not part of a Git repository.");
