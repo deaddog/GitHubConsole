@@ -9,7 +9,10 @@ namespace GitHubConsole.Commands
 {
     public abstract class Command
     {
-        private static string findRepo()
+        private static readonly string credentialsKey = "githubconsole_managedkeyw";
+        private static readonly string clientHeader = "GitHubC#Console";
+
+        protected string FindRepo()
         {
 #if DEBUG
             return findRepo(@"C:\Users\Mikkel\Documents\Git\sw7\report\");
@@ -17,11 +20,11 @@ namespace GitHubConsole.Commands
             return findRepo(Directory.GetCurrentDirectory());
 #endif
         }
-        private static string findRepo(string directory)
+        private string findRepo(string directory)
         {
             return findRepo(new DirectoryInfo(directory));
         }
-        private static string findRepo(DirectoryInfo directory)
+        private string findRepo(DirectoryInfo directory)
         {
             var dirs = directory.GetDirectories(".git");
             for (int i = 0; i < dirs.Length; i++)
@@ -34,7 +37,7 @@ namespace GitHubConsole.Commands
                 return findRepo(directory.Parent);
         }
 
-        private static bool findGitHubRemote(string gitDirectory, out string user, out string project)
+        protected bool FindGitHubRemote(string gitDirectory, out string user, out string project)
         {
             var remotes = findRemotes(gitDirectory);
 
@@ -53,7 +56,7 @@ namespace GitHubConsole.Commands
             project = null;
             return false;
         }
-        private static Tuple<string, string>[] findRemotes(string gitDirectory)
+        private Tuple<string, string>[] findRemotes(string gitDirectory)
         {
             System.Diagnostics.Process p = new System.Diagnostics.Process()
             {
@@ -88,12 +91,9 @@ namespace GitHubConsole.Commands
             return lines.ToArray();
         }
 
-        private static Credentials loadCredentials()
+        protected Credentials LoadCredentials()
         {
-            Credential c = new Credential()
-            {
-                Target = "github"
-            };
+            Credential c = new Credential() { Target = credentialsKey };
             if (!c.Load())
             {
                 Console.Write("Username: ");
@@ -102,7 +102,7 @@ namespace GitHubConsole.Commands
                 Console.Write("Password: ");
                 string password = Console.ReadLine();
 
-                c = new CredentialManagement.Credential(username, password, "github");
+                c = new CredentialManagement.Credential(username, password, credentialsKey);
                 if (!c.Save())
                 {
                     Console.WriteLine("Unable to store credentials.");
@@ -113,6 +113,10 @@ namespace GitHubConsole.Commands
             }
             else
                 return new Credentials(c.Username, c.Password);
+        }
+        protected GitHubClient CreateClient(Credentials cred)
+        {
+            return new GitHubClient(new ProductHeaderValue(clientHeader)) { Credentials = cred };
         }
     }
 }
