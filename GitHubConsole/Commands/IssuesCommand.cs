@@ -63,7 +63,10 @@ namespace GitHubConsole.Commands
                                               select n.Length).Max();
             foreach (var v in q)
             {
-                Console.ForegroundColor = ConsoleColor.DarkYellow;
+                if (v.ClosedAt.HasValue)
+                    Console.ForegroundColor = ConsoleColor.DarkRed;
+                else
+                    Console.ForegroundColor = ConsoleColor.DarkYellow;
                 Console.Write(v.Number.ToString().PadLeft(len));
 
                 string name = v.Assignee == null ? "" : v.Assignee.Login;
