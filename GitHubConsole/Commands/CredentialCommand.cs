@@ -9,67 +9,122 @@ namespace GitHubConsole.Commands
 {
     public class CredentialCommand : Command
     {
-        public override void Run(ArgumentStack args)
+        private bool setUser = false, setPass = false;
+        private string newUsername = null;
+
+        public override void Execute()
         {
-            if (args.Contains("-set-user") && args.Contains("-set-pass"))
+            Credential c = new Credential() { Target = credentialsKey };
+            if (setPass && !setUser)
             {
-                if (args["-set-user"].Count != 1)
-                    Console.WriteLine("Incorrect value supplied for -set-user.");
-                else if (args["-set-pass"].Count != 1)
-                    Console.WriteLine("Incorrect value supplied for -set-pass.");
-                else
+                if (!c.Load())
                 {
-                    Credential c = new CredentialManagement.Credential(args["-set-user"][0], args["-set-pass"][0], credentialsKey);
-                    if (!c.Save())
-                        Console.WriteLine("Unable to store credentials.");
-                    else
-                        Console.WriteLine("Credentials updated for {0}.", c.Username);
+                    Console.WriteLine("A password can not be set for user - no GitHub user defined.");
+                    return;
                 }
             }
 
-            else if (args.Contains("-set-user"))
+            if (setUser)
+                SetCredentials(newUsername);
+            else if (setPass)
+                SetPassword();
+
+            if (!setUser && !setPass)
             {
-                if (args["-set-user"].Count != 1)
-                    Console.WriteLine("Incorrect value supplied for -set-user.");
+                Console.Write("The current GitHub user is ");
+                if (c.Load())
+                {
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.WriteLine(c.Username);
+                    Console.ForegroundColor = ConsoleColor.Gray;
+                }
                 else
                 {
-                    Credential c = new Credential() { Target = credentialsKey };
-                    if (!c.Load())
-                        Console.WriteLine("No existing user defined. You must supply both username and password.");
-                    else
+                    Console.ForegroundColor = ConsoleColor.DarkRed;
+                    Console.WriteLine("N/A");
+                    Console.ForegroundColor = ConsoleColor.Gray;
+                }
+            }
+        }
+
+        public override bool HandleArgument(ArgumentStack.Argument argument)
+        {
+            switch (argument.Key)
+            {
+                case "-set-user":
+                    if (argument.Count != 0 && argument.Count != 1)
                     {
-                        c.Username = args["-set-user"][0];
-                        if (!c.Save())
-                            Console.WriteLine("Unable to store credentials.");
-                        else
-                            Console.WriteLine("Credentials updated.");
+                        Console.WriteLine("Incorrect value supplied for -set-user.");
+                        return false;
                     }
-                }
-            }
+                    if (argument.Count == 1)
+                        newUsername = argument[0];
 
+                    setUser = true;
+                    setPass = true;
+                    return true;
 
-            else if (args.Contains("-set-pass"))
-            {
-                if (args["-set-pass"].Count != 0)
-                    Console.WriteLine("Password cannot be supplied as command argument.");
-                else
-                {
-                    Credential c = new Credential() { Target = credentialsKey };
-                    if (!c.Load())
-                        Console.WriteLine("No existing user defined. You must supply both username and password.");
-                    else
+                case "-set-pass":
+                    if (argument.Count != 0)
                     {
-                        Console.Write("Password: ");
-                        string pass = Console.ReadLine();
-
-                        c.Password = pass;
-                        if (!c.Save())
-                            Console.WriteLine("Unable to store credentials.");
-                        else
-                            Console.WriteLine("Credentials updated.");
+                        Console.WriteLine("A value cannot be supplied for -set-pass.");
+                        return false;
                     }
-                }
+                    setPass = true;
+                    return true;
+
+                default:
+                    return base.HandleArgument(argument);
             }
+        }
+
+        public static void SetCredentials(string username = null)
+        {
+            Credential c = new Credential() { Target = credentialsKey };
+            c.Load();
+
+            if (username == null)
+            {
+                Console.Write("GitHub username: ");
+                username = Console.ReadLine();
+            }
+
+            c.Username = username;
+            c.Password = ".";
+
+            c.Save();
+
+            SetPassword();
+        }
+        public static void SetPassword()
+        {
+            Credential c = new Credential() { Target = credentialsKey };
+            c.Load();
+
+            Console.Write("GitHub password: ");
+            StringBuilder sb = new StringBuilder();
+
+            ConsoleKeyInfo key;
+            do
+            {
+                key = Console.ReadKey(true);
+
+                if (key.Key == ConsoleKey.Backspace)
+                {
+                    if (sb.Length > 0)
+                        sb.Remove(sb.Length - 1, 1);
+                }
+                else if (key.Key == ConsoleKey.Enter)
+                    break;
+                else
+                    sb.Append(key.KeyChar);
+            } while (true);
+            Console.WriteLine();
+
+            c.Password = sb.ToString();
+
+            c.Save();
+            Console.WriteLine("Credentials updated for {0}.", c.Username);
         }
     }
 }

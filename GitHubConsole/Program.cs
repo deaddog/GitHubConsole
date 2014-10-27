@@ -32,7 +32,6 @@ namespace GitHubConsole
                         return;
 
                 command.Execute();
-                command.Run(arguments);
             }
 #if DEBUG
             Console.WriteLine("Done.");

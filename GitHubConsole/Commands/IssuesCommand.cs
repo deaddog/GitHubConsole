@@ -10,47 +10,37 @@ namespace GitHubConsole.Commands
     public class IssuesCommand : Command
     {
         private bool openArgFound = false;
+        private RepositoryIssueRequest request = new RepositoryIssueRequest();
 
-        public override void Run(ArgumentStack args)
+        public override void Execute()
         {
             string username, project;
             GitHubClient client = CreateClient(out username, out project);
             if (client == null)
                 return;
 
-            RepositoryIssueRequest request = new RepositoryIssueRequest();
-
-            while (args.Count > 0)
-            {
-                var a = args.Pop();
-                if (!handleArgument(a, request))
-                {
-                    Console.WriteLine("Unknown parameter \"{0}\".", a.Key);
-                    return;
-                }
-            }
-
             listIssues(client, username, project, request);
         }
 
-        private bool handleArgument(ArgumentStack.Argument argument, RepositoryIssueRequest req)
+        public override bool HandleArgument(ArgumentStack.Argument argument)
         {
             switch (argument.Key)
             {
                 case "-open":
                     openArgFound = true;
-                    if (req.State == ItemState.Closed)
-                        req.State = ItemState.All;
+                    if (request.State == ItemState.Closed)
+                        request.State = ItemState.All;
                     return true;
                 case "-closed":
-                    if (req.State == ItemState.Open)
-                        req.State = openArgFound ? ItemState.All : ItemState.Closed;
+                    if (request.State == ItemState.Open)
+                        request.State = openArgFound ? ItemState.All : ItemState.Closed;
                     return true;
                 case "-all":
-                    req.State = ItemState.All;
+                    request.State = ItemState.All;
                     return true;
 
-                default: return false;
+                default:
+                    return base.HandleArgument(argument);
             }
         }
 
