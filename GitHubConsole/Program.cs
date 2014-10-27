@@ -19,10 +19,10 @@ namespace GitHubConsole
                 return;
             }
 
-            Command command = getCommand(arguments[0].Key);
+            Command command = getCommand(arguments.Pop());
             if (command == null)
             {
-                Console.WriteLine("Unknown command: {0}.", arguments[0].Key);
+                Console.WriteLine("Unknown command: {0}.", command);
                 Console.WriteLine("Run with no command to see a list of available commands.");
             }
             else
@@ -33,9 +33,9 @@ namespace GitHubConsole
 #endif
         }
 
-        private static Command getCommand(string key)
+        private static Command getCommand(ArgumentStack.Argument arg)
         {
-            switch (key)
+            switch (arg.Key)
             {
                 case "cred":
                     return new CredentialCommand();

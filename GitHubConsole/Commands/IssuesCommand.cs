@@ -9,6 +9,8 @@ namespace GitHubConsole.Commands
 {
     public class IssuesCommand : Command
     {
+        private bool openArgFound = false;
+
         public override void Run(ArgumentStack args)
         {
             string username, project;
@@ -18,13 +20,29 @@ namespace GitHubConsole.Commands
 
             RepositoryIssueRequest request = new RepositoryIssueRequest();
 
-            bool open = args.Contains("-open");
-            bool closed = args.Contains("-closed");
-            bool all = args.Contains("-all") || open && closed;
-
-            request.State = all ? ItemState.All : (closed ? ItemState.Closed : ItemState.Open);
+            while (args.Count > 0)
+                handleArgument(args.Pop(), request);
 
             listIssues(client, username, project, request);
+        }
+
+        private void handleArgument(ArgumentStack.Argument argument, RepositoryIssueRequest req)
+        {
+            switch (argument.Key)
+            {
+                case "-open":
+                    openArgFound = true;
+                    if (req.State == ItemState.Closed)
+                        req.State = ItemState.All;
+                    return;
+                case "-closed":
+                    if (req.State == ItemState.Open)
+                        req.State = openArgFound ? ItemState.All : ItemState.Closed;
+                    return;
+                case "-all":
+                    req.State = ItemState.All;
+                    return;
+            }
         }
 
         private void listIssues(GitHubClient client, string username, string project, RepositoryIssueRequest req)
