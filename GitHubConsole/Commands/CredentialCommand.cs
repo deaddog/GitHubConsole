@@ -92,6 +92,7 @@ namespace GitHubConsole.Commands
             c.Username = username;
             c.Password = ".";
 
+            c.PersistanceType = PersistanceType.LocalComputer;
             c.Save();
 
             SetPassword();
@@ -123,6 +124,7 @@ namespace GitHubConsole.Commands
 
             c.Password = sb.ToString();
 
+            c.PersistanceType = PersistanceType.LocalComputer;
             c.Save();
             Console.WriteLine("Credentials updated for {0}.", c.Username);
         }
