@@ -12,7 +12,12 @@ namespace GitHubConsole.Commands
         protected static readonly string credentialsKey = "githubconsole_managedkeyw";
         private static readonly string clientHeader = "GitHubC#Console";
 
-        public abstract void Run(ArgumentStack args);
+        public abstract void Execute();
+        public virtual bool HandleArgument(ArgumentStack.Argument argument)
+        {
+            Console.WriteLine("Unknown parameter \"{0}\".", argument.Key);
+            return false;
+        }
 
         protected string FindRepo()
         {

@@ -26,7 +26,14 @@ namespace GitHubConsole
                 Console.WriteLine("Run with no command to see a list of available commands.");
             }
             else
+            {
+                while (arguments.Count > 0)
+                    if (!command.HandleArgument(arguments.Pop()))
+                        return;
+
+                command.Execute();
                 command.Run(arguments);
+            }
 #if DEBUG
             Console.WriteLine("Done.");
             Console.ReadKey(true);
