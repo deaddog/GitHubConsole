@@ -71,6 +71,13 @@ namespace GitHubConsole
                 this.arguments.Add(new Argument(key, values));
         }
 
+        public Argument Pop()
+        {
+            Argument a = arguments[0];
+            arguments.RemoveAt(0);
+            return a;
+        }
+
         public Argument this[string key]
         {
             get { key = key.ToLower(); return arguments.FirstOrDefault(x => x.Key == key); }
