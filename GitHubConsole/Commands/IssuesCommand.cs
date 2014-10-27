@@ -38,9 +38,14 @@ namespace GitHubConsole.Commands
             {
                 Console.ForegroundColor = ConsoleColor.DarkYellow;
                 Console.Write(v.Number.ToString().PadLeft(len));
-                Console.ForegroundColor = ConsoleColor.DarkCyan;
+
                 string name = v.Assignee == null ? "" : v.Assignee.Login;
+                if (name == client.Credentials.Login)
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                else
+                    Console.ForegroundColor = ConsoleColor.DarkCyan;
                 Console.Write(" {0}", name.PadRight(namelen));
+
                 Console.ForegroundColor = ConsoleColor.Gray;
                 Console.Write(" {0}", v.Title);
 
