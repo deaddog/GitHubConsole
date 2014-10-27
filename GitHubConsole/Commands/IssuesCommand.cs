@@ -21,12 +21,19 @@ namespace GitHubConsole.Commands
             RepositoryIssueRequest request = new RepositoryIssueRequest();
 
             while (args.Count > 0)
-                handleArgument(args.Pop(), request);
+            {
+                var a = args.Pop();
+                if (!handleArgument(a, request))
+                {
+                    Console.WriteLine("Unknown parameter \"{0}\".", a.Key);
+                    return;
+                }
+            }
 
             listIssues(client, username, project, request);
         }
 
-        private void handleArgument(ArgumentStack.Argument argument, RepositoryIssueRequest req)
+        private bool handleArgument(ArgumentStack.Argument argument, RepositoryIssueRequest req)
         {
             switch (argument.Key)
             {
@@ -34,14 +41,16 @@ namespace GitHubConsole.Commands
                     openArgFound = true;
                     if (req.State == ItemState.Closed)
                         req.State = ItemState.All;
-                    return;
+                    return true;
                 case "-closed":
                     if (req.State == ItemState.Open)
                         req.State = openArgFound ? ItemState.All : ItemState.Closed;
-                    return;
+                    return true;
                 case "-all":
                     req.State = ItemState.All;
-                    return;
+                    return true;
+
+                default: return false;
             }
         }
 
