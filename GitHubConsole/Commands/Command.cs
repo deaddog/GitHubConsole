@@ -96,7 +96,7 @@ namespace GitHubConsole.Commands
         protected Credentials LoadCredentials()
         {
             Credential c = new Credential() { Target = credentialsKey };
-            if (!c.Load())
+            if (!c.Load() || (c.Username == null || c.Username.Length == 0 || c.Password == null || c.Password.Length == 0))
             {
                 Console.Write("Username: ");
                 string username = Console.ReadLine();
