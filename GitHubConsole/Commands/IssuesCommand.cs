@@ -9,7 +9,7 @@ namespace GitHubConsole.Commands
 {
     public class IssuesCommand : Command
     {
-        public override void Run(ArgumentDictionary args)
+        public override void Run(ArgumentStack args)
         {
             string username, project;
             GitHubClient client = CreateClient(out username, out project);

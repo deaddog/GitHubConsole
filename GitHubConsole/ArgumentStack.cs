@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GitHubConsole
 {
-    public class ArgumentDictionary : IEnumerable<ArgumentDictionary.Argument>
+    public class ArgumentStack : IEnumerable<ArgumentStack.Argument>
     {
         public class Argument
         {
@@ -42,7 +42,7 @@ namespace GitHubConsole
 
         private List<Argument> arguments;
 
-        public ArgumentDictionary(string[] args)
+        public ArgumentStack(string[] args)
         {
             this.arguments = new List<Argument>();
             string key = null;
@@ -98,7 +98,7 @@ namespace GitHubConsole
             get { return arguments.Count; }
         }
 
-        public IEnumerator<ArgumentDictionary.Argument> GetEnumerator()
+        public IEnumerator<ArgumentStack.Argument> GetEnumerator()
         {
             foreach (var a in arguments)
                 yield return a;

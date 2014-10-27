@@ -12,7 +12,7 @@ namespace GitHubConsole.Commands
         protected static readonly string credentialsKey = "githubconsole_managedkeyw";
         private static readonly string clientHeader = "GitHubC#Console";
 
-        public abstract void Run(ArgumentDictionary args);
+        public abstract void Run(ArgumentStack args);
 
         protected string FindRepo()
         {

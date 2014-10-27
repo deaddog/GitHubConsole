@@ -49,7 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ArgumentDictionary.cs" />
+    <Compile Include="ArgumentStack.cs" />
     <Compile Include="ColorResolver.cs" />
     <Compile Include="Commands\Command.cs" />
     <Compile Include="Commands\CredentialCommand.cs" />

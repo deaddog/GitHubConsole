@@ -9,7 +9,7 @@ namespace GitHubConsole.Commands
 {
     public class CredentialCommand : Command
     {
-        public override void Run(ArgumentDictionary args)
+        public override void Run(ArgumentStack args)
         {
             if (args.Contains("-set-user") && args.Contains("-set-pass"))
             {

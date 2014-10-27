@@ -7,7 +7,7 @@ namespace GitHubConsole
     {
         static void Main(string[] args)
         {
-            ArgumentDictionary arguments = new ArgumentDictionary(args);
+            ArgumentStack arguments = new ArgumentStack(args);
 
             if (arguments.Count == 0)
             {
