@@ -102,22 +102,7 @@ namespace GitHubConsole.Commands
         {
             Credential c = new Credential() { Target = credentialsKey };
             if (!c.Load() || (c.Username == null || c.Username.Length == 0 || c.Password == null || c.Password.Length == 0))
-            {
-                Console.Write("Username: ");
-                string username = Console.ReadLine();
-
-                Console.Write("Password: ");
-                string password = Console.ReadLine();
-
-                c = new CredentialManagement.Credential(username, password, credentialsKey);
-                if (!c.Save())
-                {
-                    Console.WriteLine("Unable to store credentials.");
-                    return null;
-                }
-                else
-                    return new Credentials(c.Username, c.Password);
-            }
+                return null;
             else
                 return new Credentials(c.Username, c.Password);
         }
@@ -155,6 +140,11 @@ namespace GitHubConsole.Commands
             if (cred == null)
             {
                 Console.WriteLine("Unable to load GitHub credentials.");
+                Console.Write("Run ");
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.Write("github cred -set-user");
+                Console.ForegroundColor = ConsoleColor.Gray;
+                Console.WriteLine(" to set.");
                 return false;
             }
 
