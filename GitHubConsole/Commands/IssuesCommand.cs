@@ -61,6 +61,28 @@ namespace GitHubConsole.Commands
                     request.State = ItemState.All;
                     return true;
 
+                case "-label":
+                    for (int i = 0; i < argument.Count; i++)
+                    {
+                        var arg = argument[i];
+                        var argReplace = argument[i].Replace('_', ' ');
+
+                        if (arg.StartsWith("!"))
+                        {
+                            arg = arg.Substring(1);
+                            argReplace = argReplace.Substring(1);
+                            AndPredicate(x => !x.Labels.Any(l => l.Name == arg || l.Name == argReplace));
+                        }
+                        else
+                        {
+                            if (arg != argReplace)
+                                AndPredicate(x => x.Labels.Any(l => l.Name == arg || l.Name == argReplace));
+                            else
+                                request.Labels.Add(arg);
+                        }
+                    }
+                    return true;
+
                 default:
                     return base.HandleArgument(argument);
             }
