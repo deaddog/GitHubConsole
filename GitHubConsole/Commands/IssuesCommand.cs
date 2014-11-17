@@ -83,6 +83,32 @@ namespace GitHubConsole.Commands
                     }
                     return true;
 
+                case "-assignee":
+                    if (argument.Count == 0)
+                    {
+                        Console.WriteLine("A user must be specified for the -assignee argument.");
+                        return false;
+                    }
+                    else if (argument.Count > 1)
+                    {
+                        Console.WriteLine("Only one user can be specified for the -assignee argument.");
+                        return false;
+                    }
+                    {
+                        var arg = argument[0];
+                        var argReplace = argument[0].Replace('_', ' ');
+
+                        if (arg.StartsWith("!"))
+                        {
+                            arg = arg.Substring(1);
+                            argReplace = argReplace.Substring(1);
+                            AndPredicate(x => x.Assignee == null || x.Assignee.Login != arg || x.Assignee.Login != argReplace);
+                        }
+                        else
+                            AndPredicate(x => x.Assignee != null && (x.Assignee.Login == arg || x.Assignee.Login == argReplace));
+                    }
+                    return true;
+
                 default:
                     return base.HandleArgument(argument);
             }
