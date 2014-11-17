@@ -9,6 +9,9 @@ namespace GitHubConsole.Commands
 {
     public class IssuesCommand : Command
     {
+        private bool firstArg = true;
+        private IssuesAssigner assigner = null;
+
         private bool openArgFound = false;
         private RepositoryIssueRequest request = new RepositoryIssueRequest();
         private Predicate<Issue> validator = null;
@@ -36,6 +39,12 @@ namespace GitHubConsole.Commands
 
         public override void Execute()
         {
+            if (assigner != null)
+            {
+                assigner.Execute();
+                return;
+            }
+
             string username, project;
             GitHubClient client = CreateClient(out username, out project);
             if (client == null)
@@ -46,6 +55,16 @@ namespace GitHubConsole.Commands
 
         public override bool HandleArgument(ArgumentStack.Argument argument)
         {
+            if (firstArg)
+            {
+                if (argument.Key == "take" || argument.Key == "drop")
+                    assigner = new IssuesAssigner();
+                firstArg = false;
+            }
+
+            if (assigner != null)
+                return assigner.HandleArgument(argument);
+
             switch (argument.Key)
             {
                 case "-open":
