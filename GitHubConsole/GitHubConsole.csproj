@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArgumentStack.cs" />
+    <Compile Include="ColorConsole.cs" />
     <Compile Include="ColorResolver.cs" />
     <Compile Include="Commands\Command.cs" />
     <Compile Include="Commands\CredentialCommand.cs" />
