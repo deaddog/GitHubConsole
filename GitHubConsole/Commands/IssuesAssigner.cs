@@ -13,8 +13,7 @@ namespace GitHubConsole.Commands
         private bool isTake = false;
         private bool isDrop = false;
 
-        private List<int> take = new List<int>();
-        private List<int> drop = new List<int>();
+        private List<int> issues = new List<int>();
 
         public override void Execute()
         {
@@ -25,16 +24,74 @@ namespace GitHubConsole.Commands
 
             if (isTake)
             {
-                var issue = client.Issue.Get(username, project, take[0]).Result;
-                var user = client.User.Current().Result;
-                
-                var update = issue.ToUpdate();
-                update.Assignee = user.Login;
-                var updated = client.Issue.Update(username, project, issue.Number, update).Result;
-            }
-            else if (isDrop)
-            {
+                if (issues.Count == 0)
+                {
+                    Console.WriteLine("You must specify which issues # to assign yourself to.");
+                    Console.Write("For instance: ");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.Write("github issues take 5 7");
+                    Console.ResetColor();
+                    Console.WriteLine(" will assign you to issue #5 and #7.");
+                }
 
+                string assignUser = client.User.Current().Result.Login;
+                for (int i = 0; i < issues.Count; i++)
+                {
+                    var issue = client.Issue.Get(username, project, issues[i]).Result;
+
+                    var update = issue.ToUpdate();
+                    update.Assignee = assignUser;
+                    client.Issue.Update(username, project, issue.Number, update).Wait();
+                }
+            }
+
+            if (isDrop)
+            {
+                if (issues.Count == 0)
+                {
+                    Console.WriteLine("You must specify which issues # to unassign yourself from.");
+                    Console.Write("For instance: ");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.Write("github issues drop 5 7");
+                    Console.ResetColor();
+                    Console.WriteLine(" will unassign you from issue #5 and #7.");
+                }
+
+                string assignUser = client.User.Current().Result.Login;
+                for (int i = 0; i < issues.Count; i++)
+                {
+                    var issue = client.Issue.Get(username, project, issues[i]).Result;
+                    if (issue.Assignee == null)
+                    {
+                        Console.Write("No one is assigned to issue ");
+
+                        Console.ForegroundColor = ConsoleColor.DarkYellow;
+                        Console.Write("#{0}", issue.Number);
+                        Console.ResetColor();
+
+                        Console.WriteLine(", you cannot be unassigned.");
+                        continue;
+                    }
+                    if (issue.Assignee.Login != assignUser)
+                    {
+                        Console.ForegroundColor = ConsoleColor.DarkCyan;
+                        Console.Write(issue.Assignee.Login);
+                        Console.ResetColor();
+
+                        Console.Write(" is assigned to issue ");
+
+                        Console.ForegroundColor = ConsoleColor.DarkYellow;
+                        Console.Write("#{0}", issue.Number);
+                        Console.ResetColor();
+
+                        Console.WriteLine(", you cannot be unassigned.");
+                        continue;
+                    }
+
+                    var update = issue.ToUpdate();
+                    update.Assignee = null;
+                    client.Issue.Update(username, project, issue.Number, update).Wait();
+                }
             }
         }
 
@@ -74,10 +131,8 @@ namespace GitHubConsole.Commands
                 return false;
             }
 
-            if (isTake)
-                take.Add(id);
-            else if (isDrop)
-                drop.Add(id);
+            if (isTake || isDrop)
+                issues.Add(id);
             else
             {
                 Console.WriteLine("take or drop must be specified before attempting to handle assignment,.");
