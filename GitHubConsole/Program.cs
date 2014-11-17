@@ -19,10 +19,11 @@ namespace GitHubConsole
                 return;
             }
 
-            Command command = getCommand(arguments.Pop());
+            var a = arguments.Pop();
+            Command command = getCommand(a);
             if (command == null)
             {
-                Console.WriteLine("Unknown command: {0}.", command);
+                Console.WriteLine("Unknown command: {0}.", a.Key);
                 Console.WriteLine("Run with no command to see a list of available commands.");
             }
             else
