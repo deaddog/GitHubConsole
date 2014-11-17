@@ -83,6 +83,14 @@ namespace GitHubConsole.Commands
                     }
                     return true;
 
+                case "-no-assignee":
+                    AndPredicate(x => x.Assignee == null);
+                    return true;
+
+                case "-has-assignee":
+                    AndPredicate(x => x.Assignee != null);
+                    return true;
+
                 case "-assignee":
                     if (argument.Count == 0)
                     {
