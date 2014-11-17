@@ -49,12 +49,8 @@ namespace GitHubConsole.Commands
             {
                 if (issues.Count == 0)
                 {
-                    Console.WriteLine("You must specify which issues # to unassign yourself from.");
-                    Console.Write("For instance: ");
-                    Console.ForegroundColor = ConsoleColor.White;
-                    Console.Write("github issues drop 5 7");
-                    Console.ResetColor();
-                    Console.WriteLine(" will unassign you from issue #5 and #7.");
+                    "You must specify which issues # to unassign yourself from.".ToConsoleLine();
+                    "For instance: [[:White:github issues drop 5 7]] will unassign you from issue #5 and #7.".ToConsoleLine();
                 }
 
                 string assignUser = client.User.Current().Result.Login;
@@ -63,28 +59,12 @@ namespace GitHubConsole.Commands
                     var issue = client.Issue.Get(username, project, issues[i]).Result;
                     if (issue.Assignee == null)
                     {
-                        Console.Write("No one is assigned to issue ");
-
-                        Console.ForegroundColor = ConsoleColor.DarkYellow;
-                        Console.Write("#{0}", issue.Number);
-                        Console.ResetColor();
-
-                        Console.WriteLine(", you cannot be unassigned.");
+                        "No one is assigned to issue [[:DarkYellow:#{0}]], you cannot be unassigned.".ToConsoleLine(issue.Number);
                         continue;
                     }
                     if (issue.Assignee.Login != assignUser)
                     {
-                        Console.ForegroundColor = ConsoleColor.DarkCyan;
-                        Console.Write(issue.Assignee.Login);
-                        Console.ResetColor();
-
-                        Console.Write(" is assigned to issue ");
-
-                        Console.ForegroundColor = ConsoleColor.DarkYellow;
-                        Console.Write("#{0}", issue.Number);
-                        Console.ResetColor();
-
-                        Console.WriteLine(", you cannot be unassigned.");
+                        "[[:DarkCyan:{0}]] is assigned to issue [[:DarkYellow:#{1}]], you cannot be unassigned.".ToConsoleLine(issue.Assignee.Login, issue.Number);
                         continue;
                     }
 
