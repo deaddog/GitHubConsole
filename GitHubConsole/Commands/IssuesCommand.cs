@@ -11,6 +11,28 @@ namespace GitHubConsole.Commands
     {
         private bool openArgFound = false;
         private RepositoryIssueRequest request = new RepositoryIssueRequest();
+        private Predicate<Issue> validator = null;
+
+        private void AndPredicate(Func<Issue, bool> func)
+        {
+            var old = validator;
+            validator = null;
+
+            if (old == null)
+                validator = x => func(x);
+            else
+                validator = x => (old(x) && func(x));
+        }
+        private void OrPredicate(Func<Issue, bool> func)
+        {
+            var old = validator;
+            validator = null;
+
+            if (old == null)
+                validator = x => func(x);
+            else
+                validator = x => (old(x) || func(x));
+        }
 
         public override void Execute()
         {
@@ -47,12 +69,18 @@ namespace GitHubConsole.Commands
         private void listIssues(GitHubClient client, string username, string project, RepositoryIssueRequest req)
         {
             var q = client.Issue.GetForRepository(username, project, req).Result;
+            if (q.Count == 0)
+                return;
+
             int len = q[0].Number.ToString().Length;
             int namelen = q.Count == 0 ? 0 : (from v in q
                                               let n = v.Assignee == null ? "" : v.Assignee.Login
                                               select n.Length).Max();
             foreach (var v in q)
             {
+                if (validator != null && !validator(v))
+                    continue;
+
                 if (v.ClosedAt.HasValue)
                     Console.ForegroundColor = ConsoleColor.DarkRed;
                 else
