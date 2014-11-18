@@ -21,37 +21,37 @@ namespace GitHubConsole
 
         public static void ToConsole(this string format, params object[] args)
         {
-            handle(format, false, args);
+            handle(string.Format(format, args), false);
         }
 
         public static void ToConsoleLine(this string format, params object[] args)
         {
-            handle(format, true, args);
+            handle(string.Format(format, args), true);
         }
 
-        private static void handle(string format, bool newline, params object[] args)
+        private static void handle(string input, bool newline)
         {
-            var m = colorRegex.Match(format);
+            var m = colorRegex.Match(input);
             if (m.Success)
             {
-                string pre = format.Substring(0, m.Index);
-                string post = format.Substring(m.Index + m.Length);
+                string pre = input.Substring(0, m.Index);
+                string post = input.Substring(m.Index + m.Length);
 
                 string content = m.Value.Remove(0, 4 + m.Groups["color"].Length);
                 content = content.Remove(content.Length - 2);
 
-                Console.Write(pre, args);
+                Console.Write(pre);
                 var color = getColor(m.Groups["color"].Value);
                 Console.ForegroundColor = color;
-                Console.Write(content, args);
+                Console.Write(content);
                 Console.ResetColor();
 
-                ToConsoleLine(post, args);
+                handle(post, newline);
             }
             else if (newline)
-                Console.WriteLine(format, args);
+                Console.WriteLine(input);
             else
-                Console.Write(format, args);
+                Console.Write(input);
         }
 
         private static ConsoleColor getColor(string color)
