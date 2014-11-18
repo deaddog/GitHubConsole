@@ -156,47 +156,19 @@ namespace GitHubConsole.Commands
                 if (validator != null && !validator(v))
                     continue;
 
-                if (v.ClosedAt.HasValue)
-                    Console.ForegroundColor = ConsoleColor.DarkRed;
-                else
-                    Console.ForegroundColor = ConsoleColor.DarkYellow;
-                Console.Write(v.Number.ToString().PadLeft(len));
-
                 string name = v.Assignee == null ? "" : v.Assignee.Login;
-                if (name == client.Credentials.Login)
-                    Console.ForegroundColor = ConsoleColor.Cyan;
-                else
-                    Console.ForegroundColor = ConsoleColor.DarkCyan;
-                Console.Write(" {0}", name.PadRight(namelen));
 
-                Console.ForegroundColor = ConsoleColor.Gray;
-                Console.Write(" {0}", v.Title);
+                "[[:{1}:{0}]] [[:{3}:{2}]] {4}".ToConsole(
+                    v.Number.ToString().PadLeft(len), v.ClosedAt.HasValue ? "DarkRed" : "DarkYellow",
+                    name.PadRight(namelen), name == client.Credentials.Login ? "Cyan" : "DarkCyan",
+                    v.Title);
 
                 if (v.Labels.Count > 0)
                 {
-                    Console.ForegroundColor = ConsoleColor.DarkYellow;
-                    Console.Write(" (");
-
-                    bool first = true;
-                    foreach (var label in v.Labels)
-                    {
-                        if (first)
-                            first = false;
-                        else
-                        {
-                            Console.ForegroundColor = ConsoleColor.DarkYellow;
-                            Console.Write(", ");
-                        }
-
-                        Console.ForegroundColor = ColorResolver.GetConsoleColor(label.Color);
-                        Console.Write(label.Name);
-                    }
-
-                    Console.ForegroundColor = ConsoleColor.DarkYellow;
-                    Console.Write(")");
+                    " [[:DarkYellow:(]]{0}[[:DarkYellow:)]]".ToConsole(
+                        string.Join(", ", v.Labels.Select(l => "[[:" + ColorResolver.GetConsoleColor(l.Color) + ":" + l.Name + "]]")));
                 }
 
-                Console.ForegroundColor = ConsoleColor.Gray;
                 Console.WriteLine();
             }
         }
