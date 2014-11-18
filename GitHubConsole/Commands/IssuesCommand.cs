@@ -10,7 +10,7 @@ namespace GitHubConsole.Commands
     public class IssuesCommand : Command
     {
         private bool firstArg = true;
-        private IssuesAssigner assigner = null;
+        private Command innerCommand = null;
 
         private bool openArgFound = false;
         private RepositoryIssueRequest request = new RepositoryIssueRequest();
@@ -39,9 +39,9 @@ namespace GitHubConsole.Commands
 
         public override void Execute()
         {
-            if (assigner != null)
+            if (innerCommand != null)
             {
-                assigner.Execute();
+                innerCommand.Execute();
                 return;
             }
 
@@ -58,12 +58,14 @@ namespace GitHubConsole.Commands
             if (firstArg)
             {
                 if (argument.Key == "take" || argument.Key == "drop")
-                    assigner = new IssuesAssigner();
+                    innerCommand = new IssuesAssigner();
+                else if (argument.Key == "label")
+                    innerCommand = new IssuesLabeler();
                 firstArg = false;
             }
 
-            if (assigner != null)
-                return assigner.HandleArgument(argument);
+            if (innerCommand != null)
+                return innerCommand.HandleArgument(argument);
 
             switch (argument.Key)
             {
