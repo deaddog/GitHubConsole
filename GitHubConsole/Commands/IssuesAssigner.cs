@@ -38,6 +38,11 @@ namespace GitHubConsole.Commands
                 for (int i = 0; i < issues.Count; i++)
                 {
                     var issue = client.Issue.Get(username, project, issues[i]).Result;
+                    if (issue.Assignee != null)
+                    {
+                        "[[:DarkCyan:{0}]] is assigned to issue [[:DarkYellow:#{1}]], you cannot be assigned.".ToConsoleLine(issue.Assignee.Login, issue.Number);
+                        continue;
+                    }
 
                     var update = issue.ToUpdate();
                     update.Assignee = assignUser;
