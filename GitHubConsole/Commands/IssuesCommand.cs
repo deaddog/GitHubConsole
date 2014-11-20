@@ -88,7 +88,7 @@ namespace GitHubConsole.Commands
                         var arg = argument[i];
                         var argReplace = argument[i].Replace('_', ' ');
 
-                        if (arg.StartsWith("!"))
+                        if (arg.StartsWith("^"))
                         {
                             arg = arg.Substring(1);
                             argReplace = argReplace.Substring(1);
