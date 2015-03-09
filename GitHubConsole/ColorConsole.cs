@@ -41,10 +41,13 @@ namespace GitHubConsole
                 content = content.Remove(content.Length - 2);
 
                 Console.Write(pre);
-                var color = getColor(m.Groups["color"].Value);
-                Console.ForegroundColor = color;
-                Console.Write(content);
-                Console.ResetColor();
+                if (content.Length > 0)
+                {
+                    var color = getColor(m.Groups["color"].Value);
+                    Console.ForegroundColor = color;
+                    Console.Write(content);
+                    Console.ResetColor();
+                }
 
                 handle(post, newline);
             }
