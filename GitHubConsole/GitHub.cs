@@ -19,7 +19,7 @@ namespace GitHubConsole
         private static string username;
         private static string project;
 
-        private static string FindRepo()
+        private static string findRepo()
         {
 #if DEBUG
             return findRepo(@"C:\Users\Mikkel\Documents\Git\ghconsole_test\");
@@ -29,19 +29,15 @@ namespace GitHubConsole
         }
         private static string findRepo(string directory)
         {
-            return findRepo(new DirectoryInfo(directory));
-        }
-        private static string findRepo(DirectoryInfo directory)
-        {
-            var dirs = directory.GetDirectories(".git");
-            for (int i = 0; i < dirs.Length; i++)
-                if (dirs[i].Name == ".git")
-                    return directory.FullName;
-
-            if (directory.Parent == null)
+            if (directory == null)
                 return null;
-            else
-                return findRepo(directory.Parent);
+
+            var dirs = Directory.GetDirectories(directory, ".git");
+            for (int i = 0; i < dirs.Length; i++)
+                if (Path.GetFileName(dirs[i]).Equals(".git"))
+                    return directory;
+
+            return findRepo(Path.GetDirectoryName(directory));
         }
 
         private static bool FindGitHubRemote(string gitDirectory, out string user, out string project)
@@ -117,7 +113,7 @@ namespace GitHubConsole
 
         private static bool validateGitDirectory(out Credentials cred, out string username, out string project)
         {
-            string gitDirectory = FindRepo();
+            string gitDirectory = findRepo();
 
             cred = null;
             username = null;
