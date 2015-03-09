@@ -57,6 +57,7 @@
     <Compile Include="Commands\IssuesAssigner.cs" />
     <Compile Include="Commands\IssuesCommand.cs" />
     <Compile Include="Commands\IssuesLabeler.cs" />
+    <Compile Include="Commands\ManagedCommand.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
