@@ -12,26 +12,26 @@ namespace GitHubConsole
 {
     public static class GitHub
     {
-        protected static readonly string credentialsKey = "githubconsole_managedkeyw";
+        private static readonly string credentialsKey = "githubconsole_managedkeyw";
         private static readonly string clientHeader = "GitHubC#Console";
 
         private static GitHubClient client;
         private static string username;
         private static string project;
 
-        protected string FindRepo()
+        private static string FindRepo()
         {
 #if DEBUG
-            return findRepo(@"C:\Users\Mikkel\Documents\Git\sw7\report\");
+            return findRepo(@"C:\Users\Mikkel\Documents\Git\ghconsole_test\");
 #else
             return findRepo(Directory.GetCurrentDirectory());
 #endif
         }
-        private string findRepo(string directory)
+        private static string findRepo(string directory)
         {
             return findRepo(new DirectoryInfo(directory));
         }
-        private string findRepo(DirectoryInfo directory)
+        private static string findRepo(DirectoryInfo directory)
         {
             var dirs = directory.GetDirectories(".git");
             for (int i = 0; i < dirs.Length; i++)
@@ -44,7 +44,7 @@ namespace GitHubConsole
                 return findRepo(directory.Parent);
         }
 
-        protected bool FindGitHubRemote(string gitDirectory, out string user, out string project)
+        private static bool FindGitHubRemote(string gitDirectory, out string user, out string project)
         {
             var remotes = findRemotes(gitDirectory);
 
@@ -63,7 +63,7 @@ namespace GitHubConsole
             project = null;
             return false;
         }
-        private Tuple<string, string>[] findRemotes(string gitDirectory)
+        private static Tuple<string, string>[] findRemotes(string gitDirectory)
         {
             System.Diagnostics.Process p = new System.Diagnostics.Process()
             {
@@ -98,7 +98,7 @@ namespace GitHubConsole
             return lines.ToArray();
         }
 
-        protected Credentials LoadCredentials()
+        private static Credentials LoadCredentials()
         {
             Credential c = new Credential() { Target = credentialsKey };
             if (!c.Load() || (c.Username == null || c.Username.Length == 0 || c.Password == null || c.Password.Length == 0))
@@ -106,7 +106,7 @@ namespace GitHubConsole
             else
                 return new Credentials(c.Username, c.Password);
         }
-        protected GitHubClient CreateClient(out string username, out string project)
+        private static GitHubClient CreateClient(out string username, out string project)
         {
             Credentials cred;
             if (validateGitDirectory(out cred, out username, out project))
@@ -115,7 +115,7 @@ namespace GitHubConsole
                 return null;
         }
 
-        private bool validateGitDirectory(out Credentials cred, out string username, out string project)
+        private static bool validateGitDirectory(out Credentials cred, out string username, out string project)
         {
             string gitDirectory = FindRepo();
 
