@@ -16,7 +16,7 @@ namespace GitHubConsole
             var names = Enum.GetNames(typeof(ConsoleColor));
             string namesRegex = string.Join("|", names);
 
-            colorRegex = new Regex(@"\[\[:(?<color>" + namesRegex + @"):([^\]]|\][^\]])+\]\]");
+            colorRegex = new Regex(@"\[\[:(?<color>" + namesRegex + @"):([^\]]|\][^\]])*\]\]");
         }
 
         public static void ToConsole(this string format, params object[] args)
