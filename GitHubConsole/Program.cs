@@ -7,7 +7,22 @@ namespace GitHubConsole
     {
         static void Main(string[] args)
         {
+#if DEBUG
+        start:
+            Console.Write("Input command (or \"exit\" to quit):");
+
+            string input = Console.ReadLine();
+            if (input.StartsWith("github"))
+                input = input.Substring(6);
+            input.Trim();
+
+            if (input == "exit")
+                return;
+
+            ArgumentStack arguments = new ArgumentStack(input.Split(' '));
+#else
             ArgumentStack arguments = new ArgumentStack(args);
+#endif
 
             if (arguments.Count == 0)
             {
@@ -35,8 +50,7 @@ namespace GitHubConsole
                 command.Execute();
             }
 #if DEBUG
-            Console.WriteLine("Done.");
-            Console.ReadKey(true);
+            goto start;
 #endif
         }
 
