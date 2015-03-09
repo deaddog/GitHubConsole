@@ -47,10 +47,9 @@ namespace GitHubConsole
                 case "cred":
                     return new CredentialCommand();
                 case "issues":
-                    var assigner = new IssuesAssigner();
                     return new SubCommand(new IssuesCommand(),
-                        "take", assigner,
-                        "drop", assigner,
+                        "take", new IssuesAssigner(true),
+                        "drop", new IssuesAssigner(false),
                         "label", new IssuesLabeler());
                 default:
                     return null;

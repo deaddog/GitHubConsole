@@ -9,11 +9,14 @@ namespace GitHubConsole.Commands
 {
     public class IssuesAssigner : Command
     {
-        private bool isFirst = true;
         private bool isTake = false;
-        private bool isDrop = false;
 
         private List<int> issues = new List<int>();
+
+        public IssuesAssigner(bool istake)
+        {
+            this.isTake = istake;
+        }
 
         public override void Execute()
         {
@@ -50,7 +53,7 @@ namespace GitHubConsole.Commands
                 }
             }
 
-            if (isDrop)
+            else // drop
             {
                 if (issues.Count == 0)
                 {
@@ -82,33 +85,6 @@ namespace GitHubConsole.Commands
 
         public override bool HandleArgument(ArgumentStack.Argument argument)
         {
-            if (isFirst)
-            {
-                isFirst = false;
-                return handleFirst(argument);
-            }
-            else
-                return handleRest(argument);
-        }
-
-        private bool handleFirst(ArgumentStack.Argument argument)
-        {
-            switch (argument.Key)
-            {
-                case "take":
-                    isTake = true;
-                    return true;
-
-                case "drop":
-                    isDrop = true;
-                    return true;
-
-                default:
-                    return base.HandleArgument(argument);
-            }
-        }
-        private bool handleRest(ArgumentStack.Argument argument)
-        {
             int id;
             if (!int.TryParse(argument.Key, out id))
             {
@@ -116,13 +92,7 @@ namespace GitHubConsole.Commands
                 return false;
             }
 
-            if (isTake || isDrop)
-                issues.Add(id);
-            else
-            {
-                Console.WriteLine("take or drop must be specified before attempting to handle assignment,.");
-                return false;
-            }
+            issues.Add(id);
             return true;
         }
     }
