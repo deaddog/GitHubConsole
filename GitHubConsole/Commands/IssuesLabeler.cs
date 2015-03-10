@@ -48,7 +48,7 @@ namespace GitHubConsole.Commands
                     update.Assignee = issue.Assignee.Login;
 
                 foreach (var l in setLabels)
-                    if (update.Labels != null && !update.Labels.Contains(l.Name))
+                    if (update.Labels == null || !update.Labels.Contains(l.Name))
                         update.AddLabel(l.Name);
 
                 if (update.Labels != null)
