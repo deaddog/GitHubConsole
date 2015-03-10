@@ -9,7 +9,6 @@ namespace GitHubConsole.Commands
 {
     public class IssuesLabeler : Command
     {
-        private bool first = true;
         private List<int> issues = new List<int>();
         private List<string> set = new List<string>();
         private List<string> remove = new List<string>();
@@ -61,14 +60,6 @@ namespace GitHubConsole.Commands
 
         public override bool HandleArgument(ArgumentStack.Argument argument)
         {
-            if (first)
-            {
-                first = false;
-                if (argument.Key != "label")
-                    return base.HandleArgument(argument);
-                return true;
-            }
-
             int number;
             if (int.TryParse(argument.Key, out number))
             {
