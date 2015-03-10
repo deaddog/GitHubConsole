@@ -12,7 +12,7 @@ namespace GitHubConsole
 {
     public static class GitHub
     {
-        private static readonly string credentialsKey = "githubconsole_managedkeyw";
+        public static readonly string CredentialsKey = "githubconsole_managedkeyw";
         private static readonly string clientHeader = "GitHubC#Console";
 
         private static GitHubClient client;
@@ -30,7 +30,7 @@ namespace GitHubConsole
                 return username;
             }
         }
-        private static string Project
+        public static string Project
         {
             get
             {
@@ -132,7 +132,7 @@ namespace GitHubConsole
 
         private static Credentials LoadCredentials()
         {
-            Credential c = new Credential() { Target = credentialsKey };
+            Credential c = new Credential() { Target = CredentialsKey };
             if (!c.Load() || (c.Username == null || c.Username.Length == 0 || c.Password == null || c.Password.Length == 0))
                 return null;
             else

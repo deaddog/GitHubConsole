@@ -17,8 +17,7 @@ namespace GitHubConsole.Commands
 
         public override void Execute()
         {
-            string username, project;
-            GitHubClient client = CreateClient(out username, out project);
+            GitHubClient client = GitHub.Client;
             if (client == null)
                 return;
 
@@ -37,7 +36,7 @@ namespace GitHubConsole.Commands
                 string assignUser = client.User.Current().Result.Login;
                 for (int i = 0; i < issues.Count; i++)
                 {
-                    var issue = client.Issue.Get(username, project, issues[i]).Result;
+                    var issue = client.Issue.Get(GitHub.Username, GitHub.Project, issues[i]).Result;
                     if (issue.Assignee != null)
                     {
                         "[[:DarkCyan:{0}]] is assigned to issue [[:DarkYellow:#{1}]], you cannot be assigned.".ToConsoleLine(issue.Assignee.Login, issue.Number);
@@ -46,7 +45,7 @@ namespace GitHubConsole.Commands
 
                     var update = issue.ToUpdate();
                     update.Assignee = assignUser;
-                    client.Issue.Update(username, project, issue.Number, update).Wait();
+                    client.Issue.Update(GitHub.Username, GitHub.Project, issue.Number, update).Wait();
                 }
             }
 
@@ -61,7 +60,7 @@ namespace GitHubConsole.Commands
                 string assignUser = client.User.Current().Result.Login;
                 for (int i = 0; i < issues.Count; i++)
                 {
-                    var issue = client.Issue.Get(username, project, issues[i]).Result;
+                    var issue = client.Issue.Get(GitHub.Username, GitHub.Project, issues[i]).Result;
                     if (issue.Assignee == null)
                     {
                         "No one is assigned to issue [[:DarkYellow:#{0}]], you cannot be unassigned.".ToConsoleLine(issue.Number);
@@ -75,7 +74,7 @@ namespace GitHubConsole.Commands
 
                     var update = issue.ToUpdate();
                     update.Assignee = null;
-                    client.Issue.Update(username, project, issue.Number, update).Wait();
+                    client.Issue.Update(GitHub.Username, GitHub.Project, issue.Number, update).Wait();
                 }
             }
         }

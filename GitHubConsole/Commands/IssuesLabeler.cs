@@ -16,15 +16,14 @@ namespace GitHubConsole.Commands
 
         public override void Execute()
         {
-            string username, project;
-            GitHubClient client = CreateClient(out username, out project);
+            GitHubClient client = GitHub.Client;
             if (client == null)
                 return;
 
             List<Label> setLabels = new List<Label>();
             List<Label> remLabels = new List<Label>();
 
-            var labels = client.Issue.Labels.GetForRepository(username, project).Result;
+            var labels = client.Issue.Labels.GetForRepository(GitHub.Username, GitHub.Project).Result;
             foreach (var s in set)
             {
                 var l = labels.FirstOrDefault(x => x.Name == s);
@@ -38,7 +37,7 @@ namespace GitHubConsole.Commands
 
             foreach (var number in issues)
             {
-                var issue = client.Issue.Get(username, project, number).Result;
+                var issue = client.Issue.Get(GitHub.Username, GitHub.Project, number).Result;
                 if (issue == null)
                 {
                     "Unknown issue [[:DarkRed:#{0}]].".ToConsoleLine(number);
@@ -56,7 +55,7 @@ namespace GitHubConsole.Commands
                     foreach (var l in remLabels)
                         update.Labels.Remove(l.Name);
 
-                client.Issue.Update(username, project, number, update).Wait();
+                client.Issue.Update(GitHub.Username, GitHub.Project, number, update).Wait();
             }
         }
 
