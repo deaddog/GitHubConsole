@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GitHubConsole.Commands
 {
-    public class IssuesLabeler : Command
+    public class IssuesLabeler : ManagedCommand
     {
         private List<int> issues = new List<int>();
         private List<string> set = new List<string>();
@@ -58,7 +58,13 @@ namespace GitHubConsole.Commands
             }
         }
 
-        public override bool HandleArgument(ArgumentStack.Argument argument)
+        protected override IEnumerable<Tuple<string, Func<ArgumentStack.Argument, bool>>> LoadArgumentHandlers()
+        {
+            yield return new Tuple<string, Func<ArgumentStack.Argument, bool>>("-set", handleSet);
+            yield return new Tuple<string, Func<ArgumentStack.Argument, bool>>("-remove", handleRemove);
+        }
+
+        public override bool HandleArgumentFallback(ArgumentStack.Argument argument)
         {
             int number;
             if (int.TryParse(argument.Key, out number))
@@ -74,28 +80,29 @@ namespace GitHubConsole.Commands
                     return true;
                 }
             }
-            else if (argument.Key == "-set")
-            {
-                for (int i = 0; i < argument.Count; i++)
-                {
-                    set.Add(argument[i]);
-                    if (argument[i].Contains('_'))
-                        set.Add(argument[i].Replace('_', ' '));
-                }
-                return true;
-            }
-            else if (argument.Key == "-remove")
-            {
-                for (int i = 0; i < argument.Count; i++)
-                {
-                    remove.Add(argument[i]);
-                    if (argument[i].Contains('_'))
-                        remove.Add(argument[i].Replace('_', ' '));
-                }
-                return true;
-            }
             else
-                return base.HandleArgument(argument);
+                return base.HandleArgumentFallback(argument);
+        }
+
+        private bool handleSet(ArgumentStack.Argument argument)
+        {
+            for (int i = 0; i < argument.Count; i++)
+            {
+                set.Add(argument[i]);
+                if (argument[i].Contains('_'))
+                    set.Add(argument[i].Replace('_', ' '));
+            }
+            return true;
+        }
+        private bool handleRemove(ArgumentStack.Argument argument)
+        {
+            for (int i = 0; i < argument.Count; i++)
+            {
+                remove.Add(argument[i]);
+                if (argument[i].Contains('_'))
+                    remove.Add(argument[i].Replace('_', ' '));
+            }
+            return true;
         }
     }
 }
