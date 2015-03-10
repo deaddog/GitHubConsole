@@ -14,7 +14,7 @@ namespace GitHubConsole
             string input = Console.ReadLine();
             if (input.StartsWith("github"))
                 input = input.Substring(6);
-            input.Trim();
+            input = input.Trim();
 
             if (input == "exit")
                 return;
