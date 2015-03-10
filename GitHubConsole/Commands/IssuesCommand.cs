@@ -36,12 +36,11 @@ namespace GitHubConsole.Commands
 
         public override void Execute()
         {
-            string username, project;
-            GitHubClient client = CreateClient(out username, out project);
+            GitHubClient client = GitHub.Client;
             if (client == null)
                 return;
 
-            listIssues(client, username, project, request);
+            listIssues(client, GitHub.Username, GitHub.Project, request);
         }
 
         public override bool HandleArgument(ArgumentStack.Argument argument)

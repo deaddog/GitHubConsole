@@ -14,7 +14,7 @@ namespace GitHubConsole.Commands
 
         public override void Execute()
         {
-            Credential c = new Credential() { Target = credentialsKey };
+            Credential c = new Credential() { Target = GitHub.CredentialsKey };
             if (setPass && !setUser)
             {
                 if (!c.Load())
@@ -80,7 +80,7 @@ namespace GitHubConsole.Commands
 
         public static void SetCredentials(string username = null)
         {
-            Credential c = new Credential() { Target = credentialsKey };
+            Credential c = new Credential() { Target = GitHub.CredentialsKey };
             c.Load();
 
             if (username == null)
@@ -99,7 +99,7 @@ namespace GitHubConsole.Commands
         }
         public static void SetPassword()
         {
-            Credential c = new Credential() { Target = credentialsKey };
+            Credential c = new Credential() { Target = GitHub.CredentialsKey };
             c.Load();
 
             Console.Write("GitHub password: ");

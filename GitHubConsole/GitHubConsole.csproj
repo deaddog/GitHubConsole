@@ -59,6 +59,7 @@
     <Compile Include="Commands\IssuesLabeler.cs" />
     <Compile Include="Commands\ManagedCommand.cs" />
     <Compile Include="Commands\SubCommand.cs" />
+    <Compile Include="GitHub.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
