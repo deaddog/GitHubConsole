@@ -16,8 +16,44 @@ namespace GitHubConsole
         private static readonly string clientHeader = "GitHubC#Console";
 
         private static GitHubClient client;
+        private static Octokit.Credentials cred;
         private static string username;
         private static string project;
+
+        public static string Username
+        {
+            get
+            {
+                if (username == null)
+                    validateGitDirectory(out cred, out username, out project);
+
+                return username;
+            }
+        }
+        private static string Project
+        {
+            get
+            {
+                if (project == null)
+                    validateGitDirectory(out cred, out username, out project);
+
+                return project;
+            }
+        }
+
+        public static GitHubClient Client
+        {
+            get
+            {
+                string user = Username;
+
+                if (client == null)
+                    client = new GitHubClient(new ProductHeaderValue(clientHeader)) { Credentials = cred };
+
+                return client;
+            }
+        }
+
 
         private static string findRepo()
         {
@@ -101,14 +137,6 @@ namespace GitHubConsole
                 return null;
             else
                 return new Credentials(c.Username, c.Password);
-        }
-        private static GitHubClient CreateClient(out string username, out string project)
-        {
-            Credentials cred;
-            if (validateGitDirectory(out cred, out username, out project))
-                return new GitHubClient(new ProductHeaderValue(clientHeader)) { Credentials = cred };
-            else
-                return null;
         }
 
         private static bool validateGitDirectory(out Credentials cred, out string username, out string project)
