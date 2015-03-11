@@ -28,12 +28,8 @@ namespace GitHubConsole.Commands
             {
                 if (issues.Count == 0)
                 {
-                    Console.WriteLine("You must specify which issues # to assign yourself to.");
-                    Console.Write("For instance: ");
-                    Console.ForegroundColor = ConsoleColor.White;
-                    Console.Write("github issues take 5 7");
-                    Console.ResetColor();
-                    Console.WriteLine(" will assign you to issue #5 and #7.");
+                    "You must specify which issues # to assign yourself to.".ToConsoleLine();
+                    "For instance: [[:White:github issues take 5 7]] will assign you to issue #5 and #7.".ToConsoleLine();
                 }
 
                 string assignUser = client.User.Current().Result.Login;

@@ -72,7 +72,7 @@ namespace GitHubConsole.Commands
             {
                 if (number < 0)
                 {
-                    Console.WriteLine("Issues # cannot be negative.");
+                    ColorConsole.ToConsoleLine("Issue [[:Red:#{0}]] is invalid. Issues must be 1, 2, 3...", number);
                     return false;
                 }
                 else
