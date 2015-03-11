@@ -59,10 +59,10 @@ namespace GitHubConsole.Commands
             }
         }
 
-        protected override IEnumerable<Tuple<string, ArgumentHandler>> LoadArgumentHandlers()
+        protected override IEnumerable<ArgumentHandlerPair> LoadArgumentHandlers()
         {
-            yield return new Tuple<string, ArgumentHandler>("-set", handleSet);
-            yield return new Tuple<string, ArgumentHandler>("-remove", handleRemove);
+            yield return new ArgumentHandlerPair("-set", handleSet);
+            yield return new ArgumentHandlerPair("-remove", handleRemove);
         }
 
         public override bool HandleArgumentFallback(Argument argument)

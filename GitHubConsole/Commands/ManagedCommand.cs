@@ -12,7 +12,7 @@ namespace GitHubConsole.Commands
             this.argumentHandlers = new Dictionary<string, ArgumentHandler>();
 
             foreach (var a in LoadArgumentHandlers())
-                this.argumentHandlers.Add(a.Item1, a.Item2);
+                this.argumentHandlers.Add(a.Key, a.Handler);
         }
 
         public virtual bool HandleArgumentFallback(Argument argument)
@@ -20,7 +20,7 @@ namespace GitHubConsole.Commands
             return base.HandleArgument(argument);
         }
 
-        protected abstract IEnumerable<Tuple<string, ArgumentHandler>> LoadArgumentHandlers();
+        protected abstract IEnumerable<ArgumentHandlerPair> LoadArgumentHandlers();
 
         public sealed override bool HandleArgument(Argument argument)
         {
