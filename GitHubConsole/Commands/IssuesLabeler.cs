@@ -59,13 +59,13 @@ namespace GitHubConsole.Commands
             }
         }
 
-        protected override IEnumerable<Tuple<string, Func<ArgumentStack.Argument, bool>>> LoadArgumentHandlers()
+        protected override IEnumerable<Tuple<string, Func<Argument, bool>>> LoadArgumentHandlers()
         {
-            yield return new Tuple<string, Func<ArgumentStack.Argument, bool>>("-set", handleSet);
-            yield return new Tuple<string, Func<ArgumentStack.Argument, bool>>("-remove", handleRemove);
+            yield return new Tuple<string, Func<Argument, bool>>("-set", handleSet);
+            yield return new Tuple<string, Func<Argument, bool>>("-remove", handleRemove);
         }
 
-        public override bool HandleArgumentFallback(ArgumentStack.Argument argument)
+        public override bool HandleArgumentFallback(Argument argument)
         {
             int number;
             if (int.TryParse(argument.Key, out number))
@@ -85,7 +85,7 @@ namespace GitHubConsole.Commands
                 return base.HandleArgumentFallback(argument);
         }
 
-        private bool handleSet(ArgumentStack.Argument argument)
+        private bool handleSet(Argument argument)
         {
             for (int i = 0; i < argument.Count; i++)
             {
@@ -95,7 +95,7 @@ namespace GitHubConsole.Commands
             }
             return true;
         }
-        private bool handleRemove(ArgumentStack.Argument argument)
+        private bool handleRemove(Argument argument)
         {
             for (int i = 0; i < argument.Count; i++)
             {

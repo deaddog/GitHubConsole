@@ -43,7 +43,7 @@ namespace GitHubConsole.Commands
             listIssues(client, GitHub.Username, GitHub.Project, request);
         }
 
-        public override bool HandleArgument(ArgumentStack.Argument argument)
+        public override bool HandleArgument(Argument argument)
         {
             switch (argument.Key)
             {

@@ -68,7 +68,7 @@ namespace GitHubConsole.Commands
             this.subcommands.Add(key6, command6);
         }
 
-        public override bool HandleArgument(ArgumentStack.Argument argument)
+        public override bool HandleArgument(Argument argument)
         {
             if (active == null)
             {

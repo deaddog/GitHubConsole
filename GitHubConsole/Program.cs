@@ -54,7 +54,7 @@ namespace GitHubConsole
 #endif
         }
 
-        private static Command getCommand(ArgumentStack.Argument arg)
+        private static Command getCommand(Argument arg)
         {
             switch (arg.Key)
             {

@@ -78,7 +78,7 @@ namespace GitHubConsole.Commands
             }
         }
 
-        public override bool HandleArgument(ArgumentStack.Argument argument)
+        public override bool HandleArgument(Argument argument)
         {
             int id;
             if (!int.TryParse(argument.Key, out id))
