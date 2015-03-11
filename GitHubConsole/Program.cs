@@ -34,40 +34,33 @@ namespace GitHubConsole
                 return;
             }
 
-            var a = arguments.Pop();
-            Command command = getCommand(a);
-            if (command == null)
-            {
-                Console.WriteLine("Unknown command: {0}.", a.Key);
-                Console.WriteLine("Run with no command to see a list of available commands.");
-            }
-            else
-            {
-                while (arguments.Count > 0)
-                    if (!command.HandleArgument(arguments.Pop()))
-                        return;
+            Command command = getCommand();
 
-                command.Execute();
-            }
+            while (arguments.Count > 0)
+                if (!command.HandleArgument(arguments.Pop()))
+                    return;
+
+            command.Execute();
 #if DEBUG
             goto start;
 #endif
         }
 
-        private static Command getCommand(Argument arg)
+        private class emptyCommand : Command
         {
-            switch (arg.Key)
+            public override void Execute()
             {
-                case "cred":
-                    return new CredentialCommand();
-                case "issues":
-                    return new SubCommand(new IssuesCommand(),
-                        "take", new IssuesAssigner(true),
-                        "drop", new IssuesAssigner(false),
-                        "label", new IssuesLabeler());
-                default:
-                    return null;
             }
+        }
+
+        private static Command getCommand()
+        {
+            return new SubCommand(new emptyCommand(),
+                "cred", new CredentialCommand(),
+                "issues", new SubCommand(new IssuesCommand(),
+                    "take", new IssuesAssigner(true),
+                    "drop", new IssuesAssigner(false),
+                    "label", new IssuesLabeler()));
         }
     }
 }
