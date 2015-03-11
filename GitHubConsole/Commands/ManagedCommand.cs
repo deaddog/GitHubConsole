@@ -5,11 +5,11 @@ namespace GitHubConsole.Commands
 {
     public abstract class ManagedCommand : Command
     {
-        private Dictionary<string, Func<Argument, bool>> argumentHandlers;
+        private Dictionary<string, ArgumentHandler> argumentHandlers;
 
         public ManagedCommand()
         {
-            this.argumentHandlers = new Dictionary<string, Func<Argument, bool>>();
+            this.argumentHandlers = new Dictionary<string, ArgumentHandler>();
 
             foreach (var a in LoadArgumentHandlers())
                 this.argumentHandlers.Add(a.Item1, a.Item2);
@@ -20,7 +20,7 @@ namespace GitHubConsole.Commands
             return base.HandleArgument(argument);
         }
 
-        protected abstract IEnumerable<Tuple<string, Func<Argument, bool>>> LoadArgumentHandlers();
+        protected abstract IEnumerable<Tuple<string, ArgumentHandler>> LoadArgumentHandlers();
 
         public sealed override bool HandleArgument(Argument argument)
         {
