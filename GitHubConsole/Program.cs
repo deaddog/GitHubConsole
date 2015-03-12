@@ -64,6 +64,7 @@ namespace GitHubConsole
             return new SubCommand(new emptyCommand(),
                 "cred", new CredentialCommand(),
                 "issues", new SubCommand(new IssuesCommand(),
+                    "create", new IssuesCreateCommand(),
                     "take", new IssuesAssigner(true),
                     "drop", new IssuesAssigner(false),
                     "label", new IssuesLabeler()));
