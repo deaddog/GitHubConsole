@@ -36,11 +36,17 @@ namespace GitHubConsole
 
             Command command = getCommand();
 
+            bool argumentsValid = true;
+
             while (arguments.Count > 0)
                 if (!command.HandleArgument(arguments.Pop()))
-                    return;
+                {
+                    argumentsValid = false;
+                    break;
+                }
 
-            command.Execute();
+            if (argumentsValid)
+                command.Execute();
 #if DEBUG
             goto start;
 #endif
