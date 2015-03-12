@@ -7,10 +7,43 @@ using System.Threading.Tasks;
 
 namespace GitHubConsole.Commands
 {
-    public class CredentialCommand : Command
+    public class CredentialCommand : ManagedCommand
     {
         private bool setUser = false, setPass = false;
         private string newUsername = null;
+
+        protected override IEnumerable<ArgumentHandlerPair> LoadArgumentHandlers()
+        {
+            yield return new ArgumentHandlerPair("-set-user", setUserArgument);
+            yield return new ArgumentHandlerPair("-set-pass", setPassArgument);
+        }
+
+        private bool setUserArgument(Argument argument)
+        {
+            if (argument.Count != 0 && argument.Count != 1)
+            {
+                Console.WriteLine("Incorrect value supplied for -set-user.");
+                return false;
+            }
+            if (argument.Count == 1)
+                newUsername = argument[0];
+            else if (argument.Count > 1)
+                ColorConsole.ToConsoleLine("Only a username can be supplied for the [[:White:-set-user]] argument. You have supplied [[:Cyan:{0}]] values.", argument.Count);
+
+            setUser = true;
+            setPass = true;
+            return true;
+        }
+        private bool setPassArgument(Argument argument)
+        {
+            if (argument.Count != 0)
+            {
+                Console.WriteLine("A value cannot be supplied for -set-pass.");
+                return false;
+            }
+            setPass = true;
+            return true;
+        }
 
         public override void Execute()
         {
@@ -44,37 +77,6 @@ namespace GitHubConsole.Commands
                     Console.WriteLine("N/A");
                     Console.ForegroundColor = ConsoleColor.Gray;
                 }
-            }
-        }
-
-        public override bool HandleArgument(Argument argument)
-        {
-            switch (argument.Key)
-            {
-                case "-set-user":
-                    if (argument.Count != 0 && argument.Count != 1)
-                    {
-                        Console.WriteLine("Incorrect value supplied for -set-user.");
-                        return false;
-                    }
-                    if (argument.Count == 1)
-                        newUsername = argument[0];
-
-                    setUser = true;
-                    setPass = true;
-                    return true;
-
-                case "-set-pass":
-                    if (argument.Count != 0)
-                    {
-                        Console.WriteLine("A value cannot be supplied for -set-pass.");
-                        return false;
-                    }
-                    setPass = true;
-                    return true;
-
-                default:
-                    return base.HandleArgument(argument);
             }
         }
 
