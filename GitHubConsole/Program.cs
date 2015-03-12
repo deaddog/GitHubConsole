@@ -45,7 +45,7 @@ namespace GitHubConsole
                     break;
                 }
 
-            if (argumentsValid)
+            if (argumentsValid && command.ValidateState())
                 command.Execute();
 #if DEBUG
             goto start;
