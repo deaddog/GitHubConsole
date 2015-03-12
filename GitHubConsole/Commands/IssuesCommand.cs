@@ -34,15 +34,6 @@ namespace GitHubConsole.Commands
                 validator = x => (old(x) || func(x));
         }
 
-        public override void Execute()
-        {
-            GitHubClient client = GitHub.Client;
-            if (client == null)
-                return;
-
-            listIssues(client, GitHub.Username, GitHub.Project, request);
-        }
-
         protected override IEnumerable<ArgumentHandlerPair> LoadArgumentHandlers()
         {
             yield return new ArgumentHandlerPair("-open", handleOpen);
@@ -121,9 +112,12 @@ namespace GitHubConsole.Commands
             return true;
         }
 
-        private void listIssues(GitHubClient client, string username, string project, RepositoryIssueRequest req)
+        public override void Execute()
         {
-            var q = client.Issue.GetForRepository(username, project, req).Result;
+            if (GitHub.Client == null)
+                return;
+
+            var q = GitHub.Client.Issue.GetForRepository(GitHub.Username, GitHub.Project, request).Result;
             if (q.Count == 0)
                 return;
 
@@ -140,7 +134,7 @@ namespace GitHubConsole.Commands
 
                 "[[:{1}:{0}]] [[:{3}:{2}]] {4}".ToConsole(
                     v.Number.ToString().PadLeft(len), v.ClosedAt.HasValue ? "DarkRed" : "DarkYellow",
-                    name.PadRight(namelen), name == client.Credentials.Login ? "Cyan" : "DarkCyan",
+                    name.PadRight(namelen), name == GitHub.Client.Credentials.Login ? "Cyan" : "DarkCyan",
                     v.Title);
 
                 if (v.Labels.Count > 0)
