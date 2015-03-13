@@ -84,6 +84,14 @@ namespace GitHubConsole.Commands
                 return active.HandleArgument(argument);
         }
 
+        public override bool ValidateState()
+        {
+            if (active != null)
+                return active.ValidateState();
+            else
+                return base.ValidateState();
+        }
+
         public override void Execute()
         {
             if (active == null)
