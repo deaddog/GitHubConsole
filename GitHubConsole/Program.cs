@@ -19,7 +19,16 @@ namespace GitHubConsole
             if (input == "exit")
                 return;
 
-            ArgumentStack arguments = new ArgumentStack(input.Split(' '));
+            var matches = System.Text.RegularExpressions.Regex.Matches(input, "[^ \"]+|\"[^\"]+\"");
+            string[] inputArr = new string[matches.Count];
+            for (int i = 0; i < inputArr.Length; i++)
+            {
+                inputArr[i] = matches[i].Value;
+                if (inputArr[i][0] == '\"' && inputArr[i][inputArr[i].Length - 1] == '\"')
+                    inputArr[i] = inputArr[i].Substring(1, inputArr[i].Length - 2);
+            }
+
+            ArgumentStack arguments = new ArgumentStack(inputArr);
 #else
             ArgumentStack arguments = new ArgumentStack(args);
 #endif
