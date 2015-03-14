@@ -8,15 +8,15 @@ using System.Threading.Tasks;
 
 namespace GitHubConsole
 {
-    public static class Config
+    public class Config
     {
+        #region Static directory ensuring
+
         private static string applicationDataPath;
         private static string configFilePath
         {
             get { return Path.Combine(applicationDataPath, "config"); }
         }
-
-        private static Dictionary<string, string> values;
 
         static Config()
         {
@@ -25,10 +25,7 @@ namespace GitHubConsole
 
             applicationDataPath = Path.Combine(roamingPath, "DeadDog", "GitHubConsole");
             ensurePath(applicationDataPath);
-
-            loadConfig();
         }
-
         private static void ensurePath(string path)
         {
             string[] levels = path.Split(Path.DirectorySeparatorChar);
@@ -50,18 +47,8 @@ namespace GitHubConsole
             }
         }
 
-        private static void loadConfig()
-        {
-            var lines = File.ReadAllLines(configFilePath);
+        #endregion
 
-            values = new Dictionary<string, string>();
-            foreach (var l in lines)
-            {
-                var temp = loadKeyValuePair(l);
-                if (temp != null)
-                    values.Add(temp.Item1, temp.Item2);
-            }
-        }
         private static Tuple<string, string> loadKeyValuePair(string line)
         {
             line = line.Trim();
@@ -74,5 +61,33 @@ namespace GitHubConsole
                 return Tuple.Create(pair.Groups["key"].Value, pair.Groups["value"].Value);
         }
 
+        private static Config config;
+
+        public static Config Default
+        {
+            get
+            {
+                if (config == null)
+                    config = new Config();
+                return config;
+            }
+        }
+
+        private Dictionary<string, string> values;
+
+        private Config()
+        {
+            values = new Dictionary<string, string>();
+            if (!File.Exists(configFilePath))
+                return;
+
+            var lines = File.ReadAllLines(configFilePath);
+            foreach (var l in lines)
+            {
+                var temp = loadKeyValuePair(l);
+                if (temp != null)
+                    values.Add(temp.Item1, temp.Item2);
+            }
+        }
     }
 }
