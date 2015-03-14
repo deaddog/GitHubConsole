@@ -1,9 +1,8 @@
 ﻿using CredentialManagement;
+using GitHubConsole.Commands.Structure;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace GitHubConsole.Commands
 {

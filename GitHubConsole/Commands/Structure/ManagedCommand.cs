@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace GitHubConsole.Commands
+namespace GitHubConsole.Commands.Structure
 {
     public abstract class ManagedCommand : Command
     {

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace GitHubConsole.Commands
+namespace GitHubConsole.Commands.Structure
 {
     public class SubCommand : Command
     {

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 
-namespace GitHubConsole.Commands
+namespace GitHubConsole.Commands.Structure
 {
     public abstract class Command
     {

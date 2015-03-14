@@ -1,4 +1,5 @@
 ﻿using GitHubConsole.Commands;
+using GitHubConsole.Commands.Structure;
 using System;
 
 namespace GitHubConsole

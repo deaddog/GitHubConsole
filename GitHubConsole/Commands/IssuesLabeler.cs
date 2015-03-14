@@ -1,9 +1,7 @@
-﻿using Octokit;
-using System;
+﻿using GitHubConsole.Commands.Structure;
+using Octokit;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GitHubConsole.Commands
 {
