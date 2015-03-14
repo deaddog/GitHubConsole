@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace GitHubConsole
@@ -10,6 +11,12 @@ namespace GitHubConsole
     public static class Config
     {
         private static string applicationDataPath;
+        private static string configFilePath
+        {
+            get { return Path.Combine(applicationDataPath, "config"); }
+        }
+
+        private static Dictionary<string, string> values;
 
         static Config()
         {
@@ -18,6 +25,16 @@ namespace GitHubConsole
 
             applicationDataPath = Path.Combine(roamingPath, "DeadDog", "GitHubConsole");
             ensurePath(applicationDataPath);
+
+            var lines = File.ReadAllLines(configFilePath);
+
+            values = new Dictionary<string, string>();
+            foreach (var l in lines)
+            {
+                var temp = loadKeyValuePair(l);
+                if (temp != null)
+                    values.Add(temp.Item1, temp.Item2);
+            }
         }
 
         private static void ensurePath(string path)
@@ -39,6 +56,18 @@ namespace GitHubConsole
                 if (!dir.Exists)
                     dir.Create();
             }
+        }
+
+        private static Tuple<string, string> loadKeyValuePair(string line)
+        {
+            line = line.Trim();
+
+            var pair = Regex.Match(line, "(?<key>[a-zA-Z]) *= *(?<value>.*[^ ])");
+
+            if (!pair.Success)
+                return null;
+            else
+                return Tuple.Create(pair.Groups["key"].Value, pair.Groups["value"].Value);
         }
     }
 }
