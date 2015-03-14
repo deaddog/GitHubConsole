@@ -7,14 +7,14 @@ namespace GitHubConsole.Commands.Structure
     {
         public abstract void Execute();
 
-        public virtual Message ValidateState()
+        public virtual ErrorMessage ValidateState()
         {
             return null;
         }
 
-        public virtual Message HandleArgument(Argument argument)
+        public virtual ErrorMessage HandleArgument(Argument argument)
         {
-            return new Message("Unknown parameter \"{0}\".", argument.Key);
+            return new ErrorMessage("Unknown parameter \"{0}\".", argument.Key);
         }
     }
 }

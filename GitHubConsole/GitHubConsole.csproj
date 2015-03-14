@@ -62,7 +62,7 @@
     <Compile Include="Commands\Structure\SubCommand.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="GitHub.cs" />
-    <Compile Include="Messages\Message.cs" />
+    <Compile Include="Messages\ErrorMessage.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

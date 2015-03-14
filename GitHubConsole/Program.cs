@@ -45,7 +45,7 @@ namespace GitHubConsole
                 return;
             }
 
-            Message message = null;
+            ErrorMessage message = null;
             Command command = getCommand();
 
             while (arguments.Count > 0)

@@ -6,15 +6,15 @@ using System.Threading.Tasks;
 
 namespace GitHubConsole.Messages
 {
-    public class Message
+    public class ErrorMessage
     {
         private string message;
 
-        public Message(string message)
+        public ErrorMessage(string message)
         {
             this.message = message;
         }
-        public Message(string message, params object[] args)
+        public ErrorMessage(string message, params object[] args)
             : this(string.Format(message, args))
         {
         }
