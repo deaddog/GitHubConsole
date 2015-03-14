@@ -36,13 +36,13 @@ namespace GitHubConsole.Commands
 
         protected override IEnumerable<ArgumentHandlerPair> LoadArgumentHandlers()
         {
-            yield return new ArgumentHandlerPair("-open", handleOpen);
-            yield return new ArgumentHandlerPair("-closed", handleClosed);
-            yield return new ArgumentHandlerPair("-all", x => { request.State = ItemState.All; return true; });
-            yield return new ArgumentHandlerPair("-label", handleLabel);
-            yield return new ArgumentHandlerPair("-no-assignee", arg => { AndPredicate(x => x.Assignee == null); return true; });
-            yield return new ArgumentHandlerPair("-has-assignee", arg => { AndPredicate(x => x.Assignee != null); return true; });
-            yield return new ArgumentHandlerPair("-assignee", handleAssignee);
+            yield return new ArgumentHandlerPair("--open", handleOpen);
+            yield return new ArgumentHandlerPair("--closed", handleClosed);
+            yield return new ArgumentHandlerPair("--all", x => { request.State = ItemState.All; return true; });
+            yield return new ArgumentHandlerPair("--label", handleLabel);
+            yield return new ArgumentHandlerPair("--no-assignee", arg => { AndPredicate(x => x.Assignee == null); return true; });
+            yield return new ArgumentHandlerPair("--has-assignee", arg => { AndPredicate(x => x.Assignee != null); return true; });
+            yield return new ArgumentHandlerPair("--assignee", handleAssignee);
         }
 
         private bool handleOpen(Argument argument)

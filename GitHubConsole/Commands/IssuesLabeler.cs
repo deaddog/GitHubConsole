@@ -61,8 +61,8 @@ namespace GitHubConsole.Commands
 
         protected override IEnumerable<ArgumentHandlerPair> LoadArgumentHandlers()
         {
-            yield return new ArgumentHandlerPair("-set", handleSet);
-            yield return new ArgumentHandlerPair("-remove", handleRemove);
+            yield return new ArgumentHandlerPair("--set", handleSet);
+            yield return new ArgumentHandlerPair("--remove", handleRemove);
         }
 
         public override bool HandleArgumentFallback(Argument argument)
