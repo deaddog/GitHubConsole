@@ -72,6 +72,7 @@ namespace GitHubConsole
         private static Command getCommand()
         {
             return new SubCommand(new emptyCommand(),
+                "config", new ConfigCommand(),
                 "cred", new CredentialCommand(),
                 "issues", new SubCommand(new IssuesCommand(),
                     "create", new IssuesCreateCommand(),
