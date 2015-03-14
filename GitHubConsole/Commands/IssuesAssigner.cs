@@ -1,4 +1,5 @@
 ﻿using GitHubConsole.Commands.Structure;
+using GitHubConsole.Messages;
 using Octokit;
 using System;
 using System.Collections.Generic;
@@ -76,17 +77,14 @@ namespace GitHubConsole.Commands
             }
         }
 
-        public override bool HandleArgument(Argument argument)
+        public override ErrorMessage HandleArgument(Argument argument)
         {
             int id;
             if (!int.TryParse(argument.Key, out id))
-            {
-                Console.WriteLine("GitHub issue # must be an integer. \"{0}\" is not valid.", argument.Key);
-                return false;
-            }
+                return new ErrorMessage("GitHub issue # must be an integer. \"{0}\" is not valid.", argument.Key);
 
             issues.Add(id);
-            return true;
+            return ErrorMessage.NoError;
         }
     }
 }
