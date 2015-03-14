@@ -1,4 +1,5 @@
 ﻿using GitHubConsole.Commands.Structure;
+using GitHubConsole.Messages;
 using Octokit;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,37 +17,31 @@ namespace GitHubConsole.Commands
             yield return new ArgumentHandlerPair("--labels", handleLabel);
         }
 
-        private bool handleTitle(Argument argument)
+        private ErrorMessage handleTitle(Argument argument)
         {
             if (argument.Count != 1)
-            {
-                ColorConsole.ToConsoleLine("Only one issue title can be specified.");
-                return false;
-            }
+                return new ErrorMessage("Only one issue title can be specified.");
 
             title = argument[0].Trim();
-            return true;
+            return ErrorMessage.NoError;
         }
-        private bool handleLabel(Argument argument)
+        private ErrorMessage handleLabel(Argument argument)
         {
             for (int i = 0; i < argument.Count; i++)
                 labels.Add(argument[i]);
 
-            return true;
+            return ErrorMessage.NoError;
         }
 
-        public override bool ValidateState()
+        public override ErrorMessage ValidateState()
         {
             if (title == null || title.Length == 0)
-                return false;
+                return new ErrorMessage("Issue must have a title. You must specify the [[:Yellow:--title <title>]] argument.");
 
             var knownLabels = GitHub.Client.Issue.Labels.GetForRepository(GitHub.Username, GitHub.Project).Result.Select(x => x.Name).ToList();
             foreach (var l in labels)
                 if (!knownLabels.Contains(l))
-                {
-                    ColorConsole.ToConsoleLine("Unknown label [[:Red:{0}]].", l);
-                    return false;
-                }
+                    return new ErrorMessage("Unknown label [[:Red:{0}]].", l);
 
             return base.ValidateState();
         }
