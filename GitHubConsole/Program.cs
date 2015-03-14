@@ -1,5 +1,6 @@
 ﻿using GitHubConsole.Commands;
 using GitHubConsole.Commands.Structure;
+using GitHubConsole.Messages;
 using System;
 
 namespace GitHubConsole
@@ -44,34 +45,38 @@ namespace GitHubConsole
                 return;
             }
 
+            Message message = null;
             Command command = getCommand();
 
-            bool argumentsValid = true;
-
             while (arguments.Count > 0)
-                if (!command.HandleArgument(arguments.Pop()))
-                {
-                    argumentsValid = false;
+            {
+                message = command.HandleArgument(arguments.Pop());
+                if (message != null)
                     break;
-                }
-
-            try
-            {
-                if (argumentsValid && command.ValidateState())
-                    command.Execute();
             }
-            catch(AggregateException aggex)
+
+
+            if (message == null)
+                message = command.ValidateState();
+
+            if (message != null)
+                ColorConsole.ToConsoleLine(message.GetMessage());
+            else
             {
-                if (aggex.InnerExceptions.Count == 1 && aggex.InnerException is Octokit.AuthorizationException)
+                try { command.Execute(); }
+                catch (AggregateException aggex)
                 {
-                    Octokit.AuthorizationException credex = aggex.InnerException as Octokit.AuthorizationException;
-                    
-                    ColorConsole.ToConsoleLine("GitHub responded to your request with an authentification error:");
-                    ColorConsole.ToConsoleLine("[[:Red:[{1}] {0}]]", credex.Message, credex.StatusCode);
-                    ColorConsole.ToConsoleLine("Run [[:Yellow:github config --set authtoken <token>]] to set authentification token.");
+                    if (aggex.InnerExceptions.Count == 1 && aggex.InnerException is Octokit.AuthorizationException)
+                    {
+                        Octokit.AuthorizationException credex = aggex.InnerException as Octokit.AuthorizationException;
+
+                        ColorConsole.ToConsoleLine("GitHub responded to your request with an authentification error:");
+                        ColorConsole.ToConsoleLine("[[:Red:[{1}] {0}]]", credex.Message, credex.StatusCode);
+                        ColorConsole.ToConsoleLine("Run [[:Yellow:github config --set authtoken <token>]] to set authentification token.");
+                    }
+                    else
+                        throw aggex;
                 }
-                else
-                    throw aggex;
             }
 #if DEBUG
             goto start;
