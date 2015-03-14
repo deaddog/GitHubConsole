@@ -14,7 +14,11 @@ namespace GitHubConsole.Commands.Structure
             this.argumentHandlers = new Dictionary<string, ArgumentHandler>();
 
             foreach (var a in LoadArgumentHandlers())
+            {
                 this.argumentHandlers.Add(a.Key, a.Handler);
+                foreach (var alias in a.Aliases)
+                    this.argumentHandlers.Add(alias, a.Handler);
+            }
         }
 
         public virtual bool HandleArgumentFallback(Argument argument)
