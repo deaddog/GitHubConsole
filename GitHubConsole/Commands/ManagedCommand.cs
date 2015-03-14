@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace GitHubConsole.Commands
 {
@@ -22,12 +24,24 @@ namespace GitHubConsole.Commands
 
         protected abstract IEnumerable<ArgumentHandlerPair> LoadArgumentHandlers();
 
+        private string[] keysFromAbbreviation(string abbreviation)
+        {
+            return argumentHandlers.Keys.Where(key => key.StartsWith("--" + abbreviation)).ToArray();
+        }
+
         public sealed override bool HandleArgument(Argument argument)
         {
             if (argumentHandlers.ContainsKey(argument.Key))
                 return argumentHandlers[argument.Key](argument);
-            else
-                return HandleArgumentFallback(argument);
+
+            if (System.Text.RegularExpressions.Regex.IsMatch(argument.Key, "^-[^-]"))
+            {
+                var temp = keysFromAbbreviation(argument.Key.Substring(1));
+                if (temp.Length == 1)
+                    return argumentHandlers[temp[0]](argument);
+            }
+
+            return HandleArgumentFallback(argument);
         }
     }
 }
