@@ -137,7 +137,7 @@ namespace GitHubConsole
                     File.WriteAllText(configFilePath, string.Join("\n", lines.Where(x => x != null)) + "\n", Encoding.UTF8);
                 }
                 else
-                    File.AppendAllText(configFilePath + "\n", setting, Encoding.UTF8);
+                    File.AppendAllText(configFilePath, setting + "\n", Encoding.UTF8);
 
                 values[key] = value;
             }
