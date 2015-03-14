@@ -55,8 +55,24 @@ namespace GitHubConsole
                     break;
                 }
 
-            if (argumentsValid && command.ValidateState())
-                command.Execute();
+            try
+            {
+                if (argumentsValid && command.ValidateState())
+                    command.Execute();
+            }
+            catch(AggregateException aggex)
+            {
+                if (aggex.InnerExceptions.Count == 1 && aggex.InnerException is Octokit.AuthorizationException)
+                {
+                    Octokit.AuthorizationException credex = aggex.InnerException as Octokit.AuthorizationException;
+                    
+                    ColorConsole.ToConsoleLine("GitHub responded to your request with an authentification error:");
+                    ColorConsole.ToConsoleLine("[[:Red:[{1}] {0}]]", credex.Message, credex.StatusCode);
+                    ColorConsole.ToConsoleLine("Run [[:Yellow:github config --set authtoken <token>]] to set authentification token.");
+                }
+                else
+                    throw aggex;
+            }
 #if DEBUG
             goto start;
 #endif
