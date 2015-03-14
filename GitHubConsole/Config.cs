@@ -53,7 +53,7 @@ namespace GitHubConsole
         {
             line = line.Trim();
 
-            var pair = Regex.Match(line, "(?<key>[a-zA-Z]) *= *(?<value>.*[^ ])");
+            var pair = Regex.Match(line, "(?<key>[a-zA-Z0-9]+) *= *(?<value>.*[^ ])");
 
             if (!pair.Success)
                 return null;
