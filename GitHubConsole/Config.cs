@@ -26,15 +26,7 @@ namespace GitHubConsole
             applicationDataPath = Path.Combine(roamingPath, "DeadDog", "GitHubConsole");
             ensurePath(applicationDataPath);
 
-            var lines = File.ReadAllLines(configFilePath);
-
-            values = new Dictionary<string, string>();
-            foreach (var l in lines)
-            {
-                var temp = loadKeyValuePair(l);
-                if (temp != null)
-                    values.Add(temp.Item1, temp.Item2);
-            }
+            loadConfig();
         }
 
         private static void ensurePath(string path)
@@ -58,6 +50,18 @@ namespace GitHubConsole
             }
         }
 
+        private static void loadConfig()
+        {
+            var lines = File.ReadAllLines(configFilePath);
+
+            values = new Dictionary<string, string>();
+            foreach (var l in lines)
+            {
+                var temp = loadKeyValuePair(l);
+                if (temp != null)
+                    values.Add(temp.Item1, temp.Item2);
+            }
+        }
         private static Tuple<string, string> loadKeyValuePair(string line)
         {
             line = line.Trim();
@@ -69,5 +73,6 @@ namespace GitHubConsole
             else
                 return Tuple.Create(pair.Groups["key"].Value, pair.Groups["value"].Value);
         }
+
     }
 }
