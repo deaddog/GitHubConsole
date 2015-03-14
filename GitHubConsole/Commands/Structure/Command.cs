@@ -9,7 +9,7 @@ namespace GitHubConsole.Commands.Structure
 
         public virtual ErrorMessage ValidateState()
         {
-            return null;
+            return ErrorMessage.NoError;
         }
 
         public virtual ErrorMessage HandleArgument(Argument argument)

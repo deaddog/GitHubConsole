@@ -10,6 +10,11 @@ namespace GitHubConsole.Messages
     {
         private string message;
 
+        public static ErrorMessage NoError
+        {
+            get { return null; }
+        }
+
         public ErrorMessage(string message)
         {
             this.message = message;
