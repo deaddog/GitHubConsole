@@ -81,7 +81,7 @@ namespace GitHubConsole
             if (!File.Exists(configFilePath))
                 return;
 
-            var lines = File.ReadAllLines(configFilePath);
+            var lines = File.ReadAllLines(configFilePath, Encoding.UTF8);
             foreach (var l in lines)
             {
                 var temp = loadKeyValuePair(l);
