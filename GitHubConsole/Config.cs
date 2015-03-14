@@ -86,7 +86,7 @@ namespace GitHubConsole
             {
                 var temp = loadKeyValuePair(l);
                 if (temp != null)
-                    values.Add(temp.Item1, temp.Item2);
+                    values[temp.Item1] = temp.Item2;
             }
         }
     }
