@@ -55,6 +55,7 @@
     <Compile Include="ArgumentStack.cs" />
     <Compile Include="ColorConsole.cs" />
     <Compile Include="ColorResolver.cs" />
+    <Compile Include="Commands\ConfigCommand.cs" />
     <Compile Include="Commands\Structure\Command.cs" />
     <Compile Include="Commands\IssuesCreateCommand.cs" />
     <Compile Include="Commands\CredentialCommand.cs" />
