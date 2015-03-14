@@ -1,4 +1,5 @@
 ﻿using GitHubConsole.Commands.Structure;
+using GitHubConsole.Messages;
 using Octokit;
 using System.Collections.Generic;
 using System.Linq;
@@ -63,27 +64,24 @@ namespace GitHubConsole.Commands
             yield return new ArgumentHandlerPair("--remove", handleRemove);
         }
 
-        public override bool HandleArgumentFallback(Argument argument)
+        public override ErrorMessage HandleArgumentFallback(Argument argument)
         {
             int number;
             if (int.TryParse(argument.Key, out number))
             {
                 if (number < 0)
-                {
-                    ColorConsole.ToConsoleLine("Issue [[:Red:#{0}]] is invalid. Issues must be 1, 2, 3...", number);
-                    return false;
-                }
+                    return new ErrorMessage("Issue [[:Red:#{0}]] is invalid. Issues must be 1, 2, 3...", number);
                 else
                 {
                     issues.Add(number);
-                    return true;
+                    return ErrorMessage.NoError;
                 }
             }
             else
                 return base.HandleArgumentFallback(argument);
         }
 
-        private bool handleSet(Argument argument)
+        private ErrorMessage handleSet(Argument argument)
         {
             for (int i = 0; i < argument.Count; i++)
             {
@@ -91,9 +89,9 @@ namespace GitHubConsole.Commands
                 if (argument[i].Contains('_'))
                     set.Add(argument[i].Replace('_', ' '));
             }
-            return true;
+            return ErrorMessage.NoError;
         }
-        private bool handleRemove(Argument argument)
+        private ErrorMessage handleRemove(Argument argument)
         {
             for (int i = 0; i < argument.Count; i++)
             {
@@ -101,7 +99,7 @@ namespace GitHubConsole.Commands
                 if (argument[i].Contains('_'))
                     remove.Add(argument[i].Replace('_', ' '));
             }
-            return true;
+            return ErrorMessage.NoError;
         }
     }
 }

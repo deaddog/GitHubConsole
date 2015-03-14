@@ -32,9 +32,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CredentialManagement">
-      <HintPath>..\packages\CredentialManagement.1.0.1\lib\net35\CredentialManagement.dll</HintPath>
-    </Reference>
     <Reference Include="Octokit">
       <HintPath>..\packages\Octokit.0.5.2\lib\net45\Octokit.dll</HintPath>
     </Reference>
@@ -55,16 +52,18 @@
     <Compile Include="ArgumentStack.cs" />
     <Compile Include="ColorConsole.cs" />
     <Compile Include="ColorResolver.cs" />
+    <Compile Include="Commands\ConfigCommand.cs" />
     <Compile Include="Commands\Structure\Command.cs" />
     <Compile Include="Commands\IssuesCreateCommand.cs" />
-    <Compile Include="Commands\CredentialCommand.cs" />
     <Compile Include="Commands\IssuesAssigner.cs" />
     <Compile Include="Commands\IssuesCommand.cs" />
     <Compile Include="Commands\IssuesLabeler.cs" />
     <Compile Include="Commands\Structure\ManagedCommand.cs" />
     <Compile Include="Commands\Structure\SubCommand.cs" />
+    <Compile Include="Config.cs" />
     <Compile Include="EditDistanceExtension.cs" />
     <Compile Include="GitHub.cs" />
+    <Compile Include="Messages\ErrorMessage.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

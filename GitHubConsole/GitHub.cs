@@ -1,5 +1,4 @@
-﻿using CredentialManagement;
-using Octokit;
+﻿using Octokit;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -46,6 +45,9 @@ namespace GitHubConsole
             get
             {
                 string user = Username;
+
+                if (cred == null)
+                    return null;
 
                 if (client == null)
                     client = new GitHubClient(new ProductHeaderValue(clientHeader)) { Credentials = cred };
@@ -130,15 +132,6 @@ namespace GitHubConsole
             return lines.ToArray();
         }
 
-        private static Credentials LoadCredentials()
-        {
-            Credential c = new Credential() { Target = CredentialsKey };
-            if (!c.Load() || (c.Username == null || c.Username.Length == 0 || c.Password == null || c.Password.Length == 0))
-                return null;
-            else
-                return new Credentials(c.Username, c.Password);
-        }
-
         private static bool validateGitDirectory(out Credentials cred, out string username, out string project)
         {
             string gitDirectory = findRepo();
@@ -160,17 +153,14 @@ namespace GitHubConsole
                 return false;
             }
 
-            cred = LoadCredentials();
-            if (cred == null)
+            string token = Config.Default["authtoken"];
+            if (token == null || token == "")
             {
-                Console.WriteLine("Unable to load GitHub credentials.");
-                Console.Write("Run ");
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.Write("github cred -set-user");
-                Console.ForegroundColor = ConsoleColor.Gray;
-                Console.WriteLine(" to set.");
+                Console.WriteLine("Unable to load GitHub authentification token.");
+                ColorConsole.ToConsoleLine("Run [[:Yellow:github config --set authtoken <token>]] to set.");
                 return false;
             }
+            cred = new Credentials(token);
 
             return true;
         }

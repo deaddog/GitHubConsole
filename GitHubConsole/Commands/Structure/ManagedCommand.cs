@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GitHubConsole.Messages;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -21,7 +22,7 @@ namespace GitHubConsole.Commands.Structure
             }
         }
 
-        public virtual bool HandleArgumentFallback(Argument argument)
+        public virtual ErrorMessage HandleArgumentFallback(Argument argument)
         {
             return base.HandleArgument(argument);
         }
@@ -33,7 +34,7 @@ namespace GitHubConsole.Commands.Structure
             return argumentHandlers.Keys.Where(key => key.StartsWith("--" + abbreviation)).ToArray();
         }
 
-        public sealed override bool HandleArgument(Argument argument)
+        public sealed override ErrorMessage HandleArgument(Argument argument)
         {
             if (argumentHandlers.ContainsKey(argument.Key))
                 return argumentHandlers[argument.Key](argument);

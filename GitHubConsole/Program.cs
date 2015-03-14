@@ -1,5 +1,6 @@
 ﻿using GitHubConsole.Commands;
 using GitHubConsole.Commands.Structure;
+using GitHubConsole.Messages;
 using System;
 
 namespace GitHubConsole
@@ -44,19 +45,39 @@ namespace GitHubConsole
                 return;
             }
 
+            ErrorMessage message = null;
             Command command = getCommand();
 
-            bool argumentsValid = true;
-
             while (arguments.Count > 0)
-                if (!command.HandleArgument(arguments.Pop()))
-                {
-                    argumentsValid = false;
+            {
+                message = command.HandleArgument(arguments.Pop());
+                if (message != null)
                     break;
-                }
+            }
 
-            if (argumentsValid && command.ValidateState())
-                command.Execute();
+
+            if (message == null)
+                message = command.ValidateState();
+
+            if (message != null)
+                ColorConsole.ToConsoleLine(message.GetMessage());
+            else
+            {
+                try { command.Execute(); }
+                catch (AggregateException aggex)
+                {
+                    if (aggex.InnerExceptions.Count == 1 && aggex.InnerException is Octokit.AuthorizationException)
+                    {
+                        Octokit.AuthorizationException credex = aggex.InnerException as Octokit.AuthorizationException;
+
+                        ColorConsole.ToConsoleLine("GitHub responded to your request with an authentification error:");
+                        ColorConsole.ToConsoleLine("[[:Red:[{1}] {0}]]", credex.Message, credex.StatusCode);
+                        ColorConsole.ToConsoleLine("Run [[:Yellow:github config --set authtoken <token>]] to set authentification token.");
+                    }
+                    else
+                        throw aggex;
+                }
+            }
 #if DEBUG
             goto start;
 #endif
@@ -72,7 +93,7 @@ namespace GitHubConsole
         private static Command getCommand()
         {
             return new SubCommand(new emptyCommand(),
-                "cred", new CredentialCommand(),
+                "config", new ConfigCommand(),
                 "issues", new SubCommand(new IssuesCommand(),
                     "create", new IssuesCreateCommand(),
                     "take", new IssuesAssigner(true),

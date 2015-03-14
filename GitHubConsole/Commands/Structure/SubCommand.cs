@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using GitHubConsole.Messages;
+using System.Collections.Generic;
 
 namespace GitHubConsole.Commands.Structure
 {
@@ -68,7 +69,7 @@ namespace GitHubConsole.Commands.Structure
             this.subcommands.Add(key6, command6);
         }
 
-        public override bool HandleArgument(Argument argument)
+        public override ErrorMessage HandleArgument(Argument argument)
         {
             if (active == null)
             {
@@ -78,13 +79,13 @@ namespace GitHubConsole.Commands.Structure
                     return active.HandleArgument(argument);
                 }
                 else
-                    return true;
+                    return ErrorMessage.NoError;
             }
             else
                 return active.HandleArgument(argument);
         }
 
-        public override bool ValidateState()
+        public override ErrorMessage ValidateState()
         {
             if (active != null)
                 return active.ValidateState();

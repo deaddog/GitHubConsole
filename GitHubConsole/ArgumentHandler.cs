@@ -1,6 +1,6 @@
-﻿using System;
+﻿using GitHubConsole.Messages;
 
 namespace GitHubConsole
 {
-    public delegate bool ArgumentHandler (Argument argument);
+    public delegate ErrorMessage ArgumentHandler(Argument argument);
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GitHubConsole.Messages;
+using System;
 
 namespace GitHubConsole.Commands.Structure
 {
@@ -6,15 +7,14 @@ namespace GitHubConsole.Commands.Structure
     {
         public abstract void Execute();
 
-        public virtual bool ValidateState()
+        public virtual ErrorMessage ValidateState()
         {
-            return true;
+            return ErrorMessage.NoError;
         }
 
-        public virtual bool HandleArgument(Argument argument)
+        public virtual ErrorMessage HandleArgument(Argument argument)
         {
-            Console.WriteLine("Unknown parameter \"{0}\".", argument.Key);
-            return false;
+            return new ErrorMessage("Unknown parameter \"{0}\".", argument.Key);
         }
     }
 }
