@@ -1,4 +1,5 @@
 ﻿using GitHubConsole.Commands.Structure;
+using GitHubConsole.Messages;
 using System;
 using System.Collections.Generic;
 
@@ -19,17 +20,15 @@ namespace GitHubConsole.Commands
                 Config.Default[set.Key] = set.Value;
         }
 
-        private bool handleSet(Argument argument)
+        private ErrorMessage handleSet(Argument argument)
         {
-            if(argument.Count != 2)
-            {
-                ColorConsole.ToConsoleLine("Setting config values requires exactly two arguments:");
-                ColorConsole.ToConsoleLine("  github config --set <key> <value>");
-                return false;
-            }
+            if (argument.Count != 2)
+                return new ErrorMessage(
+                    "Setting config values requires exactly two arguments:\n",
+                    "  github config " + argument.Key + " <key> <value>");
 
             setValues[argument[0]] = argument[1];
-            return true;
+            return ErrorMessage.NoError;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using GitHubConsole.Commands.Structure;
+using GitHubConsole.Messages;
 using Octokit;
 using System;
 using System.Collections.Generic;
@@ -37,28 +38,28 @@ namespace GitHubConsole.Commands
         {
             yield return new ArgumentHandlerPair("--open", handleOpen);
             yield return new ArgumentHandlerPair("--closed", handleClosed);
-            yield return new ArgumentHandlerPair("--all", "-a", x => { request.State = ItemState.All; return true; });
+            yield return new ArgumentHandlerPair("--all", "-a", x => { request.State = ItemState.All; return ErrorMessage.NoError; });
             yield return new ArgumentHandlerPair("--label", handleLabel);
-            yield return new ArgumentHandlerPair("--no-assignee", arg => { AndPredicate(x => x.Assignee == null); return true; });
-            yield return new ArgumentHandlerPair("--has-assignee", arg => { AndPredicate(x => x.Assignee != null); return true; });
+            yield return new ArgumentHandlerPair("--no-assignee", arg => { AndPredicate(x => x.Assignee == null); return ErrorMessage.NoError; });
+            yield return new ArgumentHandlerPair("--has-assignee", arg => { AndPredicate(x => x.Assignee != null); return ErrorMessage.NoError; });
             yield return new ArgumentHandlerPair("--assignee", "-u", handleAssignee);
         }
 
-        private bool handleOpen(Argument argument)
+        private ErrorMessage handleOpen(Argument argument)
         {
             openArgFound = true;
             if (request.State == ItemState.Closed)
                 request.State = ItemState.All;
-            return true;
+            return ErrorMessage.NoError;
         }
-        private bool handleClosed(Argument argument)
+        private ErrorMessage handleClosed(Argument argument)
         {
             if (request.State == ItemState.Open)
                 request.State = openArgFound ? ItemState.All : ItemState.Closed;
-            return true;
+            return ErrorMessage.NoError;
         }
 
-        private bool handleLabel(Argument argument)
+        private ErrorMessage handleLabel(Argument argument)
         {
 
             for (int i = 0; i < argument.Count; i++)
@@ -80,21 +81,16 @@ namespace GitHubConsole.Commands
                         request.Labels.Add(arg);
                 }
             }
-            return true;
+            return ErrorMessage.NoError;
         }
 
-        private bool handleAssignee(Argument argument)
+        private ErrorMessage handleAssignee(Argument argument)
         {
             if (argument.Count == 0)
-            {
-                Console.WriteLine("A user must be specified for the -assignee argument.");
-                return false;
-            }
+                return new ErrorMessage("A user must be specified for the -assignee argument.");
             else if (argument.Count > 1)
-            {
-                Console.WriteLine("Only one user can be specified for the -assignee argument.");
-                return false;
-            }
+                return new ErrorMessage("Only one user can be specified for the -assignee argument.");
+            else
             {
                 var arg = argument[0];
                 var argReplace = argument[0].Replace('_', ' ');
@@ -108,7 +104,7 @@ namespace GitHubConsole.Commands
                 else
                     AndPredicate(x => x.Assignee != null && (x.Assignee.Login == arg || x.Assignee.Login == argReplace));
             }
-            return true;
+            return ErrorMessage.NoError;
         }
 
         public override void Execute()
