@@ -15,6 +15,10 @@ namespace GitHubConsole.Messages
             get { return null; }
         }
 
+        protected ErrorMessage()
+        {
+            this.message = null;
+        }
         public ErrorMessage(string message)
         {
             if (message == null)
