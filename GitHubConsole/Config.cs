@@ -162,5 +162,11 @@ namespace GitHubConsole
             File.WriteAllText(configFilePath, "");
             values.Clear();
         }
+
+        public IEnumerable<KeyValuePair<string, string>> GetAll()
+        {
+            foreach (var pair in values)
+                yield return pair;
+        }
     }
 }
