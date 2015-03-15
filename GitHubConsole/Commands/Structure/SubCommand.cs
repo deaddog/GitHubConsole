@@ -76,7 +76,12 @@ namespace GitHubConsole.Commands.Structure
                 if (!subcommands.TryGetValue(argument.Key, out active))
                 {
                     active = fallback;
-                    return active.HandleArgument(argument);
+                    var message = active.HandleArgument(argument);
+
+                    if (message is UnknownArgumentMessage)
+                        (message as UnknownArgumentMessage).AddAlternatives(subcommands.Keys);
+
+                    return message;
                 }
                 else
                     return ErrorMessage.NoError;
