@@ -14,7 +14,7 @@ namespace GitHubConsole.Commands.Structure
 
         public virtual ErrorMessage HandleArgument(Argument argument)
         {
-            return new ErrorMessage("Unknown parameter \"{0}\".", argument.Key);
+            return new UnknownArgumentMessage(argument.Key);
         }
     }
 }
