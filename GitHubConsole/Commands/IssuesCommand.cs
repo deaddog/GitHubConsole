@@ -13,6 +13,8 @@ namespace GitHubConsole.Commands
         private RepositoryIssueRequest request = new RepositoryIssueRequest();
         private Predicate<Issue> validator = null;
 
+        private string outputFormat = null;
+
         private void AndPredicate(Func<Issue, bool> func)
         {
             var old = validator;
@@ -43,6 +45,7 @@ namespace GitHubConsole.Commands
             yield return new ArgumentHandlerPair("--no-assignee", arg => { AndPredicate(x => x.Assignee == null); return ErrorMessage.NoError; });
             yield return new ArgumentHandlerPair("--has-assignee", arg => { AndPredicate(x => x.Assignee != null); return ErrorMessage.NoError; });
             yield return new ArgumentHandlerPair("--assignee", "-u", handleAssignee);
+            yield return new ArgumentHandlerPair("--format", handleOutputFormat);
         }
 
         private ErrorMessage handleOpen(Argument argument)
@@ -83,7 +86,6 @@ namespace GitHubConsole.Commands
             }
             return ErrorMessage.NoError;
         }
-
         private ErrorMessage handleAssignee(Argument argument)
         {
             if (argument.Count == 0)
@@ -104,6 +106,20 @@ namespace GitHubConsole.Commands
                 else
                     AndPredicate(x => x.Assignee != null && (x.Assignee.Login == arg || x.Assignee.Login == argReplace));
             }
+            return ErrorMessage.NoError;
+        }
+
+        private ErrorMessage handleOutputFormat(Argument argument)
+        {
+            if (argument.Count == 0)
+                return new ErrorMessage("No format supplied for [[:Yellow:{0}]] argument.", argument.Key);
+            if (argument.Count > 1)
+                return new ErrorMessage("Only one format can be supplied for the [[:Yellow:{0}]] argument.", argument.Key);
+            if (outputFormat != null)
+                return new ErrorMessage("The [[:Yellow:{0}]] argument can only be supplied once.", argument.Key);
+
+            this.outputFormat = argument[0];
+
             return ErrorMessage.NoError;
         }
 
