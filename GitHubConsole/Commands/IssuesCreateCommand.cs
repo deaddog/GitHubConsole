@@ -38,10 +38,15 @@ namespace GitHubConsole.Commands
             if (title == null || title.Length == 0)
                 return new ErrorMessage("Issue must have a title. You must specify the [[:Yellow:--title <title>]] argument.");
 
-            var knownLabels = GitHub.Client.Issue.Labels.GetForRepository(GitHub.Username, GitHub.Project).Result.Select(x => x.Name).ToList();
+            var knownLabels = GitHub.Client.Issue.Labels.GetForRepository(GitHub.Username, GitHub.Project).Result.ToList();
+            var knownLabelNames = knownLabels.Select(x => x.Name).ToList();
+
             foreach (var l in labels)
-                if (!knownLabels.Contains(l))
-                    return new ErrorMessage("Unknown label [[:Red:{0}]].", l);
+                if (!knownLabelNames.Contains(l))
+                {
+                    string lblString = string.Format(string.Join("", knownLabels.Select(lbl => "\n  [[:" + ColorResolver.GetConsoleColor(lbl.Color) + ":" + lbl.Name + "]]")));
+                    return new ErrorMessage("Unknown label [[:Red:{0}]]. Valid label names are:{1}", l, lblString);
+                }
 
             return base.ValidateState();
         }
