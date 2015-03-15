@@ -161,7 +161,7 @@ namespace GitHubConsole.Commands
                 format.ToConsole(
                     v.Number.ToString().PadLeft(len), v.ClosedAt.HasValue ? "DarkRed" : "DarkYellow",
                     name.PadRight(namelen), name == GitHub.Client.Credentials.Login ? "Cyan" : "DarkCyan",
-                    v.Title,
+                    v.Title.Trim(),
                     labels);
 
                 Console.WriteLine();
