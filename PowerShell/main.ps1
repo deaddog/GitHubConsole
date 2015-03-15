@@ -15,14 +15,18 @@ function TabExpansion($line, $lastWord) {
 
 function GitHubTabExpansion($lastBlock) {
   switch -regex ($lastBlock -replace "^$(Get-AliasPattern github) ","") {
-  
+
   #switch -regex ($lastBlock) {
-    # Handles git push remote <branch>
-    # Handles git pull remote <branch>
-    "^lolcode (?<lol>.+)" {
-      #Write-Host Yes
-        #gitBranches $matches['lol']
-        @(1,"Hello",3.5,"World")
+    # Handles github <cmd>
+    "^(?<cmd>[^ ]*)$" {
+        githubCommands $matches['cmd']
     }
+
+    default { @("") }
   }
+}
+
+function script:githubCommands($command)
+{
+  @("config", "issues") | Where { $_ -match "^" + $command }
 }
