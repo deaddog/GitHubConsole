@@ -17,6 +17,11 @@ namespace GitHubConsole.Messages
 
         public ErrorMessage(string message)
         {
+            if (message == null)
+                throw new ArgumentNullException("message");
+            if (message.Trim().Length == 0)
+                throw new ArgumentException("Attempted to display an empty message.", message);
+
             this.message = message;
         }
         public ErrorMessage(string message, params object[] args)
