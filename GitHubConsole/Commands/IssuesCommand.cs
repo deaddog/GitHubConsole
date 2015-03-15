@@ -64,6 +64,8 @@ namespace GitHubConsole.Commands
 
         private ErrorMessage handleLabel(Argument argument)
         {
+            if (argument.Count == 0)
+                return new ErrorMessage("At least one label name must be supplied for the {0} argument.", argument.Key);
 
             for (int i = 0; i < argument.Count; i++)
             {
