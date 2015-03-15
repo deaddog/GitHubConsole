@@ -154,7 +154,7 @@ namespace GitHubConsole.Commands
                 string labels = "";
                 if (v.Labels.Count > 0 && format.Contains("{5}"))
                 {
-                    labels = string.Format(" [[:DarkYellow:(]]{0}[[:DarkYellow:)]]",
+                    labels = string.Format("[[:DarkYellow:(]]{0}[[:DarkYellow:)]]",
                         string.Join(", ", v.Labels.Select(l => "[[:" + ColorResolver.GetConsoleColor(l.Color) + ":" + l.Name + "]]")));
                 }
 
