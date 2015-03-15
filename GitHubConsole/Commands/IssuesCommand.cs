@@ -137,7 +137,7 @@ namespace GitHubConsole.Commands
                                               let n = v.Assignee == null ? "" : v.Assignee.Login
                                               select n.Length).Max();
 
-            string format = outputFormat ?? "%#% %user% %title% %labels%";
+            string format = (outputFormat ?? Config.Default["issues.format"]) ?? "%#% %user% %title% %labels%";
 
             format = format.Replace("%#%", "[[:{1}:{0}]]");
             format = format.Replace("%user%", "[[:{3}:{2}]]");
