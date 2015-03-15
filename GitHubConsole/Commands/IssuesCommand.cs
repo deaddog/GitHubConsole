@@ -136,6 +136,14 @@ namespace GitHubConsole.Commands
             int namelen = q.Count == 0 ? 0 : (from v in q
                                               let n = v.Assignee == null ? "" : v.Assignee.Login
                                               select n.Length).Max();
+
+            string format = outputFormat ?? "%#% %user% %title% %labels%";
+
+            format = format.Replace("%#%", "[[:{1}:{0}]]");
+            format = format.Replace("%user%", "[[:{3}:{2}]]");
+            format = format.Replace("%title%", "{4}");
+            format = format.Replace("%labels%", "{5}");
+
             foreach (var v in q)
             {
                 if (validator != null && !validator(v))
@@ -143,16 +151,18 @@ namespace GitHubConsole.Commands
 
                 string name = v.Assignee == null ? "" : v.Assignee.Login;
 
-                "[[:{1}:{0}]] [[:{3}:{2}]] {4}".ToConsole(
-                    v.Number.ToString().PadLeft(len), v.ClosedAt.HasValue ? "DarkRed" : "DarkYellow",
-                    name.PadRight(namelen), name == GitHub.Client.Credentials.Login ? "Cyan" : "DarkCyan",
-                    v.Title);
-
-                if (v.Labels.Count > 0)
+                string labels = "";
+                if (v.Labels.Count > 0 && format.Contains("{5}"))
                 {
-                    " [[:DarkYellow:(]]{0}[[:DarkYellow:)]]".ToConsole(
+                    labels = string.Format(" [[:DarkYellow:(]]{0}[[:DarkYellow:)]]",
                         string.Join(", ", v.Labels.Select(l => "[[:" + ColorResolver.GetConsoleColor(l.Color) + ":" + l.Name + "]]")));
                 }
+
+                format.ToConsole(
+                    v.Number.ToString().PadLeft(len), v.ClosedAt.HasValue ? "DarkRed" : "DarkYellow",
+                    name.PadRight(namelen), name == GitHub.Client.Credentials.Login ? "Cyan" : "DarkCyan",
+                    v.Title,
+                    labels);
 
                 Console.WriteLine();
             }
