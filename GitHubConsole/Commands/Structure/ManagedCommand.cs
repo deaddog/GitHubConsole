@@ -22,6 +22,37 @@ namespace GitHubConsole.Commands.Structure
             }
         }
 
+        protected ErrorMessage NoValuesHandler(Argument argument)
+        {
+            if (argument.Count > 0)
+                return new ErrorMessage("Values cannot be supplied for the {0} argument.", argument.Key);
+
+            return ErrorMessage.NoError;
+        }
+
+        protected ArgumentHandler NoValuesHandler(Action additionalaction)
+        {
+            return (Argument argument) =>
+                {
+                    if (argument.Count > 0)
+                        return new ErrorMessage("Values cannot be supplied for the {0} argument.", argument.Key);
+
+                    additionalaction();
+                    return ErrorMessage.NoError;
+                };
+        }
+
+        protected ArgumentHandler NoValuesHandler(ArgumentHandler fallback)
+        {
+            return (Argument argument) =>
+            {
+                if (argument.Count > 0)
+                    return new ErrorMessage("Values cannot be supplied for the {0} argument.", argument.Key);
+
+                return fallback(argument);
+            };
+        }
+
         public virtual ErrorMessage HandleArgumentFallback(Argument argument)
         {
             return base.HandleArgument(argument);

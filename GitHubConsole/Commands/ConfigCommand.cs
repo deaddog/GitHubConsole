@@ -15,7 +15,7 @@ namespace GitHubConsole.Commands
         {
             yield return new ArgumentHandlerPair("--set", handleSet);
             yield return new ArgumentHandlerPair("--remove", handleRemove);
-            yield return new ArgumentHandlerPair("--clear", handleClear);
+            yield return new ArgumentHandlerPair("--clear", NoValuesHandler(() => clear = true));
         }
 
         public override void Execute()
@@ -51,14 +51,6 @@ namespace GitHubConsole.Commands
             for (int i = 0; i < argument.Count; i++)
                 removeKeys.Add(argument[i]);
 
-            return ErrorMessage.NoError;
-        }
-        private ErrorMessage handleClear(Argument argument)
-        {
-            if (argument.Count > 0)
-                return new ErrorMessage("Values cannot be supplied for the {0} argument.", argument.Key);
-
-            clear = true;
             return ErrorMessage.NoError;
         }
     }
