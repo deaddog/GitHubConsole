@@ -142,5 +142,25 @@ namespace GitHubConsole
                 values[key] = value;
             }
         }
+
+        public void Remove(string key)
+        {
+            if (!Regex.IsMatch(key, "^[a-zA-Z0-9]+(\\.[a-zA-Z0-9]+)*$"))
+                return;
+
+            var lines = File.ReadAllLines(configFilePath, Encoding.UTF8);
+            for (int i = 0; i < lines.Length; i++)
+                if (Regex.IsMatch(lines[i], key + " *="))
+                    lines[i] = null;
+            values.Remove(key);
+
+            File.WriteAllText(configFilePath, string.Join("\n", lines.Where(x => x != null)) + "\n", Encoding.UTF8);
+        }
+
+        public void Clear()
+        {
+            File.WriteAllText(configFilePath, "");
+            values.Clear();
+        }
     }
 }
