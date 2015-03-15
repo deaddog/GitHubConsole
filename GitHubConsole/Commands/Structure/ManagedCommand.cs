@@ -46,7 +46,12 @@ namespace GitHubConsole.Commands.Structure
                     return argumentHandlers[temp[0]](argument);
             }
 
-            return HandleArgumentFallback(argument);
+            var message = HandleArgumentFallback(argument);
+
+            if (message is UnknownArgumentMessage)
+                (message as UnknownArgumentMessage).AddAlternatives(argumentHandlers.Keys.Where(x => x.StartsWith("--")));
+
+            return message;
         }
     }
 }
