@@ -135,13 +135,13 @@ namespace GitHubConsole.Commands
             listIssues(q);
         }
 
-        private void listIssues(IReadOnlyList<Issue> q)
+        private void listIssues(IReadOnlyList<Issue> issues)
         {
-            if (q.Count == 0)
+            if (issues.Count == 0)
                 return;
 
-            int len = q[0].Number.ToString().Length;
-            int namelen = q.Count == 0 ? 0 : (from v in q
+            int len = issues[0].Number.ToString().Length;
+            int namelen = issues.Count == 0 ? 0 : (from v in issues
                                               let n = v.Assignee == null ? "" : v.Assignee.Login
                                               select n.Length).Max();
 
@@ -152,7 +152,7 @@ namespace GitHubConsole.Commands
             format = format.Replace("%title%", "{4}");
             format = format.Replace("%labels%", "{5}");
 
-            foreach (var v in q)
+            foreach (var v in issues)
             {
                 if (validator != null && !validator(v))
                     continue;
