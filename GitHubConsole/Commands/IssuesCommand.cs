@@ -130,7 +130,7 @@ namespace GitHubConsole.Commands
             if (GitHub.Client == null)
                 return;
 
-            var q = GitHub.Client.Issue.GetForRepository(GitHub.Username, GitHub.Project, request).Result.ToArray();
+            var q = GitHub.Client.Issue.GetForRepository(GitHub.Username, GitHub.Project, request).Result.Where(x => validator == null || validator(x)).ToArray();
 
             listIssues(q);
         }
@@ -154,9 +154,6 @@ namespace GitHubConsole.Commands
 
             foreach (var v in issues)
             {
-                if (validator != null && !validator(v))
-                    continue;
-
                 string name = v.Assignee == null ? "" : v.Assignee.Login;
 
                 string labels = "";
