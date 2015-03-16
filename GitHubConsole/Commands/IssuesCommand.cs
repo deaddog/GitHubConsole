@@ -163,13 +163,11 @@ namespace GitHubConsole.Commands
                         string.Join(", ", v.Labels.Select(l => "[[:" + ColorResolver.GetConsoleColor(l.Color) + ":" + l.Name + "]]")));
                 }
 
-                format.ToConsole(
+                format.ToConsoleLine(
                     v.Number.ToString().PadLeft(len), v.ClosedAt.HasValue ? "DarkRed" : "DarkYellow",
                     name.PadRight(namelen), name == GitHub.Client.Credentials.Login ? "Cyan" : "DarkCyan",
                     v.Title.Trim(),
                     labels);
-
-                Console.WriteLine();
             }
         }
     }
