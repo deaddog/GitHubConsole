@@ -130,20 +130,20 @@ namespace GitHubConsole.Commands
             if (GitHub.Client == null)
                 return;
 
-            var q = GitHub.Client.Issue.GetForRepository(GitHub.Username, GitHub.Project, request).Result;
+            var q = GitHub.Client.Issue.GetForRepository(GitHub.Username, GitHub.Project, request).Result.ToArray();
 
             listIssues(q);
         }
 
-        private void listIssues(IReadOnlyList<Issue> issues)
+        private void listIssues(Issue[] issues)
         {
-            if (issues.Count == 0)
+            if (issues.Length == 0)
                 return;
 
             int len = issues[0].Number.ToString().Length;
-            int namelen = issues.Count == 0 ? 0 : (from v in issues
-                                              let n = v.Assignee == null ? "" : v.Assignee.Login
-                                              select n.Length).Max();
+            int namelen = (from v in issues
+                           let n = v.Assignee == null ? "" : v.Assignee.Login
+                           select n.Length).Max();
 
             string format = (outputFormat ?? Config.Default["issues.format"]) ?? "%#% %user% %title% %labels%";
 
