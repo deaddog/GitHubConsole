@@ -131,6 +131,12 @@ namespace GitHubConsole.Commands
                 return;
 
             var q = GitHub.Client.Issue.GetForRepository(GitHub.Username, GitHub.Project, request).Result;
+
+            listIssues(q);
+        }
+
+        private void listIssues(IReadOnlyList<Issue> q)
+        {
             if (q.Count == 0)
                 return;
 
