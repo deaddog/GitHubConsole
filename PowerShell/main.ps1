@@ -1,5 +1,5 @@
 ﻿
-if (Test-Path Function:\TabExpansion) {
+if ((Test-Path Function:\TabExpansion) -and (-not (Test-Path Function:\GitHubTabExpansionBackup))) {
   Rename-Item Function:\TabExpansion GitHubTabExpansionBackup
 }
 
