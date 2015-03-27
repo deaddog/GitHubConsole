@@ -57,7 +57,7 @@ namespace GitHubConsole
 
         private static double manhattanDistance(Color a, Color b)
         {
-            return Math.Abs(a.A - b.A) + Math.Abs(a.R - b.R) + Math.Abs(a.G - b.G) + Math.Abs(a.B - b.G);
+            return Math.Abs(a.A - b.A) + Math.Abs(a.R - b.R) + Math.Abs(a.G - b.G) + Math.Abs(a.B - b.B);
         }
     }
 }
