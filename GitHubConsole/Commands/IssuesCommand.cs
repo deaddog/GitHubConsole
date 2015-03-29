@@ -17,6 +17,8 @@ namespace GitHubConsole.Commands
 
         private readonly FlagParameter open, closed, all;
 
+        private readonly Parameter<string[]> labels;
+
         [Name("--has-assignee")]
         private readonly FlagParameter hasAssignee;
         [Name("--no-assignee")]
@@ -31,6 +33,7 @@ namespace GitHubConsole.Commands
         {
             outputFormat.SetDefault(Config.Default["issues.format"] ?? "%#% %user% %title% %labels%");
             assignee.Validate(x => x.Length > 0, "A user must be specified for the " + assignee.Name + " argument.");
+            labels.Validate(x => x.Length > 0, "At least one label name must be supplied for the " + labels.Name + " argument.");
         }
 
         protected override Message Validate()
@@ -76,33 +79,6 @@ namespace GitHubConsole.Commands
             yield return new ArgumentHandlerPair("--label", handleLabel);
         }
 
-        private ErrorMessage handleLabel(Argument argument)
-        {
-            if (argument.Count == 0)
-                return new ErrorMessage("At least one label name must be supplied for the {0} argument.", argument.Key);
-
-            for (int i = 0; i < argument.Count; i++)
-            {
-                var arg = argument[i];
-                var argReplace = argument[i].Replace('_', ' ');
-
-                if (arg.StartsWith("^"))
-                {
-                    arg = arg.Substring(1);
-                    argReplace = argReplace.Substring(1);
-                    AndPredicate(x => !x.Labels.Any(l => l.Name == arg || l.Name == argReplace));
-                }
-                else
-                {
-                    if (arg != argReplace)
-                        AndPredicate(x => x.Labels.Any(l => l.Name == arg || l.Name == argReplace));
-                    else
-                        request.Labels.Add(arg);
-                }
-            }
-            return ErrorMessage.NoError;
-        }
-
         private RepositoryIssueRequest getRequest()
         {
             var request = new RepositoryIssueRequest();
@@ -113,7 +89,7 @@ namespace GitHubConsole.Commands
         }
         private bool validateIssue(Issue issue)
         {
-            return validateAssignee(issue.Assignee);
+            return validateAssignee(issue.Assignee) && validateLabels(issue.Labels.Select(x => x.Name).ToList());
         }
         private bool validateAssignee(User a)
         {
@@ -127,6 +103,22 @@ namespace GitHubConsole.Commands
                 return a == null;
             else
                 return true;
+        }
+        private bool validateLabels(List<string> lbls)
+        {
+            if (labels.IsDefault)
+                return true;
+
+            var par = new Stack<string>(labels.Value);
+            while (par.Count > 0)
+            {
+                var p = par.Pop();
+                if (p.StartsWith("^") && lbls.Contains(p.Substring(1)))
+                    return false;
+                else if (!p.StartsWith("^") && !lbls.Contains(p))
+                    return false;
+            }
+            return true;
         }
 
         public override void Execute()
