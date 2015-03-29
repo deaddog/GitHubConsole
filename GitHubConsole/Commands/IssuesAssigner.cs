@@ -1,5 +1,4 @@
-﻿using GitHubConsole.Commands.Structure;
-using GitHubConsole.Messages;
+﻿using CommandLineParsing;
 using Octokit;
 using System;
 using System.Collections.Generic;
@@ -9,12 +8,15 @@ namespace GitHubConsole.Commands
     public class IssuesAssigner : Command
     {
         private bool isTake = false;
-
-        private List<int> issues = new List<int>();
+        
+        [NoName]
+        private Parameter<int[]> issues;
 
         public IssuesAssigner(bool istake)
         {
             this.isTake = istake;
+
+            issues.TypeErrorMessage = x => "GitHub issue # must be an integer. \"" + x + "\" is not valid.";
         }
 
         public override void Execute()
@@ -25,16 +27,16 @@ namespace GitHubConsole.Commands
 
             if (isTake)
             {
-                if (issues.Count == 0)
+                if (issues.Value.Length == 0)
                 {
                     "You must specify which issues # to assign yourself to.".ToConsoleLine();
                     "For instance: [[:White:github issues take 5 7]] will assign you to issue #5 and #7.".ToConsoleLine();
                 }
 
                 string assignUser = client.User.Current().Result.Login;
-                for (int i = 0; i < issues.Count; i++)
+                for (int i = 0; i < issues.Value.Length; i++)
                 {
-                    var issue = client.Issue.Get(GitHub.Username, GitHub.Project, issues[i]).Result;
+                    var issue = client.Issue.Get(GitHub.Username, GitHub.Project, issues.Value[i]).Result;
                     if (issue.Assignee != null)
                     {
                         "[[:DarkCyan:{0}]] is assigned to issue [[:DarkYellow:#{1}]], you cannot be assigned.".ToConsoleLine(issue.Assignee.Login, issue.Number);
@@ -49,16 +51,16 @@ namespace GitHubConsole.Commands
 
             else // drop
             {
-                if (issues.Count == 0)
+                if (issues.Value.Length == 0)
                 {
                     "You must specify which issues # to unassign yourself from.".ToConsoleLine();
                     "For instance: [[:White:github issues drop 5 7]] will unassign you from issue #5 and #7.".ToConsoleLine();
                 }
 
                 string assignUser = client.User.Current().Result.Login;
-                for (int i = 0; i < issues.Count; i++)
+                for (int i = 0; i < issues.Value.Length; i++)
                 {
-                    var issue = client.Issue.Get(GitHub.Username, GitHub.Project, issues[i]).Result;
+                    var issue = client.Issue.Get(GitHub.Username, GitHub.Project, issues.Value[i]).Result;
                     if (issue.Assignee == null)
                     {
                         "No one is assigned to issue [[:DarkYellow:#{0}]], you cannot be unassigned.".ToConsoleLine(issue.Number);
@@ -75,16 +77,6 @@ namespace GitHubConsole.Commands
                     client.Issue.Update(GitHub.Username, GitHub.Project, issue.Number, update).Wait();
                 }
             }
-        }
-
-        public override ErrorMessage HandleArgument(Argument argument)
-        {
-            int id;
-            if (!int.TryParse(argument.Key, out id))
-                return new ErrorMessage("GitHub issue # must be an integer. \"{0}\" is not valid.", argument.Key);
-
-            issues.Add(id);
-            return ErrorMessage.NoError;
         }
     }
 }
