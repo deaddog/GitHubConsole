@@ -10,7 +10,7 @@ namespace GitHubConsole.Commands
         private bool isTake = false;
 
         [NoName]
-        private Parameter<int[]> issues;
+        private readonly Parameter<int[]> issues;
 
         public IssuesAssigner(bool istake)
         {
