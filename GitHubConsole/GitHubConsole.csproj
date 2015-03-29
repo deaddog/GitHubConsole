@@ -56,8 +56,6 @@
     <Compile Include="Config.cs" />
     <Compile Include="EditDistanceExtension.cs" />
     <Compile Include="GitHub.cs" />
-    <Compile Include="Messages\ErrorMessage.cs" />
-    <Compile Include="Messages\UnknownArgumentMessage.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
