@@ -17,9 +17,37 @@ namespace GitHubConsole.Commands
 
         private readonly FlagParameter open, closed, all;
 
+        [Name("--has-assignee")]
+        private readonly FlagParameter hasAssignee;
+        [Name("--no-assignee")]
+        private readonly FlagParameter noAssignee;
+
+        [Name("--assignee")]
+        private readonly Parameter<string[]> assignee;
+        [Name("--not-assignee")]
+        private readonly Parameter<string[]> notAssignee;
+
         public IssuesCommand()
         {
             outputFormat.SetDefault(Config.Default["issues.format"] ?? "%#% %user% %title% %labels%");
+            assignee.Validate(x => x.Length > 0, "A user must be specified for the " + assignee.Name + " argument.");
+        }
+
+        protected override Message Validate()
+        {
+            if (hasAssignee.IsSet || noAssignee.IsSet)
+            {
+                if (!assignee.IsDefault)
+                    return string.Format("The {0} parameter cannot be used with the {1} or the {2} flag.", assignee.Name, hasAssignee.Name, noAssignee.Name);
+
+                if (!notAssignee.IsDefault)
+                    return string.Format("The {0} parameter cannot be used with the {1} or the {2} flag.", notAssignee.Name, hasAssignee.Name, noAssignee.Name);
+            }
+
+            if (!assignee.IsDefault && !notAssignee.IsDefault)
+                return string.Format("The {0} parameter cannot be used with the {1} parameter.", assignee.Name, notAssignee.Name);
+
+            return base.Validate();
         }
 
         private void AndPredicate(Func<Issue, bool> func)
@@ -46,9 +74,6 @@ namespace GitHubConsole.Commands
         protected override IEnumerable<ArgumentHandlerPair> LoadArgumentHandlers()
         {
             yield return new ArgumentHandlerPair("--label", handleLabel);
-            yield return new ArgumentHandlerPair("--no-assignee", arg => { AndPredicate(x => x.Assignee == null); return ErrorMessage.NoError; });
-            yield return new ArgumentHandlerPair("--has-assignee", arg => { AndPredicate(x => x.Assignee != null); return ErrorMessage.NoError; });
-            yield return new ArgumentHandlerPair("--assignee", "-u", handleAssignee);
         }
 
         private ErrorMessage handleLabel(Argument argument)
@@ -77,28 +102,6 @@ namespace GitHubConsole.Commands
             }
             return ErrorMessage.NoError;
         }
-        private ErrorMessage handleAssignee(Argument argument)
-        {
-            if (argument.Count == 0)
-                return new ErrorMessage("A user must be specified for the -assignee argument.");
-            else if (argument.Count > 1)
-                return new ErrorMessage("Only one user can be specified for the -assignee argument.");
-            else
-            {
-                var arg = argument[0];
-                var argReplace = argument[0].Replace('_', ' ');
-
-                if (arg.StartsWith("^"))
-                {
-                    arg = arg.Substring(1);
-                    argReplace = argReplace.Substring(1);
-                    AndPredicate(x => x.Assignee == null || x.Assignee.Login != arg || x.Assignee.Login != argReplace);
-                }
-                else
-                    AndPredicate(x => x.Assignee != null && (x.Assignee.Login == arg || x.Assignee.Login == argReplace));
-            }
-            return ErrorMessage.NoError;
-        }
 
         private RepositoryIssueRequest getRequest()
         {
@@ -110,7 +113,20 @@ namespace GitHubConsole.Commands
         }
         private bool validateIssue(Issue issue)
         {
-            throw new NotImplementedException();
+            return validateAssignee(issue.Assignee);
+        }
+        private bool validateAssignee(User a)
+        {
+            if (!assignee.IsDefault)
+                return a != null && assignee.Value.Contains(a.Login);
+            else if (!notAssignee.IsDefault)
+                return a == null || !notAssignee.Value.Contains(a.Login);
+            else if (hasAssignee.IsSet)
+                return a != null;
+            else if (noAssignee.IsSet)
+                return a == null;
+            else
+                return true;
         }
 
         public override void Execute()
