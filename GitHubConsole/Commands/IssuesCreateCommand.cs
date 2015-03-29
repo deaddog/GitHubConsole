@@ -1,60 +1,41 @@
-﻿using GitHubConsole.Commands.Structure;
-using GitHubConsole.Messages;
+﻿using CommandLineParsing;
 using Octokit;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace GitHubConsole.Commands
 {
-    public class IssuesCreateCommand : ManagedCommand
+    public class IssuesCreateCommand : Command
     {
-        private string title = null;
-        private List<string> labels = new List<string>();
+        [Name("--title", "-t"), Required("A title is required for an issue.")]
+        private readonly Parameter<string> title;
+        [Name("--labels", "-l")]
+        private readonly Parameter<string[]> labels;
 
-        protected override IEnumerable<ArgumentHandlerPair> LoadArgumentHandlers()
+        public IssuesCreateCommand()
         {
-            yield return new ArgumentHandlerPair("--title", handleTitle);
-            yield return new ArgumentHandlerPair("--labels", handleLabel);
+            title.Validate(x => x.Trim().Length > 0, "An issue cannot be created with an empty title.");
         }
 
-        private ErrorMessage handleTitle(Argument argument)
+        protected override Message Validate()
         {
-            if (argument.Count != 1)
-                return new ErrorMessage("Only one issue title can be specified.");
-
-            title = argument[0].Trim();
-            return ErrorMessage.NoError;
-        }
-        private ErrorMessage handleLabel(Argument argument)
-        {
-            for (int i = 0; i < argument.Count; i++)
-                labels.Add(argument[i]);
-
-            return ErrorMessage.NoError;
-        }
-
-        public override ErrorMessage ValidateState()
-        {
-            if (title == null || title.Length == 0)
-                return new ErrorMessage("Issue must have a title. You must specify the [[:Yellow:--title <title>]] argument.");
-
             var knownLabels = GitHub.Client.Issue.Labels.GetForRepository(GitHub.Username, GitHub.Project).Result.ToList();
             var knownLabelNames = knownLabels.Select(x => x.Name).ToList();
 
-            foreach (var l in labels)
+            foreach (var l in labels.Value)
                 if (!knownLabelNames.Contains(l))
                 {
                     string lblString = string.Format(string.Join("", knownLabels.Select(lbl => "\n  [[:" + ColorResolver.GetConsoleColor(lbl.Color) + ":" + lbl.Name + "]]")));
-                    return new ErrorMessage("Unknown label [[:Red:{0}]]. Valid label names are:{1}", l, lblString);
+                    return string.Format("Unknown label [[:Red:{0}]]. Valid label names are:{1}", l, lblString);
                 }
 
-            return base.ValidateState();
+            return base.Validate();
         }
 
         public override void Execute()
         {
-            NewIssue issue = new NewIssue(title);
-            foreach (var l in labels)
+            NewIssue issue = new NewIssue(title.Value.Trim());
+            foreach (var l in labels.Value)
                 issue.Labels.Add(l);
 
             var iss = GitHub.Client.Issue.Create(GitHub.Username, GitHub.Project, issue).Result;
