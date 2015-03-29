@@ -1,16 +1,19 @@
-﻿using GitHubConsole.Commands.Structure;
-using GitHubConsole.Messages;
+﻿using CommandLineParsing;
 using System;
 using System.Collections.Generic;
 
 namespace GitHubConsole.Commands
 {
-    public class ConfigCommand : ManagedCommand
+    public class ConfigCommand : Command
     {
         private Dictionary<string, string> setValues = new Dictionary<string, string>();
         private List<string> removeKeys = new List<string>();
-        private bool clear = false;
-        private bool list = false;
+
+        private readonly Parameter<string[]> set;
+        private readonly Parameter<string[]> remove;
+
+        private readonly FlagParameter clear;
+        private readonly FlagParameter list;
 
         protected override IEnumerable<ArgumentHandlerPair> LoadArgumentHandlers()
         {
