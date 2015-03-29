@@ -15,6 +15,8 @@ namespace GitHubConsole.Commands
         [Name("--format", "-f")]
         private readonly Parameter<string> outputFormat;
 
+        private readonly FlagParameter open, closed, all;
+
         public IssuesCommand()
         {
             outputFormat.SetDefault(Config.Default["issues.format"] ?? "%#% %user% %title% %labels%");
@@ -43,27 +45,10 @@ namespace GitHubConsole.Commands
 
         protected override IEnumerable<ArgumentHandlerPair> LoadArgumentHandlers()
         {
-            yield return new ArgumentHandlerPair("--open", handleOpen);
-            yield return new ArgumentHandlerPair("--closed", handleClosed);
-            yield return new ArgumentHandlerPair("--all", "-a", x => { request.State = ItemState.All; return ErrorMessage.NoError; });
             yield return new ArgumentHandlerPair("--label", handleLabel);
             yield return new ArgumentHandlerPair("--no-assignee", arg => { AndPredicate(x => x.Assignee == null); return ErrorMessage.NoError; });
             yield return new ArgumentHandlerPair("--has-assignee", arg => { AndPredicate(x => x.Assignee != null); return ErrorMessage.NoError; });
             yield return new ArgumentHandlerPair("--assignee", "-u", handleAssignee);
-        }
-
-        private ErrorMessage handleOpen(Argument argument)
-        {
-            openArgFound = true;
-            if (request.State == ItemState.Closed)
-                request.State = ItemState.All;
-            return ErrorMessage.NoError;
-        }
-        private ErrorMessage handleClosed(Argument argument)
-        {
-            if (request.State == ItemState.Open)
-                request.State = openArgFound ? ItemState.All : ItemState.Closed;
-            return ErrorMessage.NoError;
         }
 
         private ErrorMessage handleLabel(Argument argument)
@@ -117,6 +102,10 @@ namespace GitHubConsole.Commands
 
         private RepositoryIssueRequest getRequest()
         {
+            var request = new RepositoryIssueRequest();
+
+            request.State = (all.IsSet || (open.IsSet && closed.IsSet)) ? ItemState.All : (closed.IsSet ? ItemState.Closed : ItemState.Open);
+
             throw new NotImplementedException();
         }
         private bool validateIssue(Issue issue)
