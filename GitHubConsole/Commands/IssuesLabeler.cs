@@ -1,16 +1,32 @@
-﻿using GitHubConsole.Commands.Structure;
-using GitHubConsole.Messages;
+﻿using CommandLineParsing;
 using Octokit;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace GitHubConsole.Commands
 {
-    public class IssuesLabeler : ManagedCommand
+    public class IssuesLabeler : Command
     {
-        private List<int> issues = new List<int>();
-        private List<string> set = new List<string>();
-        private List<string> remove = new List<string>();
+        [NoName]
+        private Parameter<int[]> issues;
+
+        private Parameter<string[]> set;
+        private Parameter<string[]> remove;
+
+        public IssuesLabeler()
+        {
+            issues.ValidateEach(x => x > 0, x => "Issue [[:Red:#" + x + "]] is invalid.");
+        }
+
+        protected override Message Validate()
+        {
+            if (set.Value.Length == 0 && remove.Value.Length == 0)
+                return "You must specify whether to add or remove labels:\n" +
+                    "  gihub issues labels <issues> --set <label1> <label2>..." +
+                    "  gihub issues labels <issues> --remove <label1> <label2>...";
+
+            return base.Validate();
+        }
 
         public override void Execute()
         {
@@ -22,18 +38,18 @@ namespace GitHubConsole.Commands
             List<Label> remLabels = new List<Label>();
 
             var labels = client.Issue.Labels.GetForRepository(GitHub.Username, GitHub.Project).Result;
-            foreach (var s in set)
+            foreach (var s in set.Value)
             {
                 var l = labels.FirstOrDefault(x => x.Name == s);
                 if (l != null) setLabels.Add(l);
             }
-            foreach (var r in remove)
+            foreach (var r in remove.Value)
             {
                 var l = labels.FirstOrDefault(x => x.Name == r);
                 if (l != null) remLabels.Add(l);
             }
 
-            foreach (var number in issues)
+            foreach (var number in issues.Value)
             {
                 var issue = client.Issue.Get(GitHub.Username, GitHub.Project, number).Result;
                 if (issue == null)
@@ -56,50 +72,6 @@ namespace GitHubConsole.Commands
 
                 client.Issue.Update(GitHub.Username, GitHub.Project, number, update).Wait();
             }
-        }
-
-        protected override IEnumerable<ArgumentHandlerPair> LoadArgumentHandlers()
-        {
-            yield return new ArgumentHandlerPair("--set", handleSet);
-            yield return new ArgumentHandlerPair("--remove", handleRemove);
-        }
-
-        public override ErrorMessage HandleArgumentFallback(Argument argument)
-        {
-            int number;
-            if (int.TryParse(argument.Key, out number))
-            {
-                if (number < 0)
-                    return new ErrorMessage("Issue [[:Red:#{0}]] is invalid. Issues must be 1, 2, 3...", number);
-                else
-                {
-                    issues.Add(number);
-                    return ErrorMessage.NoError;
-                }
-            }
-            else
-                return base.HandleArgumentFallback(argument);
-        }
-
-        private ErrorMessage handleSet(Argument argument)
-        {
-            for (int i = 0; i < argument.Count; i++)
-            {
-                set.Add(argument[i]);
-                if (argument[i].Contains('_'))
-                    set.Add(argument[i].Replace('_', ' '));
-            }
-            return ErrorMessage.NoError;
-        }
-        private ErrorMessage handleRemove(Argument argument)
-        {
-            for (int i = 0; i < argument.Count; i++)
-            {
-                remove.Add(argument[i]);
-                if (argument[i].Contains('_'))
-                    remove.Add(argument[i].Replace('_', ' '));
-            }
-            return ErrorMessage.NoError;
         }
     }
 }
