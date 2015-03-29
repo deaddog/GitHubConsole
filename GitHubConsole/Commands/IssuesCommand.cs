@@ -115,12 +115,21 @@ namespace GitHubConsole.Commands
             return ErrorMessage.NoError;
         }
 
+        private RepositoryIssueRequest getRequest()
+        {
+            throw new NotImplementedException();
+        }
+        private bool validateIssue(Issue issue)
+        {
+            throw new NotImplementedException();
+        }
+
         public override void Execute()
         {
             if (GitHub.Client == null)
                 return;
 
-            var q = GitHub.Client.Issue.GetForRepository(GitHub.Username, GitHub.Project, request).Result.Where(x => validator == null || validator(x)).ToArray();
+            var q = GitHub.Client.Issue.GetForRepository(GitHub.Username, GitHub.Project, getRequest()).Result.Where(x => validateIssue(x)).ToArray();
 
             listIssues(q);
         }
