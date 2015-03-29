@@ -49,13 +49,10 @@
     <Compile Include="ColorConsole.cs" />
     <Compile Include="ColorResolver.cs" />
     <Compile Include="Commands\ConfigCommand.cs" />
-    <Compile Include="Commands\Structure\Command.cs" />
     <Compile Include="Commands\IssuesCreateCommand.cs" />
     <Compile Include="Commands\IssuesAssigner.cs" />
     <Compile Include="Commands\IssuesCommand.cs" />
     <Compile Include="Commands\IssuesLabeler.cs" />
-    <Compile Include="Commands\Structure\ManagedCommand.cs" />
-    <Compile Include="Commands\Structure\SubCommand.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="EditDistanceExtension.cs" />
     <Compile Include="GitHub.cs" />
