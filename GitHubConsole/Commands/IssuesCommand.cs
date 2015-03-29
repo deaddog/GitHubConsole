@@ -1,5 +1,4 @@
-﻿using GitHubConsole.Commands.Structure;
-using GitHubConsole.Messages;
+﻿using CommandLineParsing;
 using Octokit;
 using System;
 using System.Collections.Generic;
@@ -7,7 +6,7 @@ using System.Linq;
 
 namespace GitHubConsole.Commands
 {
-    public class IssuesCommand : ManagedCommand
+    public class IssuesCommand : Command
     {
         private bool openArgFound = false;
         private RepositoryIssueRequest request = new RepositoryIssueRequest();
