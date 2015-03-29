@@ -15,17 +15,23 @@ namespace GitHubConsole.Commands
         private readonly FlagParameter clear;
         private readonly FlagParameter list;
 
-        protected override IEnumerable<ArgumentHandlerPair> LoadArgumentHandlers()
+        public ConfigCommand()
         {
-            yield return new ArgumentHandlerPair("--set", handleSet);
-            yield return new ArgumentHandlerPair("--remove", handleRemove);
-            yield return new ArgumentHandlerPair("--clear", NoValuesHandler(() => clear = true));
-            yield return new ArgumentHandlerPair("--list", NoValuesHandler(() => list = true));
+            set.Validate(x => x.Length == 2,
+                "Setting config values requires exactly two arguments:\n" +
+                "  github config " + set.Name + " <key> <value>");
+            set.Callback += () => setValues.Add(set.Value[0], set.Value[1]);
+
+            remove.Validate(x => x.Length > 0,
+                "Removing config keys requires that you specify at least one key to remove:\n" +
+                "  github config " + remove.Name + " <key>\n" +
+                "  github config " + remove.Name + " <key1> <key2> <key3>...");
+            remove.Callback += () => removeKeys.AddRange(remove.Value);
         }
 
         public override void Execute()
         {
-            if (clear)
+            if (clear.IsSet)
                 Config.Default.Clear();
             else
                 foreach (var key in removeKeys)
@@ -34,33 +40,9 @@ namespace GitHubConsole.Commands
             foreach (var set in setValues)
                 Config.Default[set.Key] = set.Value;
 
-            if (list)
+            if (list.IsSet)
                 foreach (var pair in Config.Default.GetAll())
                     ColorConsole.ToConsoleLine("{0}={1}", pair.Key, pair.Value);
-        }
-
-        private ErrorMessage handleSet(Argument argument)
-        {
-            if (argument.Count != 2)
-                return new ErrorMessage(
-                    "Setting config values requires exactly two arguments:\n" +
-                    "  github config " + argument.Key + " <key> <value>");
-
-            setValues[argument[0]] = argument[1];
-            return ErrorMessage.NoError;
-        }
-        private ErrorMessage handleRemove(Argument argument)
-        {
-            if (argument.Count == 0)
-                return new ErrorMessage(
-                    "Removing config keys requires that you specify at least one key to remove:\n" +
-                    "  github config --remove <key>\n" +
-                    "  github config --remove <key1> <key2> <key3>...");
-
-            for (int i = 0; i < argument.Count; i++)
-                removeKeys.Add(argument[i]);
-
-            return ErrorMessage.NoError;
         }
     }
 }
