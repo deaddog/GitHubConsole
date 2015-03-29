@@ -53,32 +53,6 @@ namespace GitHubConsole.Commands
             return base.Validate();
         }
 
-        private void AndPredicate(Func<Issue, bool> func)
-        {
-            var old = validator;
-            validator = null;
-
-            if (old == null)
-                validator = x => func(x);
-            else
-                validator = x => (old(x) && func(x));
-        }
-        private void OrPredicate(Func<Issue, bool> func)
-        {
-            var old = validator;
-            validator = null;
-
-            if (old == null)
-                validator = x => func(x);
-            else
-                validator = x => (old(x) || func(x));
-        }
-
-        protected override IEnumerable<ArgumentHandlerPair> LoadArgumentHandlers()
-        {
-            yield return new ArgumentHandlerPair("--label", handleLabel);
-        }
-
         private RepositoryIssueRequest getRequest()
         {
             var request = new RepositoryIssueRequest();
