@@ -1,0 +1,3 @@
+[submodule "CommandLineParsing"]
+	path = CommandLineParsing
+	url = https://github.com/deaddog/CommandLineParsing.git
