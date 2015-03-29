@@ -12,7 +12,13 @@ namespace GitHubConsole.Commands
         private RepositoryIssueRequest request = new RepositoryIssueRequest();
         private Predicate<Issue> validator = null;
 
-        private string outputFormat = null;
+        [Name("--format", "-f")]
+        private readonly Parameter<string> outputFormat;
+
+        public IssuesCommand()
+        {
+            outputFormat.SetDefault(Config.Default["issues.format"] ?? "%#% %user% %title% %labels%");
+        }
 
         private void AndPredicate(Func<Issue, bool> func)
         {
@@ -44,7 +50,6 @@ namespace GitHubConsole.Commands
             yield return new ArgumentHandlerPair("--no-assignee", arg => { AndPredicate(x => x.Assignee == null); return ErrorMessage.NoError; });
             yield return new ArgumentHandlerPair("--has-assignee", arg => { AndPredicate(x => x.Assignee != null); return ErrorMessage.NoError; });
             yield return new ArgumentHandlerPair("--assignee", "-u", handleAssignee);
-            yield return new ArgumentHandlerPair("--format", handleOutputFormat);
         }
 
         private ErrorMessage handleOpen(Argument argument)
@@ -110,20 +115,6 @@ namespace GitHubConsole.Commands
             return ErrorMessage.NoError;
         }
 
-        private ErrorMessage handleOutputFormat(Argument argument)
-        {
-            if (argument.Count == 0)
-                return new ErrorMessage("No format supplied for [[:Yellow:{0}]] argument.", argument.Key);
-            if (argument.Count > 1)
-                return new ErrorMessage("Only one format can be supplied for the [[:Yellow:{0}]] argument.", argument.Key);
-            if (outputFormat != null)
-                return new ErrorMessage("The [[:Yellow:{0}]] argument can only be supplied once.", argument.Key);
-
-            this.outputFormat = argument[0];
-
-            return ErrorMessage.NoError;
-        }
-
         public override void Execute()
         {
             if (GitHub.Client == null)
@@ -144,7 +135,7 @@ namespace GitHubConsole.Commands
                            let n = v.Assignee == null ? "" : v.Assignee.Login
                            select n.Length).Max();
 
-            string format = (outputFormat ?? Config.Default["issues.format"]) ?? "%#% %user% %title% %labels%";
+            string format = outputFormat.Value;
 
             format = format.Replace("%#%", "[[:{1}:{0}]]");
             format = format.Replace("%user%", "[[:{3}:{2}]]");
