@@ -8,7 +8,7 @@ namespace GitHubConsole.Commands
     public class IssuesAssigner : Command
     {
         private bool isTake = false;
-        
+
         [NoName]
         private Parameter<int[]> issues;
 
@@ -19,6 +19,22 @@ namespace GitHubConsole.Commands
             issues.TypeErrorMessage = x => "GitHub issue # must be an integer. \"" + x + "\" is not valid.";
         }
 
+        protected override Message Validate()
+        {
+            if (isTake)
+            {
+                if (issues.Value.Length == 0)
+                    return "You must specify which issues # to assign yourself to.\nFor instance: [[:White:github issues take 5 7]] will assign you to issue #5 and #7.";
+            }
+            else
+            {
+                if (issues.Value.Length == 0)
+                    return "You must specify which issues # to unassign yourself from.\nFor instance: [[:White:github issues drop 5 7]] will unassign you from issue #5 and #7.";
+            }
+
+            return base.Validate();
+        }
+
         public override void Execute()
         {
             GitHubClient client = GitHub.Client;
@@ -27,12 +43,6 @@ namespace GitHubConsole.Commands
 
             if (isTake)
             {
-                if (issues.Value.Length == 0)
-                {
-                    "You must specify which issues # to assign yourself to.".ToConsoleLine();
-                    "For instance: [[:White:github issues take 5 7]] will assign you to issue #5 and #7.".ToConsoleLine();
-                }
-
                 string assignUser = client.User.Current().Result.Login;
                 for (int i = 0; i < issues.Value.Length; i++)
                 {
@@ -51,12 +61,6 @@ namespace GitHubConsole.Commands
 
             else // drop
             {
-                if (issues.Value.Length == 0)
-                {
-                    "You must specify which issues # to unassign yourself from.".ToConsoleLine();
-                    "For instance: [[:White:github issues drop 5 7]] will unassign you from issue #5 and #7.".ToConsoleLine();
-                }
-
                 string assignUser = client.User.Current().Result.Login;
                 for (int i = 0; i < issues.Value.Length; i++)
                 {
