@@ -28,7 +28,7 @@ namespace GitHubConsole.Commands
             return base.Validate();
         }
 
-        public override void Execute()
+        protected override void Execute()
         {
             GitHubClient client = GitHub.Client;
             if (client == null)

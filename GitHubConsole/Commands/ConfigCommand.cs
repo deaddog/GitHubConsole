@@ -29,7 +29,7 @@ namespace GitHubConsole.Commands
             remove.Callback += () => removeKeys.AddRange(remove.Value);
         }
 
-        public override void Execute()
+        protected override void Execute()
         {
             if (clear.IsSet)
                 Config.Default.Clear();

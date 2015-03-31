@@ -32,7 +32,7 @@ namespace GitHubConsole.Commands
             return base.Validate();
         }
 
-        public override void Execute()
+        protected override void Execute()
         {
             NewIssue issue = new NewIssue(title.Value.Trim());
             foreach (var l in labels.Value)

@@ -95,7 +95,7 @@ namespace GitHubConsole.Commands
             return true;
         }
 
-        public override void Execute()
+        protected override void Execute()
         {
             if (GitHub.Client == null)
                 return;
