@@ -31,6 +31,11 @@ namespace GitHubConsole.Commands
 
         public IssuesCommand()
         {
+            SubCommands.Add("create", new IssuesCreateCommand());
+            SubCommands.Add("take", new IssuesAssigner(true));
+            SubCommands.Add("drop", new IssuesAssigner(false));
+            SubCommands.Add("label", new IssuesLabeler());
+
             outputFormat.SetDefault(Config.Default["issues.format"] ?? "%#% %user% %title% %labels%");
             assignee.Validate(x => x.Length > 0, "A user must be specified for the " + assignee.Name + " argument.");
             labels.Validate(x => x.Length > 0, "At least one label name must be supplied for the " + labels.Name + " argument.");
@@ -59,7 +64,7 @@ namespace GitHubConsole.Commands
 
             request.State = (all.IsSet || (open.IsSet && closed.IsSet)) ? ItemState.All : (closed.IsSet ? ItemState.Closed : ItemState.Open);
 
-            throw new NotImplementedException();
+            return request;
         }
         private bool validateIssue(Issue issue)
         {
