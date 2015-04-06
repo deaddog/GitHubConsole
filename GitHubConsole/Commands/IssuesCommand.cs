@@ -29,6 +29,8 @@ namespace GitHubConsole.Commands
         [Name("--not-assignee")]
         private readonly Parameter<string[]> notAssignee;
 
+        private List<Issue> issues;
+
         public IssuesCommand()
         {
             SubCommands.Add("create", new IssuesCreateCommand());
@@ -54,6 +56,8 @@ namespace GitHubConsole.Commands
 
             if (!assignee.IsDefault && !notAssignee.IsDefault)
                 return string.Format("The {0} parameter cannot be used with the {1} parameter.", assignee.Name, notAssignee.Name);
+
+            issues = GitHub.Client.Issue.GetForRepository(GitHub.Username, GitHub.Project, getRequest()).Result.ToList();
 
             return base.Validate();
         }
@@ -102,17 +106,16 @@ namespace GitHubConsole.Commands
 
         protected override void Execute()
         {
-            if (GitHub.Client == null)
-                return;
+            for (int i = 0; i < issues.Count; i++)
+                if (!validateIssue(issues[i]))
+                    issues.RemoveAt(i--);
 
-            var q = GitHub.Client.Issue.GetForRepository(GitHub.Username, GitHub.Project, getRequest()).Result.Where(x => validateIssue(x)).ToArray();
-
-            listIssues(q);
+            listIssues();
         }
 
-        private void listIssues(Issue[] issues)
+        private void listIssues()
         {
-            if (issues.Length == 0)
+            if (issues.Count == 0)
                 return;
 
             int len = issues[0].Number.ToString().Length;
