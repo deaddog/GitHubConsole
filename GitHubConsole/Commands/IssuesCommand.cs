@@ -8,7 +8,6 @@ namespace GitHubConsole.Commands
 {
     public class IssuesCommand : Command
     {
-        private bool openArgFound = false;
         private RepositoryIssueRequest request = new RepositoryIssueRequest();
         private Predicate<Issue> validator = null;
 
@@ -28,6 +27,11 @@ namespace GitHubConsole.Commands
         private readonly Parameter<string[]> assignee;
         [Name("--not-assignee")]
         private readonly Parameter<string[]> notAssignee;
+
+        private readonly FlagParameter take, drop;
+
+        [NoName]
+        private readonly Parameter<int[]> issuesIn;
 
         private List<Issue> issues;
 
