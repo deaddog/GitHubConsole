@@ -6,12 +6,14 @@ namespace GitHubConsole
 {
     class Program
     {
+        private const string HELP = "help";
+
         static void Main(string[] args)
         {
 #if DEBUG
-            Command.SimulateREPL(() => new MainCommand(), "quit");
+            Command.SimulateREPL(() => new MainCommand(), "quit", HELP);
 #else
-            try { Command.RunCommand(new MainCommand(), args); }
+            try { Command.RunCommand(new MainCommand(), args, HELP); }
             catch (AggregateException aggex)
             {
                 if (aggex.InnerExceptions.Count == 1 && aggex.InnerException is Octokit.AuthorizationException)
@@ -34,6 +36,11 @@ namespace GitHubConsole
             {
                 SubCommands.Add("config", new ConfigCommand());
                 SubCommands.Add("issues", new IssuesCommand());
+            }
+
+            protected override Message Validate()
+            {
+                return GetHelpMessage();
             }
         }
     }
