@@ -57,22 +57,27 @@ namespace GitHubConsole.Commands
             if (!assignee.IsDefault && !notAssignee.IsDefault)
                 return string.Format("The {0} parameter cannot be used with the {1} parameter.", assignee.Name, notAssignee.Name);
 
-            issues = GitHub.Client.Issue.GetForRepository(GitHub.Username, GitHub.Project, getRequest()).Result.ToList();
+            issues = GitHub.Client.Issue.GetForRepository(GitHub.Username, GitHub.Project, new RepositoryIssueRequest() { State = ItemState.All }).Result.ToList();
 
             return base.Validate();
         }
 
-        private RepositoryIssueRequest getRequest()
-        {
-            var request = new RepositoryIssueRequest();
-
-            request.State = (all.IsSet || (open.IsSet && closed.IsSet)) ? ItemState.All : (closed.IsSet ? ItemState.Closed : ItemState.Open);
-
-            return request;
-        }
         private bool validateIssue(Issue issue)
         {
-            return validateAssignee(issue.Assignee) && validateLabels(issue.Labels.Select(x => x.Name).ToList());
+
+            return
+                validateState(issue.State) &&
+                validateAssignee(issue.Assignee) &&
+                validateLabels(issue.Labels.Select(x => x.Name).ToList());
+        }
+        private bool validateState(ItemState state)
+        {
+            switch (state)
+            {
+                case ItemState.Closed: return all.IsSet || closed.IsSet;
+                case ItemState.Open: return all.IsSet || open.IsSet || !closed.IsSet;
+            }
+            return false;
         }
         private bool validateAssignee(User a)
         {
