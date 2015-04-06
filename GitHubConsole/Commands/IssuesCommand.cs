@@ -62,7 +62,30 @@ namespace GitHubConsole.Commands
             if (!assignee.IsDefault && !notAssignee.IsDefault)
                 return string.Format("The {0} parameter cannot be used with the {1} parameter.", assignee.Name, notAssignee.Name);
 
+            if (take.IsSet && drop.IsSet)
+                return string.Format("The {0} and {1} parameters cannot be used simultaneously.", take.Name, drop.Name);
+
+            if (take.IsSet && issuesIn.Value.Length == 0)
+                return "You must specify which issues # to assign yourself to.\nFor instance: [[:White:github issues 5 7 --take]] will assign you to issue #5 and #7.";
+
+            if (drop.IsSet && issuesIn.Value.Length == 0)
+                return "You must specify which issues # to unassign yourself from.\nFor instance: [[:White:github issues 5 7 --drop]] will unassign you from issue #5 and #7.";
+
+            if (issuesIn.Value.Length > 0)
+            {
+                if (open.IsSet || closed.IsSet || all.IsSet || !labels.IsDefault || hasAssignee.IsSet || noAssignee.IsSet || !assignee.IsDefault || !notAssignee.IsDefault)
+                    return "Issue filtering cannot be applied when specifying specific issues.";
+            }
+
             issues = GitHub.Client.Issue.GetForRepository(GitHub.Username, GitHub.Project, new RepositoryIssueRequest() { State = ItemState.All }).Result.ToList();
+
+            if (issuesIn.Value.Length > 0)
+            {
+                int max = issues.Select(x => x.Number).Max();
+
+                foreach (var i in issuesIn.Value)
+                    if (i > max) return string.Format("The repo does not contain a #{0} issue.", i);
+            }
 
             return base.Validate();
         }
