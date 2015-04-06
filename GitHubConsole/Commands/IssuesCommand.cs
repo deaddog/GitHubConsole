@@ -92,6 +92,8 @@ namespace GitHubConsole.Commands
 
         private bool validateIssue(Issue issue)
         {
+            if (issuesIn.Value.Length > 0)
+                return issuesIn.Value.Contains(issue.Number);
 
             return
                 validateState(issue.State) &&
