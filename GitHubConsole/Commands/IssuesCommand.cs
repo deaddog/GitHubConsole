@@ -39,8 +39,6 @@ namespace GitHubConsole.Commands
         public IssuesCommand()
         {
             SubCommands.Add("create", new IssuesCreateCommand());
-            SubCommands.Add("take", new IssuesAssigner(true));
-            SubCommands.Add("drop", new IssuesAssigner(false));
             SubCommands.Add("label", new IssuesLabeler());
 
             outputFormat.SetDefault(Config.Default["issues.format"] ?? "%#% %user% %title% %labels%");
@@ -111,7 +109,7 @@ namespace GitHubConsole.Commands
                 if (msg.IsError)
                     return msg;
 
-                msg = ValidateEach(issues, x => x.Assignee.Login != assignUser,
+                msg = ValidateEach(issues, x => x.Assignee.Login == assignUser,
                     x => string.Format("[[:DarkCyan:{0}]] is assigned to issue [[:DarkYellow:#{1}]], you cannot be unassigned.", x.Assignee.Login, x.Number));
                 if (msg.IsError)
                     return msg;
@@ -173,7 +171,7 @@ namespace GitHubConsole.Commands
         {
             if (take.IsSet)
             {
-                ColorConsole.ToConsoleLine("Assigning [[:Cyan:{0}]] to issue(s) {1}.", assignUser, issuesIn.Value.ToString(", ", " and "));
+                ColorConsole.ToConsoleLine("Assigning [[:Cyan:{0}]] to issue{2} {1}.", assignUser, issuesIn.Value.ToString(", ", " and "), issuesIn.Value.Length > 1 ? "s" : "");
 
                 for (int i = 0; i < issues.Count; i++)
                 {
@@ -184,7 +182,7 @@ namespace GitHubConsole.Commands
             }
             else if (drop.IsSet)
             {
-                ColorConsole.ToConsoleLine("Removing [[:Cyan:{0}]] as assignee for issue(s) {1}.", assignUser, issuesIn.Value.ToString(", ", " and "));
+                ColorConsole.ToConsoleLine("Removing [[:Cyan:{0}]] as assignee for issue{2} {1}.", assignUser, issuesIn.Value.ToString(", ", " and "), issuesIn.Value.Length > 1 ? "s" : "");
 
                 for (int i = 0; i < issues.Count; i++)
                 {
