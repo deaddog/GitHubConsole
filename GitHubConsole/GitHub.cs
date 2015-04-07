@@ -56,26 +56,31 @@ namespace GitHubConsole
             }
         }
 
-
-        private static string findRepo()
+        private static bool isGitRepo()
         {
 #if DEBUG
-            return findRepo(@"C:\Users\Mikkel\Documents\Git\ghconsole_test\");
-#else
-            return findRepo(Directory.GetCurrentDirectory());
+            Directory.SetCurrentDirectory(@"C:\Users\Mikkel\Documents\Git\ghconsole_test");
 #endif
-        }
-        private static string findRepo(string directory)
-        {
-            if (directory == null)
-                return null;
+            System.Diagnostics.Process p = new System.Diagnostics.Process()
+            {
+                StartInfo = new System.Diagnostics.ProcessStartInfo("git.exe", "status")
+                {
+                    RedirectStandardError = true,
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false
+                }
+            };
+            bool ok;
 
-            var dirs = Directory.GetDirectories(directory, ".git");
-            for (int i = 0; i < dirs.Length; i++)
-                if (Path.GetFileName(dirs[i]).Equals(".git"))
-                    return directory;
+            p.Start();
+            using (StreamReader output = p.StandardError)
+            {
+                p.WaitForExit();
+                ok = output.EndOfStream;
+            }
+            p.Dispose();
 
-            return findRepo(Path.GetDirectoryName(directory));
+            return ok;
         }
 
         private static bool FindGitHubRemote(string gitDirectory, out string user, out string project)
@@ -134,13 +139,11 @@ namespace GitHubConsole
 
         private static bool validateGitDirectory(out Credentials cred, out string username, out string project)
         {
-            string gitDirectory = findRepo();
-
             cred = null;
             username = null;
             project = null;
 
-            if (gitDirectory == null)
+            if (!isGitRepo())
             {
                 Console.WriteLine("The current directory is not part of a Git repository.");
                 Console.WriteLine("GitHub commands cannot be executed.");
