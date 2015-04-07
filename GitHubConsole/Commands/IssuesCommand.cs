@@ -34,6 +34,7 @@ namespace GitHubConsole.Commands
         private readonly Parameter<int[]> issuesIn;
 
         private List<Issue> issues;
+        private string assignUser;
 
         public IssuesCommand()
         {
@@ -85,6 +86,31 @@ namespace GitHubConsole.Commands
 
                 foreach (var i in issuesIn.Value)
                     if (i > max) return string.Format("The repo does not contain a #{0} issue.", i);
+            }
+
+            if (take.IsSet)
+            {
+                assignUser = GitHub.Client.User.Current().Result.Login;
+                var msg = ValidateEach(issues, x => x.Assignee == null,
+                    x => string.Format("[[:DarkCyan:{0}]] is assigned to issue [[:DarkYellow:#{1}]], you cannot be assigned.", x.Assignee.Login, x.Number));
+
+                if (msg.IsError)
+                    return msg;
+            }
+            if (drop.IsSet)
+            {
+                assignUser = GitHub.Client.User.Current().Result.Login;
+                Message msg;
+
+                msg = ValidateEach(issues, x => x.Assignee != null,
+                    x => string.Format("No one is assigned to issue [[:DarkYellow:#{0}]], you cannot be unassigned.", x.Number));
+                if (msg.IsError)
+                    return msg;
+
+                msg = ValidateEach(issues, x => x.Assignee.Login != assignUser,
+                    x => string.Format("[[:DarkCyan:{0}]] is assigned to issue [[:DarkYellow:#{1}]], you cannot be unassigned.", x.Assignee.Login, x.Number));
+                if (msg.IsError)
+                    return msg;
             }
 
             return base.Validate();
