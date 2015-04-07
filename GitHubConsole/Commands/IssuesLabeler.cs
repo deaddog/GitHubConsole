@@ -54,7 +54,7 @@ namespace GitHubConsole.Commands
                 var issue = client.Issue.Get(GitHub.Username, GitHub.Project, number).Result;
                 if (issue == null)
                 {
-                    "Unknown issue [[:DarkRed:#{0}]].".ToConsoleLine(number);
+                    ColorConsole.WriteLine("Unknown issue [[:DarkRed:#{0}]].", number);
                     continue;
                 }
 

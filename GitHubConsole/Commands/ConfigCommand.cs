@@ -42,7 +42,7 @@ namespace GitHubConsole.Commands
 
             if (list.IsSet)
                 foreach (var pair in Config.Default.GetAll())
-                    ColorConsole.ToConsoleLine("{0}={1}", pair.Key, pair.Value);
+                    ColorConsole.WriteLine("{0}={1}", pair.Key, pair.Value);
         }
     }
 }

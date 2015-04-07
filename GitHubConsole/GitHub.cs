@@ -1,11 +1,9 @@
-﻿using Octokit;
+﻿using CommandLineParsing;
+using Octokit;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace GitHubConsole
 {
@@ -158,7 +156,7 @@ namespace GitHubConsole
             if (token == null || token == "")
             {
                 Console.WriteLine("Unable to load GitHub authentification token.");
-                ColorConsole.ToConsoleLine("Run [[:Yellow:github config --set authtoken <token>]] to set.");
+                ColorConsole.WriteLine("Run [[:Yellow:github config --set authtoken <token>]] to set.");
                 return false;
             }
             cred = new Credentials(token);

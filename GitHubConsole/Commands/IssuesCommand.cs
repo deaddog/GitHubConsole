@@ -171,7 +171,7 @@ namespace GitHubConsole.Commands
         {
             if (take.IsSet)
             {
-                ColorConsole.ToConsoleLine("Assigning [[:Cyan:{0}]] to issue{2} {1}.", assignUser, issuesIn.Value.ToString(", ", " and "), issuesIn.Value.Length > 1 ? "s" : "");
+                ColorConsole.WriteLine("Assigning [[:Cyan:{0}]] to issue{2} {1}.", assignUser, issuesIn.Value.ToString(", ", " and "), issuesIn.Value.Length > 1 ? "s" : "");
 
                 for (int i = 0; i < issues.Count; i++)
                 {
@@ -182,7 +182,7 @@ namespace GitHubConsole.Commands
             }
             else if (drop.IsSet)
             {
-                ColorConsole.ToConsoleLine("Removing [[:Cyan:{0}]] as assignee for issue{2} {1}.", assignUser, issuesIn.Value.ToString(", ", " and "), issuesIn.Value.Length > 1 ? "s" : "");
+                ColorConsole.WriteLine("Removing [[:Cyan:{0}]] as assignee for issue{2} {1}.", assignUser, issuesIn.Value.ToString(", ", " and "), issuesIn.Value.Length > 1 ? "s" : "");
 
                 for (int i = 0; i < issues.Count; i++)
                 {
@@ -223,7 +223,7 @@ namespace GitHubConsole.Commands
                         string.Join(", ", v.Labels.Select(l => "[[:" + ColorResolver.GetConsoleColor(l.Color) + ":" + l.Name + "]]")));
                 }
 
-                format.ToConsoleLine(
+                ColorConsole.WriteLine(format,
                     v.Number.ToString().PadLeft(len), v.ClosedAt.HasValue ? "DarkRed" : "DarkYellow",
                     name.PadRight(namelen), name == GitHub.Client.Credentials.Login ? "Cyan" : "DarkCyan",
                     v.Title.Trim(),
