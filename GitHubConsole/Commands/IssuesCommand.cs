@@ -88,6 +88,10 @@ namespace GitHubConsole.Commands
                     if (i > max) return string.Format("The repo does not contain a #{0} issue.", i);
             }
 
+            for (int i = 0; i < issues.Count; i++)
+                if (!validateIssue(issues[i]))
+                    issues.RemoveAt(i--);
+
             if (take.IsSet)
             {
                 assignUser = GitHub.Client.User.Current().Result.Login;
@@ -167,10 +171,6 @@ namespace GitHubConsole.Commands
 
         protected override void Execute()
         {
-            for (int i = 0; i < issues.Count; i++)
-                if (!validateIssue(issues[i]))
-                    issues.RemoveAt(i--);
-
             listIssues();
         }
 
