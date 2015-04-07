@@ -11,7 +11,6 @@ namespace GitHubConsole
 {
     public static class GitHub
     {
-        public static readonly string CredentialsKey = "githubconsole_managedkeyw";
         private static readonly string clientHeader = "GitHubC#Console";
 
         private static GitHubClient client;
