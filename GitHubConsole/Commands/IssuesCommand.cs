@@ -173,7 +173,7 @@ namespace GitHubConsole.Commands
         {
             if (take.IsSet)
             {
-                ColorConsole.ToConsoleLine("Assigning [[:Cyan:{0}]] to issue(s).", assignUser);
+                ColorConsole.ToConsoleLine("Assigning [[:Cyan:{0}]] to issue(s) {1}.", assignUser, issuesIn.Value.ToString(", ", " and "));
 
                 for (int i = 0; i < issues.Count; i++)
                 {
@@ -184,7 +184,7 @@ namespace GitHubConsole.Commands
             }
             else if (drop.IsSet)
             {
-                ColorConsole.ToConsoleLine("Removing [[:Cyan:{0}]] as assignee for issue(s).", assignUser);
+                ColorConsole.ToConsoleLine("Removing [[:Cyan:{0}]] as assignee for issue(s) {1}.", assignUser, issuesIn.Value.ToString(", ", " and "));
 
                 for (int i = 0; i < issues.Count; i++)
                 {
