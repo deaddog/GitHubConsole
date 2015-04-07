@@ -83,9 +83,9 @@ namespace GitHubConsole
             return ok;
         }
 
-        private static bool FindGitHubRemote(string gitDirectory, out string user, out string project)
+        private static bool FindGitHubRemote(out string user, out string project)
         {
-            var remotes = findRemotes(gitDirectory);
+            var remotes = findRemotes();
 
             for (int i = 0; i < remotes.Length; i++)
             {
@@ -102,15 +102,14 @@ namespace GitHubConsole
             project = null;
             return false;
         }
-        private static Tuple<string, string>[] findRemotes(string gitDirectory)
+        private static Tuple<string, string>[] findRemotes()
         {
             System.Diagnostics.Process p = new System.Diagnostics.Process()
             {
                 StartInfo = new System.Diagnostics.ProcessStartInfo("git.exe", "remote -v")
                 {
                     RedirectStandardOutput = true,
-                    UseShellExecute = false,
-                    WorkingDirectory = gitDirectory
+                    UseShellExecute = false
                 }
             };
             p.Start();
@@ -150,7 +149,7 @@ namespace GitHubConsole
                 return false;
             }
 
-            if (!FindGitHubRemote(gitDirectory, out username, out project))
+            if (!FindGitHubRemote(out username, out project))
             {
                 Console.WriteLine("Unable to find GitHub project.");
                 return false;
