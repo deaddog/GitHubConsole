@@ -171,6 +171,29 @@ namespace GitHubConsole.Commands
 
         protected override void Execute()
         {
+            if (take.IsSet)
+            {
+                ColorConsole.ToConsoleLine("Assigning [[:Cyan:{0}]] to issue(s).", assignUser);
+
+                for (int i = 0; i < issues.Count; i++)
+                {
+                    var update = issues[i].ToUpdate();
+                    update.Assignee = assignUser;
+                    issues[i] = GitHub.Client.Issue.Update(GitHub.Username, GitHub.Project, issues[i].Number, update).Result;
+                }
+            }
+            else if (drop.IsSet)
+            {
+                ColorConsole.ToConsoleLine("Removing [[:Cyan:{0}]] as assignee for issue(s).", assignUser);
+
+                for (int i = 0; i < issues.Count; i++)
+                {
+                    var update = issues[i].ToUpdate();
+                    update.Assignee = null;
+                    issues[i] = GitHub.Client.Issue.Update(GitHub.Username, GitHub.Project, issues[i].Number, update).Result;
+                }
+            }
+
             listIssues();
         }
 
