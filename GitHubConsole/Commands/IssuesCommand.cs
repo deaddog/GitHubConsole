@@ -76,6 +76,10 @@ namespace GitHubConsole.Commands
                     return "Issue filtering cannot be applied when specifying specific issues.";
             }
 
+            if (take.IsSet || drop.IsSet)
+                if (!GitHub.Client.Repository.Get(GitHub.Username, GitHub.Project).Result.Permissions.Admin)
+                    return "You do not have admin rights for the [[:Yellow:" + GitHub.Username + "/" + GitHub.Project + "]] repository.\n " + take.Name + " and " + drop.Name + " are not available.";
+
             issues = GitHub.Client.Issue.GetForRepository(GitHub.Username, GitHub.Project, new RepositoryIssueRequest() { State = ItemState.All }).Result.ToList();
 
             if (issuesIn.Value.Length > 0)
