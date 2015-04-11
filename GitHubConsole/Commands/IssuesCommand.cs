@@ -10,24 +10,33 @@ namespace GitHubConsole.Commands
     {
         private RepositoryIssueRequest request = new RepositoryIssueRequest();
 
-        [Name("--format", "-f")]
+        [Name("--format", "-f"), Description("Allows for describing an output format when listing issues.")]
         private readonly Parameter<string> outputFormat = null;
 
-        private readonly FlagParameter open = null, closed = null, all = null;
+        [Description("List issues that are currently open.")]
+        private readonly FlagParameter open = null;
+        [Description("List issues that are currently closed.")]
+        private readonly FlagParameter closed = null;
+        [Description("List issues that are currently either open or closed.")]
+        private readonly FlagParameter all = null;
 
+        [Description("A set of labels that issues must have in order to be listed.")]
         private readonly Parameter<string[]> labels = null;
 
-        [Name("--has-assignee")]
+        [Name("--has-assignee"), Description("List issues that have an assignee.")]
         private readonly FlagParameter hasAssignee = null;
-        [Name("--no-assignee")]
+        [Name("--no-assignee"), Description("List issues that does not have an assignee.")]
         private readonly FlagParameter noAssignee = null;
 
-        [Name("--assignee")]
+        [Name("--assignee"), Description("List issues where the assignee is one in a range of users.")]
         private readonly Parameter<string[]> assignee = null;
-        [Name("--not-assignee")]
+        [Name("--not-assignee"), Description("List issues where the assignee is not one in a range of users.")]
         private readonly Parameter<string[]> notAssignee = null;
 
-        private readonly FlagParameter take = null, drop = null;
+        [Description("Assign yourself to a selected issue (or range of issues).")]
+        private readonly FlagParameter take = null;
+        [Description("Unassign yourself from a selected issue (or range of issues).")]
+        private readonly FlagParameter drop = null;
 
         [NoName]
         private readonly Parameter<int[]> issuesIn = null;

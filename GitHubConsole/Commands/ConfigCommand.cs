@@ -9,10 +9,14 @@ namespace GitHubConsole.Commands
         private Dictionary<string, string> setValues = new Dictionary<string, string>();
         private List<string> removeKeys = new List<string>();
 
+        [Description("Sets a key value combination in the configuration file.")]
         private readonly Parameter<string[]> set = null;
+        [Description("Removes a key from the configuration file.")]
         private readonly Parameter<string[]> remove = null;
 
+        [Description("Removes all keys from the configuration file.")]
         private readonly FlagParameter clear = null;
+        [Description("Lists all key value combinations in the configuration file.")]
         private readonly FlagParameter list = null;
 
         public ConfigCommand()

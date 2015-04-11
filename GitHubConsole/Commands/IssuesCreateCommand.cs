@@ -7,9 +7,9 @@ namespace GitHubConsole.Commands
 {
     public class IssuesCreateCommand : Command
     {
-        [Name("--title", "-t"), Required("A title is required for an issue.")]
+        [Name("--title", "-t"), Required("A title is required for an issue."), Description("The title used for the new issue on GitHub.com")]
         private readonly Parameter<string> title = null;
-        [Name("--labels", "-l")]
+        [Name("--labels", "-l"), Description("A list <label1> <label2>... of labels that should be applied to the new issue.")]
         private readonly Parameter<string[]> labels = null;
 
         public IssuesCreateCommand()

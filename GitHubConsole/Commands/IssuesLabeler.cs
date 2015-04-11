@@ -10,7 +10,9 @@ namespace GitHubConsole.Commands
         [NoName]
         private readonly Parameter<int[]> issues = null;
 
-        private readonly Parameter<string[]> set = null;
+        [Description("Adds a set of labels selected issues.")]
+        private readonly Parameter<string[]> add = null;
+        [Description("Removes a set of labels from selected issues.")]
         private readonly Parameter<string[]> remove = null;
 
         public IssuesLabeler()
@@ -20,9 +22,9 @@ namespace GitHubConsole.Commands
 
         protected override Message Validate()
         {
-            if (set.Value.Length == 0 && remove.Value.Length == 0)
+            if (add.Value.Length == 0 && remove.Value.Length == 0)
                 return "You must specify whether to add or remove labels:\n" +
-                    "  gihub issues labels <issues> --set <label1> <label2>..." +
+                    "  gihub issues labels <issues> --add <label1> <label2>..." +
                     "  gihub issues labels <issues> --remove <label1> <label2>...";
 
             return base.Validate();
@@ -38,7 +40,7 @@ namespace GitHubConsole.Commands
             List<Label> remLabels = new List<Label>();
 
             var labels = client.Issue.Labels.GetForRepository(GitHub.Username, GitHub.Project).Result;
-            foreach (var s in set.Value)
+            foreach (var s in add.Value)
             {
                 var l = labels.FirstOrDefault(x => x.Name == s);
                 if (l != null) setLabels.Add(l);
