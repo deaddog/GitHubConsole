@@ -8,10 +8,10 @@ namespace GitHubConsole.Commands
     public class IssuesLabeler : Command
     {
         [NoName]
-        private readonly Parameter<int[]> issues;
+        private readonly Parameter<int[]> issues = null;
 
-        private readonly Parameter<string[]> set;
-        private readonly Parameter<string[]> remove;
+        private readonly Parameter<string[]> set = null;
+        private readonly Parameter<string[]> remove = null;
 
         public IssuesLabeler()
         {

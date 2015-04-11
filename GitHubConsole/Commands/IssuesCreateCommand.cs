@@ -8,9 +8,9 @@ namespace GitHubConsole.Commands
     public class IssuesCreateCommand : Command
     {
         [Name("--title", "-t"), Required("A title is required for an issue.")]
-        private readonly Parameter<string> title;
+        private readonly Parameter<string> title = null;
         [Name("--labels", "-l")]
-        private readonly Parameter<string[]> labels;
+        private readonly Parameter<string[]> labels = null;
 
         public IssuesCreateCommand()
         {

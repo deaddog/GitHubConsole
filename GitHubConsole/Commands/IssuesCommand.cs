@@ -12,26 +12,26 @@ namespace GitHubConsole.Commands
         private Predicate<Issue> validator = null;
 
         [Name("--format", "-f")]
-        private readonly Parameter<string> outputFormat;
+        private readonly Parameter<string> outputFormat = null;
 
-        private readonly FlagParameter open, closed, all;
+        private readonly FlagParameter open = null, closed = null, all = null;
 
-        private readonly Parameter<string[]> labels;
+        private readonly Parameter<string[]> labels = null;
 
         [Name("--has-assignee")]
-        private readonly FlagParameter hasAssignee;
+        private readonly FlagParameter hasAssignee = null;
         [Name("--no-assignee")]
-        private readonly FlagParameter noAssignee;
+        private readonly FlagParameter noAssignee = null;
 
         [Name("--assignee")]
-        private readonly Parameter<string[]> assignee;
+        private readonly Parameter<string[]> assignee = null;
         [Name("--not-assignee")]
-        private readonly Parameter<string[]> notAssignee;
+        private readonly Parameter<string[]> notAssignee = null;
 
-        private readonly FlagParameter take, drop;
+        private readonly FlagParameter take = null, drop = null;
 
         [NoName]
-        private readonly Parameter<int[]> issuesIn;
+        private readonly Parameter<int[]> issuesIn = null;
 
         private List<Issue> issues;
         private string assignUser;

@@ -9,11 +9,11 @@ namespace GitHubConsole.Commands
         private Dictionary<string, string> setValues = new Dictionary<string, string>();
         private List<string> removeKeys = new List<string>();
 
-        private readonly Parameter<string[]> set;
-        private readonly Parameter<string[]> remove;
+        private readonly Parameter<string[]> set = null;
+        private readonly Parameter<string[]> remove = null;
 
-        private readonly FlagParameter clear;
-        private readonly FlagParameter list;
+        private readonly FlagParameter clear = null;
+        private readonly FlagParameter list = null;
 
         public ConfigCommand()
         {
