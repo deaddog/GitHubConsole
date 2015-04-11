@@ -9,7 +9,6 @@ namespace GitHubConsole.Commands
     public class IssuesCommand : Command
     {
         private RepositoryIssueRequest request = new RepositoryIssueRequest();
-        private Predicate<Issue> validator = null;
 
         [Name("--format", "-f")]
         private readonly Parameter<string> outputFormat = null;
