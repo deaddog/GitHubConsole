@@ -25,8 +25,8 @@ namespace GitHubConsole.Commands
             foreach (var l in labels.Value)
                 if (!knownLabelNames.Contains(l))
                 {
-                    string lblString = string.Format(string.Join("", knownLabels.Select(lbl => "\n  [[:" + ColorResolver.GetConsoleColor(lbl.Color) + ":" + lbl.Name + "]]")));
-                    return string.Format("Unknown label [[:Red:{0}]]. Valid label names are:{1}", l, lblString);
+                    string lblString = string.Format(string.Join("", knownLabels.Select(lbl => "\n  [" + ColorResolver.GetConsoleColor(lbl.Color) + ":" + lbl.Name + "]")));
+                    return string.Format("Unknown label [Red:{0}]. Valid label names are:{1}", l, lblString);
                 }
 
             return base.Validate();

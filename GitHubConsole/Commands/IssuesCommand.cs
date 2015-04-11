@@ -73,10 +73,10 @@ namespace GitHubConsole.Commands
                 return string.Format("The {0} and {1} parameters cannot be used simultaneously.", take.Name, drop.Name);
 
             if (take.IsSet && issuesIn.Value.Length == 0)
-                return "You must specify which issues # to assign yourself to.\nFor instance: [[:White:github issues 5 7 --take]] will assign you to issue #5 and #7.";
+                return "You must specify which issues # to assign yourself to.\nFor instance: [White:github issues 5 7 --take] will assign you to issue #5 and #7.";
 
             if (drop.IsSet && issuesIn.Value.Length == 0)
-                return "You must specify which issues # to unassign yourself from.\nFor instance: [[:White:github issues 5 7 --drop]] will unassign you from issue #5 and #7.";
+                return "You must specify which issues # to unassign yourself from.\nFor instance: [White:github issues 5 7 --drop] will unassign you from issue #5 and #7.";
 
             if (issuesIn.Value.Length > 0)
             {
@@ -86,7 +86,7 @@ namespace GitHubConsole.Commands
 
             if (take.IsSet || drop.IsSet)
                 if (!GitHub.Client.Repository.Get(GitHub.Username, GitHub.Project).Result.Permissions.Admin)
-                    return "You do not have admin rights for the [[:Yellow:" + GitHub.Username + "/" + GitHub.Project + "]] repository.\n " + take.Name + " and " + drop.Name + " are not available.";
+                    return "You do not have admin rights for the [Yellow:" + GitHub.Username + "/" + GitHub.Project + "] repository.\n " + take.Name + " and " + drop.Name + " are not available.";
 
             issues = GitHub.Client.Issue.GetForRepository(GitHub.Username, GitHub.Project, new RepositoryIssueRequest() { State = ItemState.All }).Result.ToList();
 
@@ -106,7 +106,7 @@ namespace GitHubConsole.Commands
             {
                 assignUser = GitHub.Client.User.Current().Result.Login;
                 var msg = ValidateEach(issues, x => x.Assignee == null,
-                    x => string.Format("[[:DarkCyan:{0}]] is assigned to issue [[:DarkYellow:#{1}]], you cannot be assigned.", x.Assignee.Login, x.Number));
+                    x => string.Format("[DarkCyan:{0}] is assigned to issue [DarkYellow:#{1}], you cannot be assigned.", x.Assignee.Login, x.Number));
 
                 if (msg.IsError)
                     return msg;
@@ -117,12 +117,12 @@ namespace GitHubConsole.Commands
                 Message msg;
 
                 msg = ValidateEach(issues, x => x.Assignee != null,
-                    x => string.Format("No one is assigned to issue [[:DarkYellow:#{0}]], you cannot be unassigned.", x.Number));
+                    x => string.Format("No one is assigned to issue [DarkYellow:#{0}], you cannot be unassigned.", x.Number));
                 if (msg.IsError)
                     return msg;
 
                 msg = ValidateEach(issues, x => x.Assignee.Login == assignUser,
-                    x => string.Format("[[:DarkCyan:{0}]] is assigned to issue [[:DarkYellow:#{1}]], you cannot be unassigned.", x.Assignee.Login, x.Number));
+                    x => string.Format("[DarkCyan:{0}] is assigned to issue [DarkYellow:#{1}], you cannot be unassigned.", x.Assignee.Login, x.Number));
                 if (msg.IsError)
                     return msg;
             }
@@ -183,7 +183,7 @@ namespace GitHubConsole.Commands
         {
             if (take.IsSet)
             {
-                ColorConsole.WriteLine("Assigning [[:Cyan:{0}]] to issue{2} {1}.", assignUser, issuesIn.Value.ToString(", ", " and "), issuesIn.Value.Length > 1 ? "s" : "");
+                ColorConsole.WriteLine("Assigning [Cyan:{0}] to issue{2} {1}.", assignUser, issuesIn.Value.ToString(", ", " and "), issuesIn.Value.Length > 1 ? "s" : "");
 
                 for (int i = 0; i < issues.Count; i++)
                 {
@@ -194,7 +194,7 @@ namespace GitHubConsole.Commands
             }
             else if (drop.IsSet)
             {
-                ColorConsole.WriteLine("Removing [[:Cyan:{0}]] as assignee for issue{2} {1}.", assignUser, issuesIn.Value.ToString(", ", " and "), issuesIn.Value.Length > 1 ? "s" : "");
+                ColorConsole.WriteLine("Removing [Cyan:{0}] as assignee for issue{2} {1}.", assignUser, issuesIn.Value.ToString(", ", " and "), issuesIn.Value.Length > 1 ? "s" : "");
 
                 for (int i = 0; i < issues.Count; i++)
                 {
@@ -219,8 +219,8 @@ namespace GitHubConsole.Commands
 
             string format = outputFormat.Value;
 
-            format = format.Replace("%#%", "[[:{1}:{0}]]");
-            format = format.Replace("%user%", "[[:{3}:{2}]]");
+            format = format.Replace("%#%", "[{1}:{0}]");
+            format = format.Replace("%user%", "[{3}:{2}]");
             format = format.Replace("%title%", "{4}");
             format = format.Replace("%labels%", "{5}");
 
@@ -231,8 +231,8 @@ namespace GitHubConsole.Commands
                 string labels = "";
                 if (v.Labels.Count > 0 && format.Contains("{5}"))
                 {
-                    labels = string.Format("[[:DarkYellow:(]]{0}[[:DarkYellow:)]]",
-                        string.Join(", ", v.Labels.Select(l => "[[:" + ColorResolver.GetConsoleColor(l.Color) + ":" + l.Name + "]]")));
+                    labels = string.Format("[DarkYellow:(]{0}[DarkYellow:)]",
+                        string.Join(", ", v.Labels.Select(l => "[" + ColorResolver.GetConsoleColor(l.Color) + ":" + l.Name + "]")));
                 }
 
                 ColorConsole.WriteLine(format,

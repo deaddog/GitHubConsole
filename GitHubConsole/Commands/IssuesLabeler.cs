@@ -17,7 +17,7 @@ namespace GitHubConsole.Commands
 
         public IssuesLabeler()
         {
-            issues.Validator.AddForeach(x => x > 0, x => "Issue [[:Red:#" + x + "]] is invalid.");
+            issues.Validator.AddForeach(x => x > 0, x => "Issue [Red:#" + x + "] is invalid.");
         }
 
         protected override Message Validate()
@@ -56,7 +56,7 @@ namespace GitHubConsole.Commands
                 var issue = client.Issue.Get(GitHub.Username, GitHub.Project, number).Result;
                 if (issue == null)
                 {
-                    ColorConsole.WriteLine("Unknown issue [[:DarkRed:#{0}]].", number);
+                    ColorConsole.WriteLine("Unknown issue [DarkRed:#{0}].", number);
                     continue;
                 }
 

@@ -156,7 +156,7 @@ namespace GitHubConsole
             if (token == null || token == "")
             {
                 Console.WriteLine("Unable to load GitHub authentification token.");
-                ColorConsole.WriteLine("Run [[:Yellow:github config --set authtoken <token>]] to set.");
+                ColorConsole.WriteLine("Run [Yellow:github config --set authtoken <token>] to set.");
                 return false;
             }
             cred = new Credentials(token);
