@@ -50,9 +50,9 @@ namespace GitHubConsole.Commands
             SubCommands.Add("label", new IssuesLabeler());
 
             outputFormat.SetDefault(Config.Default["issues.format"] ?? "%#% %user% %title% %labels%");
-            assignee.Validate(x => x.Length > 0, "A user must be specified for the " + assignee.Name + " parameter.");
-            notAssignee.Validate(x => x.Length > 0, "A user must be specified for the " + assignee.Name + " parameter.");
-            labels.Validate(x => x.Length > 0, "At least one label name must be supplied for the " + labels.Name + " parameter.");
+            assignee.Validator.Add(x => x.Length > 0, "A user must be specified for the " + assignee.Name + " parameter.");
+            notAssignee.Validator.Add(x => x.Length > 0, "A user must be specified for the " + assignee.Name + " parameter.");
+            labels.Validator.Add(x => x.Length > 0, "At least one label name must be supplied for the " + labels.Name + " parameter.");
         }
 
         protected override Message Validate()

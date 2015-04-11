@@ -21,12 +21,12 @@ namespace GitHubConsole.Commands
 
         public ConfigCommand()
         {
-            set.Validate(x => x.Length == 2,
+            set.Validator.Add(x => x.Length == 2,
                 "Setting config values requires exactly two arguments:\n" +
                 "  github config " + set.Name + " <key> <value>");
             set.Callback += () => setValues.Add(set.Value[0], set.Value[1]);
 
-            remove.Validate(x => x.Length > 0,
+            remove.Validator.Add(x => x.Length > 0,
                 "Removing config keys requires that you specify at least one key to remove:\n" +
                 "  github config " + remove.Name + " <key>\n" +
                 "  github config " + remove.Name + " <key1> <key2> <key3>...");

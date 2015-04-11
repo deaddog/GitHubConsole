@@ -17,7 +17,7 @@ namespace GitHubConsole.Commands
 
         public IssuesLabeler()
         {
-            issues.ValidateEach(x => x > 0, x => "Issue [[:Red:#" + x + "]] is invalid.");
+            issues.Validator.AddForeach(x => x > 0, x => "Issue [[:Red:#" + x + "]] is invalid.");
         }
 
         protected override Message Validate()

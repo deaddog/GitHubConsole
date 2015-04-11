@@ -14,7 +14,7 @@ namespace GitHubConsole.Commands
 
         public IssuesCreateCommand()
         {
-            title.Validate(x => x.Trim().Length > 0, "An issue cannot be created with an empty title.");
+            title.Validator.Add(x => x.Trim().Length > 0, "An issue cannot be created with an empty title.");
         }
 
         protected override Message Validate()
