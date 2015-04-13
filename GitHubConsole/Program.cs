@@ -13,7 +13,7 @@ namespace GitHubConsole
 #if DEBUG
             Command.SimulateREPL(() => new MainCommand(), "quit", HELP);
 #else
-            try { Command.RunCommand(new MainCommand(), args, HELP); }
+            try { new MainCommand().RunCommand(args, HELP); }
             catch (AggregateException aggex)
             {
                 if (aggex.InnerExceptions.Count == 1 && aggex.InnerException is Octokit.AuthorizationException)
