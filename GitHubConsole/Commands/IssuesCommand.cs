@@ -86,13 +86,13 @@ namespace GitHubConsole.Commands
             if (take.IsSet && drop.IsSet)
                 return string.Format("The {0} and {1} parameters cannot be used simultaneously.", take.Name, drop.Name);
 
-            if (take.IsSet && issuesIn.Value.Length == 0)
+            if (take.IsSet && issuesIn.Value.Length == 0 && create.IsDefault)
                 return "You must specify which issues # to assign yourself to.\nFor instance: [White:github issues 5 7 " + take.Name + "] will assign you to issue #5 and #7.";
 
             if (drop.IsSet && issuesIn.Value.Length == 0)
                 return "You must specify which issues # to unassign yourself from.\nFor instance: [White:github issues 5 7 " + drop.Name + "] will unassign you from issue #5 and #7.";
 
-            if (!setLabel.IsDefault && issuesIn.Value.Length == 0)
+            if (!setLabel.IsDefault && issuesIn.Value.Length == 0 && create.IsDefault)
                 return "You must specify which issues # to add labels to.\nFor instance: [White:github issues 5 7 " + setLabel.Name + " bug] will label issue #5 and #7 with the bug label.";
 
             if (!remLabel.IsDefault && issuesIn.Value.Length == 0)
@@ -127,7 +127,10 @@ namespace GitHubConsole.Commands
             }
 
             if (!create.IsDefault)
+            {
+                assignUser = GitHub.Client.User.Current().Result.Login;
                 return Message.NoError;
+            }
 
             issues = GitHub.Client.Issue.GetForRepository(GitHub.Username, GitHub.Project, new RepositoryIssueRequest() { State = ItemState.All }).Result.ToList();
 
@@ -226,7 +229,20 @@ namespace GitHubConsole.Commands
 
         protected override void Execute()
         {
-            if (take.IsSet || drop.IsSet || !setLabel.IsDefault || !remLabel.IsDefault)
+            if (!create.IsDefault)
+            {
+                NewIssue nIssue = new NewIssue(create.Value.Trim());
+
+                if (take.IsSet)
+                    nIssue.Assignee = assignUser;
+                foreach (var l in setLabel.Value)
+                    nIssue.Labels.Add(l);
+
+                var issue = GitHub.Client.Issue.Create(GitHub.Username, GitHub.Project, nIssue).Result;
+
+                issues = new List<Issue>(1) { issue };
+            }
+            else if (take.IsSet || drop.IsSet || !setLabel.IsDefault || !remLabel.IsDefault)
             {
                 for (int i = 0; i < issues.Count; i++)
                 {
