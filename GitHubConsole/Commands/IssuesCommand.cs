@@ -158,17 +158,19 @@ namespace GitHubConsole.Commands
             return base.Validate();
         }
 
+        #region Filtering
+
         private bool validateIssue(Issue issue)
         {
             if (issuesIn.Value.Length > 0)
                 return issuesIn.Value.Contains(issue.Number);
 
             return
-                validateState(issue.State) &&
-                validateAssignee(issue.Assignee) &&
-                validateLabels(issue.Labels.Select(x => x.Name).ToList());
+                validateIssueState(issue.State) &&
+                validateIssueAssignee(issue.Assignee) &&
+                validateIssueLabels(issue.Labels.Select(x => x.Name).ToList());
         }
-        private bool validateState(ItemState state)
+        private bool validateIssueState(ItemState state)
         {
             switch (state)
             {
@@ -177,7 +179,7 @@ namespace GitHubConsole.Commands
             }
             return false;
         }
-        private bool validateAssignee(User a)
+        private bool validateIssueAssignee(User a)
         {
             if (!assignee.IsDefault)
                 return a != null && assignee.Value.Contains(a.Login);
@@ -190,7 +192,7 @@ namespace GitHubConsole.Commands
             else
                 return true;
         }
-        private bool validateLabels(List<string> lbls)
+        private bool validateIssueLabels(List<string> lbls)
         {
             if (labels.IsDefault)
                 return true;
@@ -206,6 +208,8 @@ namespace GitHubConsole.Commands
             }
             return true;
         }
+
+        #endregion
 
         protected override void Execute()
         {
