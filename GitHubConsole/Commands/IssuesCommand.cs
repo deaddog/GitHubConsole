@@ -43,6 +43,9 @@ namespace GitHubConsole.Commands
         [Name("--remove-labels", "-rl"), Description("Removes a set of labels from a selected issue (or range of issues).")]
         private readonly Parameter<string[]> remLabel = null;
 
+        [Name("--create"), Description("Creates a new issue.")]
+        private readonly Parameter<string> create = null;
+
         [NoName]
         private readonly Parameter<int[]> issuesIn = null;
 
@@ -62,6 +65,8 @@ namespace GitHubConsole.Commands
                 + "  gihub issues <issues> " + setLabel.Name + " <label1> <label2>...");
             remLabel.Validator.Add(x => x.Length > 0, "You must specify a set of labels to remove:\n"
                 + "  gihub issues <issues> " + remLabel.Name + " <label1> <label2>...");
+
+            create.Validator.Add(x => x.Trim().Length > 0, "An issue cannot be created with an empty title.");
         }
 
         protected override Message Validate()
