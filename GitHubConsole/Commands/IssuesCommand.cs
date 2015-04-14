@@ -83,10 +83,16 @@ namespace GitHubConsole.Commands
                 return string.Format("The {0} and {1} parameters cannot be used simultaneously.", take.Name, drop.Name);
 
             if (take.IsSet && issuesIn.Value.Length == 0)
-                return "You must specify which issues # to assign yourself to.\nFor instance: [White:github issues 5 7 --take] will assign you to issue #5 and #7.";
+                return "You must specify which issues # to assign yourself to.\nFor instance: [White:github issues 5 7 " + take.Name + "] will assign you to issue #5 and #7.";
 
             if (drop.IsSet && issuesIn.Value.Length == 0)
-                return "You must specify which issues # to unassign yourself from.\nFor instance: [White:github issues 5 7 --drop] will unassign you from issue #5 and #7.";
+                return "You must specify which issues # to unassign yourself from.\nFor instance: [White:github issues 5 7 " + drop.Name + "] will unassign you from issue #5 and #7.";
+
+            if (!setLabel.IsDefault && issuesIn.Value.Length == 0)
+                return "You must specify which issues # to add labels to.\nFor instance: [White:github issues 5 7 " + setLabel.Name + " bug] will label issue #5 and #7 with the bug label.";
+
+            if (!remLabel.IsDefault && issuesIn.Value.Length == 0)
+                return "You must specify which issues # to remove labels from.\nFor instance: [White:github issues 5 7 " + remLabel.Name + " bug] will remove the bug label from issue #5 and #7.";
 
             if (issuesIn.Value.Length > 0)
             {
@@ -94,7 +100,7 @@ namespace GitHubConsole.Commands
                     return "Issue filtering cannot be applied when specifying specific issues.";
             }
 
-            if (take.IsSet || drop.IsSet)
+            if (take.IsSet || drop.IsSet || !remLabel.IsDefault || !setLabel.IsDefault)
                 if (!GitHub.Client.Repository.Get(GitHub.Username, GitHub.Project).Result.Permissions.Admin)
                     return "You do not have admin rights for the [Yellow:" + GitHub.Username + "/" + GitHub.Project + "] repository.\n " + take.Name + " and " + drop.Name + " are not available.";
 
@@ -135,6 +141,14 @@ namespace GitHubConsole.Commands
                     x => string.Format("[DarkCyan:{0}] is assigned to issue [DarkYellow:#{1}], you cannot be unassigned.", x.Assignee.Login, x.Number));
                 if (msg.IsError)
                     return msg;
+            }
+            if (!setLabel.IsDefault || !remLabel.IsDefault)
+            {
+                var all = setLabel.Value.Concat(remLabel.Value).ToList();
+                var labels = GitHub.Client.Issue.Labels.GetForRepository(GitHub.Username, GitHub.Project).Result.Select(x => x.Name).ToList();
+                foreach (var a in all)
+                    if (!labels.Contains(a))
+                        return "There is no [Red:" + a + "] label in this repository.";
             }
 
             return base.Validate();
