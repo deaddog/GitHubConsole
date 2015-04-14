@@ -214,6 +214,14 @@ namespace GitHubConsole.Commands
                     else if (drop.IsSet) update.Assignee = null;
                     else update.Assignee = issues[i].Assignee == null ? null : issues[i].Assignee.Login;
 
+                    foreach (var l in setLabel.Value)
+                        if (update.Labels == null || !update.Labels.Contains(l))
+                            update.AddLabel(l);
+
+                    if (update.Labels != null)
+                        foreach (var l in remLabel.Value)
+                            update.Labels.Remove(l);
+
                     issues[i] = GitHub.Client.Issue.Update(GitHub.Username, GitHub.Project, issues[i].Number, update).Result;
                 }
             }
