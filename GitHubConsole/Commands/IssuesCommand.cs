@@ -98,10 +98,10 @@ namespace GitHubConsole.Commands
             if (!remLabel.IsDefault && issuesIn.Value.Length == 0)
                 return "You must specify which issues # to remove labels from.\nFor instance: [White:github issues 5 7 " + remLabel.Name + " bug] will remove the bug label from issue #5 and #7.";
 
-            if (issuesIn.Value.Length > 0)
+            if (issuesIn.Value.Length > 0 || !create.IsDefault)
             {
                 if (open.IsSet || closed.IsSet || all.IsSet || !labels.IsDefault || hasAssignee.IsSet || noAssignee.IsSet || !assignee.IsDefault || !notAssignee.IsDefault)
-                    return "Issue filtering cannot be applied when specifying specific issues.";
+                    return "Issue filtering cannot be applied when specifying specific issues or creating new ones.";
             }
 
             if (take.IsSet || drop.IsSet || !remLabel.IsDefault || !setLabel.IsDefault)
