@@ -48,7 +48,6 @@
   <ItemGroup>
     <Compile Include="ColorResolver.cs" />
     <Compile Include="Commands\ConfigCommand.cs" />
-    <Compile Include="Commands\IssuesCreateCommand.cs" />
     <Compile Include="Commands\IssuesCommand.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="GitHub.cs" />
