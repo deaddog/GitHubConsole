@@ -65,57 +65,59 @@ namespace GitHubConsole.Commands
                 + "  gihub issues <issues> " + remLabel.Name + " <label1> <label2>...");
 
             create.Validator.Add(x => x.Trim().Length > 0, "An issue cannot be created with an empty title.");
+
+            this.Validator.Add(Validate);
         }
 
-        protected override Message Validate()
+        protected Message Validate()
         {
             if (hasAssignee.IsSet || noAssignee.IsSet)
             {
-                if (!assignee.IsDefault)
+                if (assignee.IsSet)
                     return string.Format("The {0} parameter cannot be used with the {1} or the {2} flag.", assignee.Name, hasAssignee.Name, noAssignee.Name);
 
-                if (!notAssignee.IsDefault)
+                if (notAssignee.IsSet)
                     return string.Format("The {0} parameter cannot be used with the {1} or the {2} flag.", notAssignee.Name, hasAssignee.Name, noAssignee.Name);
             }
 
-            if (!assignee.IsDefault && !notAssignee.IsDefault)
+            if (assignee.IsSet && notAssignee.IsSet)
                 return string.Format("The {0} parameter cannot be used with the {1} parameter.", assignee.Name, notAssignee.Name);
 
             if (take.IsSet && drop.IsSet)
                 return string.Format("The {0} and {1} parameters cannot be used simultaneously.", take.Name, drop.Name);
 
-            if (take.IsSet && issuesIn.Value.Length == 0 && create.IsDefault)
+            if (take.IsSet && issuesIn.Value.Length == 0 && !create.IsSet)
                 return "You must specify which issues # to assign yourself to.\nFor instance: [White:github issues 5 7 " + take.Name + "] will assign you to issue #5 and #7.";
 
             if (drop.IsSet && issuesIn.Value.Length == 0)
                 return "You must specify which issues # to unassign yourself from.\nFor instance: [White:github issues 5 7 " + drop.Name + "] will unassign you from issue #5 and #7.";
 
-            if (!setLabel.IsDefault && issuesIn.Value.Length == 0 && create.IsDefault)
+            if (setLabel.IsSet && issuesIn.Value.Length == 0 && !create.IsSet)
                 return "You must specify which issues # to add labels to.\nFor instance: [White:github issues 5 7 " + setLabel.Name + " bug] will label issue #5 and #7 with the bug label.";
 
-            if (!remLabel.IsDefault && issuesIn.Value.Length == 0)
+            if (remLabel.IsSet && issuesIn.Value.Length == 0)
                 return "You must specify which issues # to remove labels from.\nFor instance: [White:github issues 5 7 " + remLabel.Name + " bug] will remove the bug label from issue #5 and #7.";
 
-            if (issuesIn.Value.Length > 0 || !create.IsDefault)
+            if (issuesIn.Value.Length > 0 || create.IsSet)
             {
-                if (open.IsSet || closed.IsSet || all.IsSet || !labels.IsDefault || hasAssignee.IsSet || noAssignee.IsSet || !assignee.IsDefault || !notAssignee.IsDefault)
+                if (open.IsSet || closed.IsSet || all.IsSet || labels.IsSet || hasAssignee.IsSet || noAssignee.IsSet || assignee.IsSet || notAssignee.IsSet)
                     return "Issue filtering cannot be applied when specifying specific issues or creating new ones.";
             }
 
-            if (!create.IsDefault && !issuesIn.IsDefault)
+            if (create.IsSet && issuesIn.IsSet)
                 return "You cannot specify issues # when creating a new issue.";
 
-            if (!create.IsDefault && drop.IsSet)
+            if (create.IsSet && drop.IsSet)
                 return string.Format("You cannot unassign yourself from an issue you are creating.");
 
-            if (!create.IsDefault && !remLabel.IsDefault)
+            if (create.IsSet && remLabel.IsSet)
                 return string.Format("You cannot remove labels from an issue you are creating.");
 
-            if (take.IsSet || drop.IsSet || !remLabel.IsDefault || !setLabel.IsDefault)
+            if (take.IsSet || drop.IsSet || remLabel.IsSet || setLabel.IsSet)
                 if (!GitHub.Client.Repository.Get(GitHub.Username, GitHub.Project).Result.Permissions.Admin)
                     return "You do not have admin rights for the [Yellow:" + GitHub.Username + "/" + GitHub.Project + "] repository.\n " + take.Name + " and " + drop.Name + " are not available.";
 
-            if (!setLabel.IsDefault || !remLabel.IsDefault)
+            if (setLabel.IsSet || remLabel.IsSet)
             {
                 var all = setLabel.Value.Concat(remLabel.Value).ToList();
                 var labels = GitHub.Client.Issue.Labels.GetForRepository(GitHub.Username, GitHub.Project).Result.Select(x => x.Name).ToList();
@@ -124,7 +126,7 @@ namespace GitHubConsole.Commands
                         return "There is no [Red:" + a + "] label in this repository.";
             }
 
-            if (!create.IsDefault)
+            if (create.IsSet)
             {
                 assignUser = GitHub.Client.User.Current().Result.Login;
                 return Message.NoError;
@@ -147,7 +149,7 @@ namespace GitHubConsole.Commands
             if (take.IsSet)
             {
                 assignUser = GitHub.Client.User.Current().Result.Login;
-                var msg = ValidateEach(issues, x => x.Assignee == null,
+                var msg = issues.ValidateEach(x => x.Assignee == null,
                     x => string.Format("[DarkCyan:{0}] is assigned to issue [DarkYellow:#{1}], you cannot be assigned.", x.Assignee.Login, x.Number));
 
                 if (msg.IsError)
@@ -158,18 +160,18 @@ namespace GitHubConsole.Commands
                 assignUser = GitHub.Client.User.Current().Result.Login;
                 Message msg;
 
-                msg = ValidateEach(issues, x => x.Assignee != null,
+                msg = issues.ValidateEach(x => x.Assignee != null,
                     x => string.Format("No one is assigned to issue [DarkYellow:#{0}], you cannot be unassigned.", x.Number));
                 if (msg.IsError)
                     return msg;
 
-                msg = ValidateEach(issues, x => x.Assignee.Login == assignUser,
+                msg = issues.ValidateEach(x => x.Assignee.Login == assignUser,
                     x => string.Format("[DarkCyan:{0}] is assigned to issue [DarkYellow:#{1}], you cannot be unassigned.", x.Assignee.Login, x.Number));
                 if (msg.IsError)
                     return msg;
             }
 
-            return base.Validate();
+            return Message.NoError;
         }
 
         #region Filtering
@@ -195,9 +197,9 @@ namespace GitHubConsole.Commands
         }
         private bool validateIssueAssignee(User a)
         {
-            if (!assignee.IsDefault)
+            if (assignee.IsSet)
                 return a != null && assignee.Value.Contains(a.Login);
-            else if (!notAssignee.IsDefault)
+            else if (notAssignee.IsSet)
                 return a == null || !notAssignee.Value.Contains(a.Login);
             else if (hasAssignee.IsSet)
                 return a != null;
@@ -208,7 +210,7 @@ namespace GitHubConsole.Commands
         }
         private bool validateIssueLabels(List<string> lbls)
         {
-            if (labels.IsDefault)
+            if (!labels.IsSet)
                 return true;
 
             var par = new Stack<string>(labels.Value);
@@ -227,7 +229,7 @@ namespace GitHubConsole.Commands
 
         protected override void Execute()
         {
-            if (!create.IsDefault)
+            if (create.IsSet)
             {
                 NewIssue nIssue = new NewIssue(create.Value.Trim());
 
@@ -240,7 +242,7 @@ namespace GitHubConsole.Commands
 
                 issues = new List<Issue>(1) { issue };
             }
-            else if (take.IsSet || drop.IsSet || !setLabel.IsDefault || !remLabel.IsDefault)
+            else if (take.IsSet || drop.IsSet || setLabel.IsSet || remLabel.IsSet)
             {
                 for (int i = 0; i < issues.Count; i++)
                 {

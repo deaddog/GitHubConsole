@@ -36,11 +36,8 @@ namespace GitHubConsole
             {
                 SubCommands.Add("config", new ConfigCommand());
                 SubCommands.Add("issues", new IssuesCommand());
-            }
 
-            protected override Message Validate()
-            {
-                return GetHelpMessage();
+                Validator.Add(GetHelpMessage);
             }
         }
     }
