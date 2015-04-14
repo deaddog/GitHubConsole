@@ -38,6 +38,11 @@ namespace GitHubConsole.Commands
         [Description("Unassign yourself from a selected issue (or range of issues).")]
         private readonly FlagParameter drop = null;
 
+        [Name("--set-labels", "-sl"), Description("Adds a set of labels to a selected issue (or range of issues).")]
+        private readonly Parameter<string[]> setLabel = null;
+        [Name("--remove-labels", "-rl"), Description("Removes a set of labels from a selected issue (or range of issues).")]
+        private readonly Parameter<string[]> remLabel = null;
+
         [NoName]
         private readonly Parameter<int[]> issuesIn = null;
 
@@ -53,6 +58,11 @@ namespace GitHubConsole.Commands
             assignee.Validator.Add(x => x.Length > 0, "A user must be specified for the " + assignee.Name + " parameter.");
             notAssignee.Validator.Add(x => x.Length > 0, "A user must be specified for the " + assignee.Name + " parameter.");
             labels.Validator.Add(x => x.Length > 0, "At least one label name must be supplied for the " + labels.Name + " parameter.");
+
+            setLabel.Validator.Add(x => x.Length > 0, "You must specify a set of labels to set:\n"
+                + "  gihub issues <issues> " + setLabel.Name + " <label1> <label2>...");
+            remLabel.Validator.Add(x => x.Length > 0, "You must specify a set of labels to remove:\n"
+                + "  gihub issues <issues> " + remLabel.Name + " <label1> <label2>...");
         }
 
         protected override Message Validate()
