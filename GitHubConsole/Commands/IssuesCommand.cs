@@ -104,9 +104,21 @@ namespace GitHubConsole.Commands
                     return "Issue filtering cannot be applied when specifying specific issues or creating new ones.";
             }
 
+            if (!create.IsDefault && !issuesIn.IsDefault)
+                return "You cannot specify issues # when creating a new issue.";
+
             if (take.IsSet || drop.IsSet || !remLabel.IsDefault || !setLabel.IsDefault)
                 if (!GitHub.Client.Repository.Get(GitHub.Username, GitHub.Project).Result.Permissions.Admin)
                     return "You do not have admin rights for the [Yellow:" + GitHub.Username + "/" + GitHub.Project + "] repository.\n " + take.Name + " and " + drop.Name + " are not available.";
+
+            if (!setLabel.IsDefault || !remLabel.IsDefault)
+            {
+                var all = setLabel.Value.Concat(remLabel.Value).ToList();
+                var labels = GitHub.Client.Issue.Labels.GetForRepository(GitHub.Username, GitHub.Project).Result.Select(x => x.Name).ToList();
+                foreach (var a in all)
+                    if (!labels.Contains(a))
+                        return "There is no [Red:" + a + "] label in this repository.";
+            }
 
             issues = GitHub.Client.Issue.GetForRepository(GitHub.Username, GitHub.Project, new RepositoryIssueRequest() { State = ItemState.All }).Result.ToList();
 
@@ -145,14 +157,6 @@ namespace GitHubConsole.Commands
                     x => string.Format("[DarkCyan:{0}] is assigned to issue [DarkYellow:#{1}], you cannot be unassigned.", x.Assignee.Login, x.Number));
                 if (msg.IsError)
                     return msg;
-            }
-            if (!setLabel.IsDefault || !remLabel.IsDefault)
-            {
-                var all = setLabel.Value.Concat(remLabel.Value).ToList();
-                var labels = GitHub.Client.Issue.Labels.GetForRepository(GitHub.Username, GitHub.Project).Result.Select(x => x.Name).ToList();
-                foreach (var a in all)
-                    if (!labels.Contains(a))
-                        return "There is no [Red:" + a + "] label in this repository.";
             }
 
             return base.Validate();
