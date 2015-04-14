@@ -52,7 +52,6 @@ namespace GitHubConsole.Commands
         public IssuesCommand()
         {
             SubCommands.Add("create", new IssuesCreateCommand());
-            SubCommands.Add("label", new IssuesLabeler());
 
             outputFormat.SetDefault(Config.Default["issues.format"] ?? "%#% %user% %title% %labels%");
             assignee.Validator.Add(x => x.Length > 0, "A user must be specified for the " + assignee.Name + " parameter.");
