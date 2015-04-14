@@ -107,6 +107,12 @@ namespace GitHubConsole.Commands
             if (!create.IsDefault && !issuesIn.IsDefault)
                 return "You cannot specify issues # when creating a new issue.";
 
+            if (!create.IsDefault && drop.IsSet)
+                return string.Format("You cannot unassign yourself from an issue you are creating.");
+
+            if (!create.IsDefault && !remLabel.IsDefault)
+                return string.Format("You cannot remove labels from an issue you are creating.");
+
             if (take.IsSet || drop.IsSet || !remLabel.IsDefault || !setLabel.IsDefault)
                 if (!GitHub.Client.Repository.Get(GitHub.Username, GitHub.Project).Result.Permissions.Admin)
                     return "You do not have admin rights for the [Yellow:" + GitHub.Username + "/" + GitHub.Project + "] repository.\n " + take.Name + " and " + drop.Name + " are not available.";
@@ -119,6 +125,9 @@ namespace GitHubConsole.Commands
                     if (!labels.Contains(a))
                         return "There is no [Red:" + a + "] label in this repository.";
             }
+
+            if (!create.IsDefault)
+                return Message.NoError;
 
             issues = GitHub.Client.Issue.GetForRepository(GitHub.Username, GitHub.Project, new RepositoryIssueRequest() { State = ItemState.All }).Result.ToList();
 
