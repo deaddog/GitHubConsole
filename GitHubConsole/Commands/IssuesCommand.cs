@@ -181,25 +181,15 @@ namespace GitHubConsole.Commands
 
         protected override void Execute()
         {
-            if (take.IsSet)
+            if (take.IsSet || drop.IsSet || !setLabel.IsDefault || !remLabel.IsDefault)
             {
-                ColorConsole.WriteLine("Assigning [Cyan:{0}] to issue{2} {1}.", assignUser, issuesIn.Value.ToString(", ", " and "), issuesIn.Value.Length > 1 ? "s" : "");
-
                 for (int i = 0; i < issues.Count; i++)
                 {
                     var update = issues[i].ToUpdate();
-                    update.Assignee = assignUser;
-                    issues[i] = GitHub.Client.Issue.Update(GitHub.Username, GitHub.Project, issues[i].Number, update).Result;
-                }
-            }
-            else if (drop.IsSet)
-            {
-                ColorConsole.WriteLine("Removing [Cyan:{0}] as assignee for issue{2} {1}.", assignUser, issuesIn.Value.ToString(", ", " and "), issuesIn.Value.Length > 1 ? "s" : "");
+                    if (take.IsSet) update.Assignee = assignUser;
+                    else if (drop.IsSet) update.Assignee = null;
+                    else update.Assignee = issues[i].Assignee == null ? null : issues[i].Assignee.Login;
 
-                for (int i = 0; i < issues.Count; i++)
-                {
-                    var update = issues[i].ToUpdate();
-                    update.Assignee = null;
                     issues[i] = GitHub.Client.Issue.Update(GitHub.Username, GitHub.Project, issues[i].Number, update).Result;
                 }
             }
