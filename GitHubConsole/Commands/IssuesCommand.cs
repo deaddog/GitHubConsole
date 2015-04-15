@@ -42,6 +42,8 @@ namespace GitHubConsole.Commands
         private readonly Parameter<string[]> setLabels = null;
         [Name("--remove-labels", "-rl"), Description("Removes a set of labels from a selected issue (or range of issues).")]
         private readonly Parameter<string[]> remLabels = null;
+        [Name("--edit-labels", "-el"), Description("Allow for editing an issues labels using a menu interface.")]
+        private readonly FlagParameter editLabels = null;
 
         [Name("--create"), Description("Creates a new issue.")]
         private readonly Parameter<string> create = null;
@@ -95,6 +97,9 @@ namespace GitHubConsole.Commands
             if (setLabels.IsSet && issuesIn.Value.Length == 0 && !create.IsSet)
                 return "You must specify which issues # to add labels to.\nFor instance: [White:github issues 5 7 " + setLabels.Name + " bug] will label issue #5 and #7 with the bug label.";
 
+            if (editLabels.IsSet && issuesIn.Value.Length == 0 && !create.IsSet)
+                return "You must specify which issues # to edit labels for.\nFor instance: [White:github issues 5 7 " + editLabels.Name + " bug] will allow you to edit labels for issue #5 and #7.";
+
             if (remLabels.IsSet && issuesIn.Value.Length == 0)
                 return "You must specify which issues # to remove labels from.\nFor instance: [White:github issues 5 7 " + remLabels.Name + " bug] will remove the bug label from issue #5 and #7.";
 
@@ -113,7 +118,7 @@ namespace GitHubConsole.Commands
             if (create.IsSet && remLabels.IsSet)
                 return string.Format("You cannot remove labels from an issue you are creating.");
 
-            if (take.IsSet || drop.IsSet || remLabels.IsSet || setLabels.IsSet)
+            if (take.IsSet || drop.IsSet || remLabels.IsSet || setLabels.IsSet || editLabels.IsSet)
                 if (!GitHub.Client.Repository.Get(GitHub.Username, GitHub.Project).Result.Permissions.Admin)
                     return "You do not have admin rights for the [Yellow:" + GitHub.Username + "/" + GitHub.Project + "] repository.\n " + take.Name + " and " + drop.Name + " are not available.";
 
