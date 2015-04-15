@@ -39,9 +39,9 @@ namespace GitHubConsole.Commands
         private readonly FlagParameter drop = null;
 
         [Name("--set-labels", "-sl"), Description("Adds a set of labels to a selected issue (or range of issues).")]
-        private readonly Parameter<string[]> setLabel = null;
+        private readonly Parameter<string[]> setLabels = null;
         [Name("--remove-labels", "-rl"), Description("Removes a set of labels from a selected issue (or range of issues).")]
-        private readonly Parameter<string[]> remLabel = null;
+        private readonly Parameter<string[]> remLabels = null;
 
         [Name("--create"), Description("Creates a new issue.")]
         private readonly Parameter<string> create = null;
@@ -59,10 +59,10 @@ namespace GitHubConsole.Commands
             notAssignee.Validator.Add(x => x.Length > 0, "A user must be specified for the " + assignee.Name + " parameter.");
             labels.Validator.Add(x => x.Length > 0, "At least one label name must be supplied for the " + labels.Name + " parameter.");
 
-            setLabel.Validator.Add(x => x.Length > 0, "You must specify a set of labels to set:\n"
-                + "  gihub issues <issues> " + setLabel.Name + " <label1> <label2>...");
-            remLabel.Validator.Add(x => x.Length > 0, "You must specify a set of labels to remove:\n"
-                + "  gihub issues <issues> " + remLabel.Name + " <label1> <label2>...");
+            setLabels.Validator.Add(x => x.Length > 0, "You must specify a set of labels to set:\n"
+                + "  gihub issues <issues> " + setLabels.Name + " <label1> <label2>...");
+            remLabels.Validator.Add(x => x.Length > 0, "You must specify a set of labels to remove:\n"
+                + "  gihub issues <issues> " + remLabels.Name + " <label1> <label2>...");
 
             create.Validator.Add(x => x.Trim().Length > 0, "An issue cannot be created with an empty title.");
 
@@ -92,11 +92,11 @@ namespace GitHubConsole.Commands
             if (drop.IsSet && issuesIn.Value.Length == 0)
                 return "You must specify which issues # to unassign yourself from.\nFor instance: [White:github issues 5 7 " + drop.Name + "] will unassign you from issue #5 and #7.";
 
-            if (setLabel.IsSet && issuesIn.Value.Length == 0 && !create.IsSet)
-                return "You must specify which issues # to add labels to.\nFor instance: [White:github issues 5 7 " + setLabel.Name + " bug] will label issue #5 and #7 with the bug label.";
+            if (setLabels.IsSet && issuesIn.Value.Length == 0 && !create.IsSet)
+                return "You must specify which issues # to add labels to.\nFor instance: [White:github issues 5 7 " + setLabels.Name + " bug] will label issue #5 and #7 with the bug label.";
 
-            if (remLabel.IsSet && issuesIn.Value.Length == 0)
-                return "You must specify which issues # to remove labels from.\nFor instance: [White:github issues 5 7 " + remLabel.Name + " bug] will remove the bug label from issue #5 and #7.";
+            if (remLabels.IsSet && issuesIn.Value.Length == 0)
+                return "You must specify which issues # to remove labels from.\nFor instance: [White:github issues 5 7 " + remLabels.Name + " bug] will remove the bug label from issue #5 and #7.";
 
             if (issuesIn.Value.Length > 0 || create.IsSet)
             {
@@ -110,16 +110,16 @@ namespace GitHubConsole.Commands
             if (create.IsSet && drop.IsSet)
                 return string.Format("You cannot unassign yourself from an issue you are creating.");
 
-            if (create.IsSet && remLabel.IsSet)
+            if (create.IsSet && remLabels.IsSet)
                 return string.Format("You cannot remove labels from an issue you are creating.");
 
-            if (take.IsSet || drop.IsSet || remLabel.IsSet || setLabel.IsSet)
+            if (take.IsSet || drop.IsSet || remLabels.IsSet || setLabels.IsSet)
                 if (!GitHub.Client.Repository.Get(GitHub.Username, GitHub.Project).Result.Permissions.Admin)
                     return "You do not have admin rights for the [Yellow:" + GitHub.Username + "/" + GitHub.Project + "] repository.\n " + take.Name + " and " + drop.Name + " are not available.";
 
-            if (setLabel.IsSet || remLabel.IsSet)
+            if (setLabels.IsSet || remLabels.IsSet)
             {
-                var all = setLabel.Value.Concat(remLabel.Value).ToList();
+                var all = setLabels.Value.Concat(remLabels.Value).ToList();
                 var labels = GitHub.Client.Issue.Labels.GetForRepository(GitHub.Username, GitHub.Project).Result.Select(x => x.Name).ToList();
                 foreach (var a in all)
                     if (!labels.Contains(a))
@@ -235,14 +235,14 @@ namespace GitHubConsole.Commands
 
                 if (take.IsSet)
                     nIssue.Assignee = assignUser;
-                foreach (var l in setLabel.Value)
+                foreach (var l in setLabels.Value)
                     nIssue.Labels.Add(l);
 
                 var issue = GitHub.Client.Issue.Create(GitHub.Username, GitHub.Project, nIssue).Result;
 
                 issues = new List<Issue>(1) { issue };
             }
-            else if (take.IsSet || drop.IsSet || setLabel.IsSet || remLabel.IsSet)
+            else if (take.IsSet || drop.IsSet || setLabels.IsSet || remLabels.IsSet)
             {
                 for (int i = 0; i < issues.Count; i++)
                 {
@@ -251,12 +251,12 @@ namespace GitHubConsole.Commands
                     else if (drop.IsSet) update.Assignee = null;
                     else update.Assignee = issues[i].Assignee == null ? null : issues[i].Assignee.Login;
 
-                    foreach (var l in setLabel.Value)
+                    foreach (var l in setLabels.Value)
                         if (update.Labels == null || !update.Labels.Contains(l))
                             update.AddLabel(l);
 
                     if (update.Labels != null)
-                        foreach (var l in remLabel.Value)
+                        foreach (var l in remLabels.Value)
                             update.Labels.Remove(l);
 
                     issues[i] = GitHub.Client.Issue.Update(GitHub.Username, GitHub.Project, issues[i].Number, update).Result;
