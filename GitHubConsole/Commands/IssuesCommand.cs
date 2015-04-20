@@ -154,7 +154,7 @@ namespace GitHubConsole.Commands
             if (take.IsSet)
             {
                 assignUser = GitHub.Client.User.Current().Result.Login;
-                var msg = issues.ValidateEach(x => x.Assignee == null,
+                var msg = issues.ValidateEach(x => x.Assignee == null || x.Assignee.Login == assignUser,
                     x => string.Format("[DarkCyan:{0}] is assigned to issue [DarkYellow:#{1}], you cannot be assigned.", x.Assignee.Login, x.Number));
 
                 if (msg.IsError)
