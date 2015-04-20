@@ -13,11 +13,11 @@ namespace GitHubConsole.Commands
         [Name("--format", "-f"), Description("Allows for describing an output format when listing issues.")]
         private readonly Parameter<string> outputFormat = null;
 
-        [Description("List issues that are currently open.")]
+        [Name("--open", "-o"), Description("List issues that are currently open.")]
         private readonly FlagParameter open = null;
-        [Description("List issues that are currently closed.")]
+        [Name("--closed", "-c"), Description("List issues that are currently closed.")]
         private readonly FlagParameter closed = null;
-        [Description("List issues that are currently either open or closed.")]
+        [Name("--all", "-a"), Description("List issues that are currently either open or closed.")]
         private readonly FlagParameter all = null;
 
         [Description("A set of labels that issues must have in order to be listed.")]
