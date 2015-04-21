@@ -4,11 +4,16 @@ namespace GitHubConsole.Commands
 {
     public class GoCommand : Command
     {
+        private const string GITHUBCOM = "Github.com";
+
+        [Description("Opens the issues page on " + GITHUBCOM + " for the current project.")]
         private readonly FlagParameter issues = null;
-        [Name("--issue", "-i")]
+        [Name("--issue", "-i"), Description("Opens a single issue page on " + GITHUBCOM + ".")]
         private readonly Parameter<int> issue = null;
 
+        [Description("Opens the labels page on " + GITHUBCOM + " for the current project.")]
         private readonly FlagParameter labels = null;
+        [Description("Opens the wiki page on " + GITHUBCOM + " for the current project.")]
         private readonly FlagParameter wiki = null;
 
         public GoCommand()
