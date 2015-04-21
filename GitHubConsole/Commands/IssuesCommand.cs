@@ -242,8 +242,18 @@ namespace GitHubConsole.Commands
 
                 if (take.IsSet)
                     nIssue.Assignee = assignUser;
-                foreach (var l in setLabels.Value)
-                    nIssue.Labels.Add(l);
+
+                if (editLabels.IsSet)
+                {
+                    var allLabels = GitHub.Client.Issue.Labels.GetForRepository(GitHub.Username, GitHub.Project).Result.ToArray();
+                    string header = string.Format("Set labels for the new issue: {0}", create.Value.Trim());
+                    var updateLabels = selectLabels(header, allLabels, new string[0]);
+                    foreach (var l in updateLabels.Item1)
+                        nIssue.Labels.Add(l);
+                }
+                else
+                    foreach (var l in setLabels.Value)
+                        nIssue.Labels.Add(l);
 
                 var issue = GitHub.Client.Issue.Create(GitHub.Username, GitHub.Project, nIssue).Result;
 
