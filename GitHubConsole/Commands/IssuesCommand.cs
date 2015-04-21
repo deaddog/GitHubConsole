@@ -307,8 +307,12 @@ namespace GitHubConsole.Commands
             }
         }
 
-        private Tuple<string[], string[]> selectLabels(Label[] knownLabelNames, IEnumerable<string> preSelected)
+        private Tuple<string[], string[]> selectLabels(string header, Label[] knownLabelNames, IEnumerable<string> preSelected)
         {
+            int theader = Console.CursorTop;
+            if (header != null)
+                ColorConsole.WriteLine(header);
+
             List<string> added = new List<string>();
             List<string> removed = new List<string>();
             List<string> pre = new List<string>(preSelected);
@@ -340,6 +344,10 @@ namespace GitHubConsole.Commands
                 }
             }
             while (res != null);
+
+            Console.CursorTop = theader;
+            Console.WriteLine(new string(' ', header.Length));
+            Console.CursorTop = theader;
 
             return Tuple.Create(added.ToArray(), removed.ToArray());
         }
