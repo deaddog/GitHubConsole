@@ -36,6 +36,7 @@ namespace GitHubConsole
             {
                 SubCommands.Add("config", new ConfigCommand());
                 SubCommands.Add("issues", new IssuesCommand());
+                SubCommands.Add("go", new GoCommand());
 
                 Validator.Add(GetHelpMessage);
             }
