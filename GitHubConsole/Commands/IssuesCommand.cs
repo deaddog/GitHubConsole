@@ -327,7 +327,7 @@ namespace GitHubConsole.Commands
                 ColorConsole.WriteLine(format,
                     v.Number.ToString().PadLeft(len), v.ClosedAt.HasValue ? "DarkRed" : "DarkYellow",
                     name.PadRight(namelen), name == GitHub.Client.Credentials.Login ? "Cyan" : "DarkCyan",
-                    v.Title.Trim(),
+                    v.Title.Trim().Replace("[", "\\[").Replace("]", "\\]"),
                     labels);
             }
         }
