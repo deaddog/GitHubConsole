@@ -259,8 +259,9 @@ namespace GitHubConsole.Commands
 
                 issues = new List<Issue>(1) { issue };
             }
-            else if (take.IsSet || drop.IsSet || setLabels.IsSet || remLabels.IsSet)
+            else if (take.IsSet || drop.IsSet || setLabels.IsSet || remLabels.IsSet || editLabels.IsSet)
             {
+                var allLabels = GitHub.Client.Issue.Labels.GetForRepository(GitHub.Username, GitHub.Project).Result.ToArray();
                 for (int i = 0; i < issues.Count; i++)
                 {
                     var update = issues[i].ToUpdate();
@@ -268,13 +269,25 @@ namespace GitHubConsole.Commands
                     else if (drop.IsSet) update.Assignee = null;
                     else update.Assignee = issues[i].Assignee == null ? null : issues[i].Assignee.Login;
 
-                    foreach (var l in setLabels.Value)
-                        if (update.Labels == null || !update.Labels.Contains(l))
+                    if (editLabels.IsSet)
+                    {
+                        string header = string.Format("Set labels for issue #{0}: {1}", issues[i].Number, issues[i].Title);
+                        var updateLabels = selectLabels(header, allLabels, issues[i].Labels.Select(x => x.Name));
+                        foreach (var l in updateLabels.Item1)
                             update.AddLabel(l);
-
-                    if (update.Labels != null)
-                        foreach (var l in remLabels.Value)
+                        foreach (var l in updateLabels.Item2)
                             update.Labels.Remove(l);
+                    }
+                    else
+                    {
+                        foreach (var l in setLabels.Value)
+                            if (update.Labels == null || !update.Labels.Contains(l))
+                                update.AddLabel(l);
+
+                        if (update.Labels != null)
+                            foreach (var l in remLabels.Value)
+                                update.Labels.Remove(l);
+                    }
 
                     issues[i] = GitHub.Client.Issue.Update(GitHub.Username, GitHub.Project, issues[i].Number, update).Result;
                 }
