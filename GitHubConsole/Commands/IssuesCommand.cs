@@ -349,43 +349,21 @@ namespace GitHubConsole.Commands
             if (header != null)
                 ColorConsole.WriteLine(header);
 
-            List<string> added = new List<string>();
-            List<string> removed = new List<string>();
             List<string> pre = new List<string>(preSelected);
 
-            string res = null;
+            var rr = knownLabelNames.MenuSelectMultiple(new MenuSettings() { Cleanup = MenuCleanup.RemoveMenu },
+                x => "[" + ColorResolver.GetConsoleColor(x.Color) + ":" + x.Name + "]",
+                x => "[DarkGray:" + x.Name + "]",
+                x => pre.Contains(x.Name));
 
-            Func<string, bool> on = x => added.Contains(x) || (pre.Contains(x) && !removed.Contains(x));
-            Func<Label, ConsoleColor> color = x => on(x.Name) ? ColorResolver.GetConsoleColor(x.Color) : ConsoleColor.DarkGray;
-
-            do
-            {
-                Menu<string> labelMenu = new Menu<string>(MenuLabeling.Numbers);
-                foreach (var l in knownLabelNames)
-                    labelMenu.Add("[" + color(l) + ":" + l.Name + "]", l.Name);
-                labelMenu.SetCancel("Done");
-
-                res = labelMenu.Show(MenuCleanup.RemoveMenu, " ");
-
-                if (res != null)
-                {
-                    if (added.Contains(res))
-                        added.Remove(res);
-                    else if (removed.Contains(res))
-                        removed.Remove(res);
-                    else if (pre.Contains(res))
-                        removed.Add(res);
-                    else
-                        added.Add(res);
-                }
-            }
-            while (res != null);
+            var added = rr.Where(x => !pre.Contains(x.Name)).Select(x => x.Name).ToArray();
+            var removed = pre.Where(x => !rr.Any(l => l.Name == x)).ToArray();
 
             Console.CursorTop = theader;
             Console.WriteLine(new string(' ', header.Length));
             Console.CursorTop = theader;
 
-            return Tuple.Create(added.ToArray(), removed.ToArray());
+            return Tuple.Create(added, removed);
         }
     }
 }
