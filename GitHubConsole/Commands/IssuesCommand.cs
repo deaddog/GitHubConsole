@@ -73,6 +73,17 @@ namespace GitHubConsole.Commands
             this.Validator.Add(Validate);
         }
 
+        protected override Message GetHelpMessage()
+        {
+            return
+                "Provides information about and operations on issues on GitHub.com.\n" +
+                "To address specific issues use:\n\n" +
+                "  [Example:github issues \\[1 2 3...\\] <arguments>]\n\n" +
+                "Below is a complete list of all parameters for this command:" +
+
+            base.GetParametersMessage(2);
+        }
+
         protected Message Validate()
         {
             if (hasAssignee.IsSet || noAssignee.IsSet)
