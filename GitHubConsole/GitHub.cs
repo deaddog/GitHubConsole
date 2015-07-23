@@ -148,19 +148,20 @@ namespace GitHubConsole
                 return validated;
 
             if (!isGitRepo())
-                return "The current directory is not part of a Git repository.\n" +
+                return validated = "The current directory is not part of a Git repository.\n" +
                     "GitHub commands cannot be executed.";
 
             if (!FindGitHubRemote())
-                return "The current repository has no GitHub.com remotes.\n" +
+                return validated = "The current repository has no GitHub.com remotes.\n" +
                     "GitHub commands cannot be executed.";
 
             string token = Config.Default["authentification.token"];
             if (token == null || token == "")
-                return "Unable to load GitHub authentification token.\n" +
+                return validated = "Unable to load GitHub authentification token.\n" +
                     "Run [Yellow:github config --set authentification.token <token>] to set.";
 
             cred = new Credentials(token);
+            validated = Message.NoError;
 
             return Message.NoError;
         }
