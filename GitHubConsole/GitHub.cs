@@ -95,7 +95,10 @@ namespace GitHubConsole
 
             for (int i = 0; i < remotes.Length; i++)
             {
-                var m = Regex.Match(remotes[i].Item2, @"https://github.com/(?<user>[^/]+)/(?<proj>.+)\.git");
+                string domain = @"https://github\.com/|git@github\.com:";
+                string user = @"[^/]+";
+                string proj = @"([^.]|\.[^g]|\.g[^i]|\.gi[^t]|\.git.)+";
+                var m = Regex.Match(remotes[i].Item2, $@"^({domain})(?<user>{user})/(?<proj>{proj})(\.git)?$", RegexOptions.IgnoreCase);
                 if (m.Success)
                 {
                     username = m.Groups["user"].Value;
