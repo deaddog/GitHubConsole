@@ -138,7 +138,7 @@ namespace GitHubConsole.Commands
             if (setLabels.IsSet || remLabels.IsSet)
             {
                 var all = setLabels.Value.Concat(remLabels.Value).ToList();
-                var labels = GitHub.Client.Issue.Labels.GetForRepository(GitHub.Username, GitHub.Project).Result.Select(x => x.Name).ToList();
+                var labels = GitHub.Client.Issue.Labels.GetAllForRepository(GitHub.Username, GitHub.Project).Result.Select(x => x.Name).ToList();
                 foreach (var a in all)
                     if (!labels.Contains(a))
                         return "There is no [Red:" + a + "] label in this repository.";
@@ -150,7 +150,7 @@ namespace GitHubConsole.Commands
                 return Message.NoError;
             }
 
-            issues = GitHub.Client.Issue.GetForRepository(GitHub.Username, GitHub.Project, new RepositoryIssueRequest() { State = ItemState.All }).Result.ToList();
+            issues = GitHub.Client.Issue.GetAllForRepository(GitHub.Username, GitHub.Project, new RepositoryIssueRequest() { State = ItemState.All }).Result.ToList();
 
             if (issuesIn.Value.Length > 0)
             {
@@ -256,7 +256,7 @@ namespace GitHubConsole.Commands
 
                 if (editLabels.IsSet)
                 {
-                    var allLabels = GitHub.Client.Issue.Labels.GetForRepository(GitHub.Username, GitHub.Project).Result.ToArray();
+                    var allLabels = GitHub.Client.Issue.Labels.GetAllForRepository(GitHub.Username, GitHub.Project).Result.ToArray();
                     string header = string.Format("Set labels for the new issue: {0}", create.Value.Trim());
                     var updateLabels = selectLabels(header, allLabels, new string[0]);
                     foreach (var l in updateLabels.Item1)
@@ -272,7 +272,7 @@ namespace GitHubConsole.Commands
             }
             else if (take.IsSet || drop.IsSet || setLabels.IsSet || remLabels.IsSet || editLabels.IsSet)
             {
-                var allLabels = GitHub.Client.Issue.Labels.GetForRepository(GitHub.Username, GitHub.Project).Result.ToArray();
+                var allLabels = GitHub.Client.Issue.Labels.GetAllForRepository(GitHub.Username, GitHub.Project).Result.ToArray();
                 for (int i = 0; i < issues.Count; i++)
                 {
                     var update = issues[i].ToUpdate();
