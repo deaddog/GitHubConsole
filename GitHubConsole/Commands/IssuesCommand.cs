@@ -68,6 +68,7 @@ namespace GitHubConsole.Commands
 
             create.Validator.Add(x => x.Trim().Length > 0, "An issue cannot be created with an empty title.");
 
+            this.PreValidator.Add(GitHub.ValidateGitDirectory);
             this.Validator.AddOnlyOne(editLabels, setLabels);
             this.Validator.AddOnlyOne(editLabels, remLabels);
             this.Validator.Add(Validate);
