@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CachedGitHub\Fallback.cs" />
     <Compile Include="ColorResolver.cs" />
     <Compile Include="Commands\ConfigCommand.cs" />
     <Compile Include="Commands\GoCommand.cs" />
