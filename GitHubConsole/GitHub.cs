@@ -1,4 +1,5 @@
 ﻿using CommandLineParsing;
+using GitHubConsole.CachedGitHub;
 using Octokit;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ namespace GitHubConsole
     {
         private static readonly string clientHeader = "GitHubC#Console";
 
-        private static GitHubClient client;
+        private static CachedGitHubClient client;
         private static Octokit.Credentials cred;
         private static string username;
         private static string project;
@@ -37,7 +38,7 @@ namespace GitHubConsole
             }
         }
 
-        public static GitHubClient Client
+        public static CachedGitHubClient Client
         {
             get
             {
@@ -47,7 +48,7 @@ namespace GitHubConsole
                     return null;
 
                 if (client == null)
-                    client = new GitHubClient(new ProductHeaderValue(clientHeader)) { Credentials = cred };
+                    client = new CachedGitHub.CachedGitHubClient(new GitHubClient(new ProductHeaderValue(clientHeader)) { Credentials = cred });
 
                 return client;
             }
