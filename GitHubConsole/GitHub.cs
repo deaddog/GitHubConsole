@@ -82,7 +82,7 @@ namespace GitHubConsole
             return ok;
         }
 
-        private static bool FindGitHubRemote(out string user, out string project)
+        private static bool FindGitHubRemote()
         {
             var remotes = findRemotes();
 
@@ -91,13 +91,13 @@ namespace GitHubConsole
                 var m = Regex.Match(remotes[i].Item2, @"https://github.com/(?<user>[^/]+)/(?<proj>.+)\.git");
                 if (m.Success)
                 {
-                    user = m.Groups["user"].Value;
+                    username = m.Groups["user"].Value;
                     project = m.Groups["proj"].Value;
                     return true;
                 }
             }
 
-            user = null;
+            username = null;
             project = null;
             return false;
         }
