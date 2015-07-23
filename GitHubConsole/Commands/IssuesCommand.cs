@@ -360,7 +360,7 @@ namespace GitHubConsole.Commands
                            let n = v.Assignee == null ? "" : v.Assignee.Login
                            select n.Length).Max();
 
-            string format = outputFormat.Value;
+            string format = outputFormat.Value.Replace("\\n", "\n");
 
             foreach (var v in issues)
             {
