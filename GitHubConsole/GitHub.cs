@@ -22,8 +22,11 @@ namespace GitHubConsole
         {
             get
             {
-                if (username == null)
-                    validateGitDirectory(out cred, out username, out project);
+                if (validated == null)
+                    throw new InvalidOperationException($"{nameof(Username)} cannot be retrieved before running the {nameof(ValidateGitDirectory)} method.");
+
+                if (validated != Message.NoError)
+                    throw new InvalidOperationException($"{nameof(Username)} cannot be retrieved when git validation was not successfull.");
 
                 return username;
             }
@@ -32,8 +35,11 @@ namespace GitHubConsole
         {
             get
             {
-                if (project == null)
-                    validateGitDirectory(out cred, out username, out project);
+                if (validated == null)
+                    throw new InvalidOperationException($"{nameof(Project)} cannot be retrieved before running the {nameof(ValidateGitDirectory)} method.");
+
+                if (validated != Message.NoError)
+                    throw new InvalidOperationException($"{nameof(Project)} cannot be retrieved when git validation was not successfull.");
 
                 return project;
             }
@@ -43,10 +49,11 @@ namespace GitHubConsole
         {
             get
             {
-                string user = Username;
+                if (validated == null)
+                    throw new InvalidOperationException($"{nameof(Client)} cannot be retrieved before running the {nameof(ValidateGitDirectory)} method.");
 
-                if (cred == null)
-                    return null;
+                if (validated != Message.NoError)
+                    throw new InvalidOperationException($"{nameof(Client)} cannot be retrieved when git validation was not successfull.");
 
                 if (client == null)
                     client = new GitHubClient(new ProductHeaderValue(clientHeader)) { Credentials = cred };
