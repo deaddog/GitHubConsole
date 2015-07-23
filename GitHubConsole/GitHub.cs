@@ -12,7 +12,9 @@ namespace GitHubConsole
         private static readonly string clientHeader = "GitHubC#Console";
 
         private static GitHubClient client;
-        private static Octokit.Credentials cred;
+        private static Message validated;
+
+        private static Credentials cred;
         private static string username;
         private static string project;
 
