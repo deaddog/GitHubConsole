@@ -1,11 +1,24 @@
 ﻿using Octokit;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace GitHubConsole.CachedGitHub
 {
     public class CachedIssuesClient : Fallback<IssuesClient>, IIssuesClient
     {
+        private string path
+        {
+            get
+            {
+                string dir = Path.Combine(GitHub.RepositoryRoot, ".git", "gh_caching");
+                if (!Directory.Exists(dir))
+                    Directory.CreateDirectory(dir);
+
+                return Path.Combine(dir, "issues.xml");
+            }
+        }
+
         public CachedIssuesClient(GitHubClient client)
             : base(() => client.Issue as IssuesClient)
         {
