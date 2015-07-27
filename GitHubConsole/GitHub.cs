@@ -86,7 +86,7 @@ namespace GitHubConsole
 #endif
             System.Diagnostics.Process p = new System.Diagnostics.Process()
             {
-                StartInfo = new System.Diagnostics.ProcessStartInfo("git.exe", "status")
+                StartInfo = new System.Diagnostics.ProcessStartInfo("git.exe", "rev-parse --show-toplevel")
                 {
                     RedirectStandardError = true,
                     RedirectStandardOutput = true,
@@ -101,6 +101,13 @@ namespace GitHubConsole
                 p.WaitForExit();
                 ok = output.EndOfStream;
             }
+            if (ok)
+            {
+                using (StreamReader path = p.StandardOutput)
+                    repoRoot = path.ReadLine();
+                repoRoot = repoRoot.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+            }
+
             p.Dispose();
 
             return ok;
