@@ -19,6 +19,8 @@ namespace GitHubConsole
         private static string username;
         private static string project;
 
+        private static string repoRoot;
+
         public static string Username
         {
             get
@@ -43,6 +45,20 @@ namespace GitHubConsole
                     throw new InvalidOperationException($"{nameof(Project)} cannot be retrieved when git validation was not successfull.");
 
                 return project;
+            }
+        }
+
+        public static string RepositoryRoot
+        {
+            get
+            {
+                if (validated == null)
+                    throw new InvalidOperationException($"{nameof(RepositoryRoot)} cannot be retrieved before running the {nameof(ValidateGitDirectory)} method.");
+
+                if (validated != Message.NoError)
+                    throw new InvalidOperationException($"{nameof(RepositoryRoot)} cannot be retrieved when git validation was not successfull.");
+
+                return repoRoot;
             }
         }
 
