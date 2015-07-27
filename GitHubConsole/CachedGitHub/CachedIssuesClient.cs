@@ -1,6 +1,9 @@
 ﻿using Octokit;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace GitHubConsole.CachedGitHub
@@ -39,7 +42,34 @@ namespace GitHubConsole.CachedGitHub
         public Task<IReadOnlyList<Issue>> GetAllForOwnedAndMemberRepositories() => fallback.GetAllForOwnedAndMemberRepositories();
         public Task<IReadOnlyList<Issue>> GetAllForOwnedAndMemberRepositories(IssueRequest request) => fallback.GetAllForOwnedAndMemberRepositories(request);
         public Task<IReadOnlyList<Issue>> GetAllForRepository(string owner, string name) => GetAllForRepository(owner, name, new RepositoryIssueRequest());
-        public Task<IReadOnlyList<Issue>> GetAllForRepository(string owner, string name, RepositoryIssueRequest request) => fallback.GetAllForRepository(owner, name, request);
+        public Task<IReadOnlyList<Issue>> GetAllForRepository(string owner, string name, RepositoryIssueRequest request)
+        {
+            if (useCache())
+                return Task.FromResult(new ReadOnlyCollection<Issue>(loadIssues().ToList()) as IReadOnlyList<Issue>);
+            else
+            {
+                var r = fallback.GetAllForRepository(owner, name).Result;
+
+                saveIssues(r);
+
+                return Task.FromResult(r);
+            }
+        }
         public Task<Issue> Update(string owner, string name, int number, IssueUpdate issueUpdate) => fallback.Update(owner, name, number, issueUpdate);
+
+        private bool useCache()
+        {
+            throw new NotImplementedException();
+        }
+
+        private IEnumerable<Issue> loadIssues()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void saveIssues(IEnumerable<Issue> issues)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
