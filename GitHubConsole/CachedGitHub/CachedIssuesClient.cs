@@ -74,8 +74,11 @@ namespace GitHubConsole.CachedGitHub
         {
             XDocument doc = XDocument.Load(path);
             var xIssues = doc.Element("cache").Element("issues");
-            foreach (var e in xIssues.Elements("issue"))
-                yield return XDeserializer.Deserialize<Issue>(e);
+
+            var issues = xIssues.Elements("issue").Select(x => XDeserializer.Deserialize<Issue>(x)).ToArray();
+            Array.Sort(issues, (x, y) => -x.Number.CompareTo(y.Number));
+
+            return issues;
         }
 
         private void saveIssues(IEnumerable<Issue> issues)
@@ -86,7 +89,7 @@ namespace GitHubConsole.CachedGitHub
             XDocument doc;
             doc = !File.Exists(path) ? new XDocument(new XElement("cache", new XElement("timestamp", ""), new XElement("issues"))) : XDocument.Load(path);
             var xIssues = doc.Element("cache").Element("issues");
-            
+
             foreach (var i in arr)
             {
                 var xI = XSerializer.Serialize("issue", i);
