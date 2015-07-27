@@ -1,4 +1,5 @@
 ﻿using CommandLineParsing;
+using GitHubConsole.CachedGitHub;
 using Octokit;
 using System;
 using System.Collections.Generic;
@@ -11,17 +12,24 @@ namespace GitHubConsole
     {
         private static readonly string clientHeader = "GitHubC#Console";
 
-        private static GitHubClient client;
-        private static Octokit.Credentials cred;
+        private static CachedGitHubClient client;
+        private static Message validated;
+
+        private static Credentials cred;
         private static string username;
         private static string project;
+
+        private static string repoRoot;
 
         public static string Username
         {
             get
             {
-                if (username == null)
-                    validateGitDirectory(out cred, out username, out project);
+                if (validated == null)
+                    throw new InvalidOperationException($"{nameof(Username)} cannot be retrieved before running the {nameof(ValidateGitDirectory)} method.");
+
+                if (validated != Message.NoError)
+                    throw new InvalidOperationException($"{nameof(Username)} cannot be retrieved when git validation was not successfull.");
 
                 return username;
             }
@@ -30,24 +38,42 @@ namespace GitHubConsole
         {
             get
             {
-                if (project == null)
-                    validateGitDirectory(out cred, out username, out project);
+                if (validated == null)
+                    throw new InvalidOperationException($"{nameof(Project)} cannot be retrieved before running the {nameof(ValidateGitDirectory)} method.");
+
+                if (validated != Message.NoError)
+                    throw new InvalidOperationException($"{nameof(Project)} cannot be retrieved when git validation was not successfull.");
 
                 return project;
             }
         }
 
-        public static GitHubClient Client
+        public static string RepositoryRoot
         {
             get
             {
-                string user = Username;
+                if (validated == null)
+                    throw new InvalidOperationException($"{nameof(RepositoryRoot)} cannot be retrieved before running the {nameof(ValidateGitDirectory)} method.");
 
-                if (cred == null)
-                    return null;
+                if (validated != Message.NoError)
+                    throw new InvalidOperationException($"{nameof(RepositoryRoot)} cannot be retrieved when git validation was not successfull.");
+
+                return repoRoot;
+            }
+        }
+
+        public static CachedGitHubClient Client
+        {
+            get
+            {
+                if (validated == null)
+                    throw new InvalidOperationException($"{nameof(Client)} cannot be retrieved before running the {nameof(ValidateGitDirectory)} method.");
+
+                if (validated != Message.NoError)
+                    throw new InvalidOperationException($"{nameof(Client)} cannot be retrieved when git validation was not successfull.");
 
                 if (client == null)
-                    client = new GitHubClient(new ProductHeaderValue(clientHeader)) { Credentials = cred };
+                    client = new CachedGitHub.CachedGitHubClient(new GitHubClient(new ProductHeaderValue(clientHeader)) { Credentials = cred });
 
                 return client;
             }
@@ -60,7 +86,7 @@ namespace GitHubConsole
 #endif
             System.Diagnostics.Process p = new System.Diagnostics.Process()
             {
-                StartInfo = new System.Diagnostics.ProcessStartInfo("git.exe", "status")
+                StartInfo = new System.Diagnostics.ProcessStartInfo("git.exe", "rev-parse --show-toplevel")
                 {
                     RedirectStandardError = true,
                     RedirectStandardOutput = true,
@@ -75,27 +101,37 @@ namespace GitHubConsole
                 p.WaitForExit();
                 ok = output.EndOfStream;
             }
+            if (ok)
+            {
+                using (StreamReader path = p.StandardOutput)
+                    repoRoot = path.ReadLine();
+                repoRoot = repoRoot.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+            }
+
             p.Dispose();
 
             return ok;
         }
 
-        private static bool FindGitHubRemote(out string user, out string project)
+        private static bool FindGitHubRemote()
         {
             var remotes = findRemotes();
 
             for (int i = 0; i < remotes.Length; i++)
             {
-                var m = Regex.Match(remotes[i].Item2, @"https://github.com/(?<user>[^/]+)/(?<proj>.+)\.git");
+                string domain = @"https://github\.com/|git@github\.com:";
+                string user = @"[^/]+";
+                string proj = @"([^.]|\.[^g]|\.g[^i]|\.gi[^t]|\.git.)+";
+                var m = Regex.Match(remotes[i].Item2, $@"^({domain})(?<user>{user})/(?<proj>{proj})(\.git)?$", RegexOptions.IgnoreCase);
                 if (m.Success)
                 {
-                    user = m.Groups["user"].Value;
+                    username = m.Groups["user"].Value;
                     project = m.Groups["proj"].Value;
                     return true;
                 }
             }
 
-            user = null;
+            username = null;
             project = null;
             return false;
         }
@@ -133,35 +169,28 @@ namespace GitHubConsole
             return lines.ToArray();
         }
 
-        private static bool validateGitDirectory(out Credentials cred, out string username, out string project)
+        public static Message ValidateGitDirectory()
         {
-            cred = null;
-            username = null;
-            project = null;
+            if (validated != null)
+                return validated;
 
             if (!isGitRepo())
-            {
-                Console.WriteLine("The current directory is not part of a Git repository.");
-                Console.WriteLine("GitHub commands cannot be executed.");
-                return false;
-            }
+                return validated = "The current directory is not part of a Git repository.\n" +
+                    "GitHub commands cannot be executed.";
 
-            if (!FindGitHubRemote(out username, out project))
-            {
-                Console.WriteLine("Unable to find GitHub project.");
-                return false;
-            }
+            if (!FindGitHubRemote())
+                return validated = "The current repository has no GitHub.com remotes.\n" +
+                    "GitHub commands cannot be executed.";
 
             string token = Config.Default["authentification.token"];
             if (token == null || token == "")
-            {
-                Console.WriteLine("Unable to load GitHub authentification token.");
-                ColorConsole.WriteLine("Run [Yellow:github config --set authentification.token <token>] to set.");
-                return false;
-            }
-            cred = new Credentials(token);
+                return validated = "Unable to load GitHub authentification token.\n" +
+                    "Run [Yellow:github config --set authentification.token <token>] to set.";
 
-            return true;
+            cred = new Credentials(token);
+            validated = Message.NoError;
+
+            return Message.NoError;
         }
     }
 }
