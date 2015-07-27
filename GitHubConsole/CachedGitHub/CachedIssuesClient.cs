@@ -38,7 +38,7 @@ namespace GitHubConsole.CachedGitHub
         public Task<IReadOnlyList<Issue>> GetAllForOrganization(string organization, IssueRequest request) => fallback.GetAllForOrganization(organization, request);
         public Task<IReadOnlyList<Issue>> GetAllForOwnedAndMemberRepositories() => fallback.GetAllForOwnedAndMemberRepositories();
         public Task<IReadOnlyList<Issue>> GetAllForOwnedAndMemberRepositories(IssueRequest request) => fallback.GetAllForOwnedAndMemberRepositories(request);
-        public Task<IReadOnlyList<Issue>> GetAllForRepository(string owner, string name) => fallback.GetAllForRepository(owner, name);
+        public Task<IReadOnlyList<Issue>> GetAllForRepository(string owner, string name) => GetAllForRepository(owner, name, new RepositoryIssueRequest());
         public Task<IReadOnlyList<Issue>> GetAllForRepository(string owner, string name, RepositoryIssueRequest request) => fallback.GetAllForRepository(owner, name, request);
         public Task<Issue> Update(string owner, string name, int number, IssueUpdate issueUpdate) => fallback.Update(owner, name, number, issueUpdate);
     }
