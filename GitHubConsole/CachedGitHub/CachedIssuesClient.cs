@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace GitHubConsole.CachedGitHub
 {
@@ -59,17 +60,48 @@ namespace GitHubConsole.CachedGitHub
 
         private bool useCache()
         {
-            throw new NotImplementedException();
+            if (!File.Exists(path))
+                return false;
+
+            XDocument doc = XDocument.Load(path);
+
+            DateTime dt = DateTime.Parse(doc.Element("cache").Element("timestamp").Value);
+
+            return (DateTime.Now - dt).TotalSeconds <= int.Parse(Config.Default["issues.timeout"] ?? "0");
         }
 
         private IEnumerable<Issue> loadIssues()
         {
-            throw new NotImplementedException();
+            XDocument doc = XDocument.Load(path);
+            var xIssues = doc.Element("cache").Element("issues");
+            foreach (var e in xIssues.Elements("issue"))
+                yield return XDeserializer.Deserialize<Issue>(e);
         }
 
         private void saveIssues(IEnumerable<Issue> issues)
         {
-            throw new NotImplementedException();
+            var arr = issues.ToArray();
+            Array.Sort<Issue>(arr, (x, y) => x.Number.CompareTo(y.Number));
+
+            XDocument doc;
+            doc = !File.Exists(path) ? new XDocument(new XElement("cache", new XElement("timestamp", ""), new XElement("issues"))) : XDocument.Load(path);
+            var xIssues = doc.Element("cache").Element("issues");
+            
+            foreach (var i in arr)
+            {
+                var xI = XSerializer.Serialize("issue", i);
+
+                var old = xIssues.Elements("issue").Where(x => x.Element("number")?.Value == i.Number.ToString()).FirstOrDefault();
+                if (old != null)
+                    old.ReplaceWith(xI);
+                else
+                    xIssues.Add(xI);
+
+            }
+
+            doc.Element("cache").Element("timestamp").SetValue(DateTime.Now);
+
+            doc.Save(path);
         }
     }
 }
