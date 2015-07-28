@@ -14,18 +14,13 @@ namespace GitHubConsole
             Command.SimulateREPL(() => new MainCommand(), "quit", HELP);
 #else
             try { new MainCommand().RunCommand(args, HELP); }
-            catch (AggregateException aggex)
+            catch (AggregateException aggex) when (aggex.InnerExceptions.Count == 1 && aggex.InnerException is Octokit.AuthorizationException)
             {
-                if (aggex.InnerExceptions.Count == 1 && aggex.InnerException is Octokit.AuthorizationException)
-                {
-                    Octokit.AuthorizationException credex = aggex.InnerException as Octokit.AuthorizationException;
+                Octokit.AuthorizationException credex = aggex.InnerException as Octokit.AuthorizationException;
 
-                    ColorConsole.WriteLine("GitHub responded to your request with an authentification error:");
-                    ColorConsole.WriteLine("[Red:[{1}] {0}]", credex.Message, credex.StatusCode);
-                    ColorConsole.WriteLine("Run [Yellow:github config --set authtoken <token>] to set authentification token.");
-                }
-                else
-                    throw aggex;
+                ColorConsole.WriteLine("GitHub responded to your request with an authentification error:");
+                ColorConsole.WriteLine("[Red:[{1}] {0}]", credex.Message, credex.StatusCode);
+                ColorConsole.WriteLine("Run [Yellow:github config --set authtoken <token>] to set authentification token.");
             }
 #endif
         }
