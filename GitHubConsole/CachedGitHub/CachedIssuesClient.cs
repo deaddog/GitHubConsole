@@ -15,7 +15,7 @@ namespace GitHubConsole.CachedGitHub
         {
             get
             {
-                string dir = Path.Combine(GitHub.RepositoryRoot, ".git", "gh_caching");
+                string dir = Path.Combine(GitHub.RepositoryGirDirectory, "gh_caching");
                 if (!Directory.Exists(dir))
                     Directory.CreateDirectory(dir);
 

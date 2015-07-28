@@ -20,6 +20,7 @@ namespace GitHubConsole
         private static string project;
 
         private static string repoRoot;
+        private static string repoGitDir;
 
         public static string Username
         {
@@ -61,6 +62,19 @@ namespace GitHubConsole
                 return repoRoot;
             }
         }
+        public static string RepositoryGirDirectory
+        {
+            get
+            {
+                if (validated == null)
+                    throw new InvalidOperationException($"{nameof(RepositoryGirDirectory)} cannot be retrieved before running the {nameof(ValidateGitDirectory)} method.");
+
+                if (validated != Message.NoError)
+                    throw new InvalidOperationException($"{nameof(RepositoryGirDirectory)} cannot be retrieved when git validation was not successfull.");
+
+                return repoGitDir;
+            }
+        }
 
         public static CachedGitHubClient Client
         {
@@ -86,7 +100,7 @@ namespace GitHubConsole
 #endif
             System.Diagnostics.Process p = new System.Diagnostics.Process()
             {
-                StartInfo = new System.Diagnostics.ProcessStartInfo("git.exe", "rev-parse --show-toplevel")
+                StartInfo = new System.Diagnostics.ProcessStartInfo("git.exe", "rev-parse --git-dir --show-toplevel")
                 {
                     RedirectStandardError = true,
                     RedirectStandardOutput = true,
@@ -104,7 +118,11 @@ namespace GitHubConsole
             if (ok)
             {
                 using (StreamReader path = p.StandardOutput)
+                {
+                    repoGitDir = path.ReadLine();
                     repoRoot = path.ReadLine();
+                }
+                repoGitDir = repoGitDir.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
                 repoRoot = repoRoot.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
             }
 
