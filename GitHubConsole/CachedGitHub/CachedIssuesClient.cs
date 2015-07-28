@@ -60,6 +60,11 @@ namespace GitHubConsole.CachedGitHub
 
         private bool useCache()
         {
+            int timeout = int.Parse(Config.Default["issues.timeout"] ?? "0");
+
+            if (timeout <= 0)
+                return false;
+
             if (!File.Exists(path))
                 return false;
 
@@ -67,7 +72,7 @@ namespace GitHubConsole.CachedGitHub
 
             DateTime dt = DateTime.Parse(doc.Element("cache").Element("timestamp").Value);
 
-            return (DateTime.Now - dt).TotalSeconds <= int.Parse(Config.Default["issues.timeout"] ?? "0");
+            return (DateTime.Now - dt).TotalSeconds <= timeout;
         }
 
         private IEnumerable<Issue> loadIssues()
