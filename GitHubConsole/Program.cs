@@ -26,9 +26,9 @@ namespace GitHubConsole
             {
                 Octokit.AuthorizationException credex = aggex.InnerException as Octokit.AuthorizationException;
 
-                ColorConsole.WriteLine("GitHub responded to your request with an authentification error:");
+                ColorConsole.WriteLine("GitHub responded to your request with an authentication error:");
                 ColorConsole.WriteLine("[Red:[{1}] {0}]", credex.Message, credex.StatusCode);
-                ColorConsole.WriteLine("Run [Yellow:github config --set authtoken <token>] to set authentification token.");
+                ColorConsole.WriteLine("Run [Yellow:github config --set authtoken <token>] to set authentication token.");
             }
 #endif
         }

@@ -213,10 +213,10 @@ namespace GitHubConsole
                 return validated = "The current repository has no GitHub.com remotes.\n" +
                     "GitHub commands cannot be executed.";
 
-            string token = Config.Default["authentification.token"];
+            string token = Config.Default["authentication.token"];
             if (token == null || token == "")
-                return validated = "Unable to load GitHub authentification token.\n" +
-                    "Run [Yellow:github config --set authentification.token <token>] to set.";
+                return validated = "Unable to load GitHub authentication token.\n" +
+                    "Run [Yellow:github config --set authentication.token <token>] to set.";
 
             cred = new Credentials(token);
             validated = Message.NoError;
