@@ -135,6 +135,9 @@ namespace GitHubConsole.Commands
             if (setDescription.IsSet && issuesIn.IsSet && issuesIn.Value.Length > 1)
                 return "Description cannot be assigned to multiple issues at once.";
 
+            if (setDescription.IsSet && !setTitle.IsSet)
+                return $"When using the {setDescription.Name} parameter you must also use the {setTitle.Name} parameter.";
+
             if (edit.IsSet && !issuesIn.IsSet)
                 return "You much specify which issue you want to edit.";
             if (edit.IsSet && issuesIn.IsSet && issuesIn.Value.Length > 1)
