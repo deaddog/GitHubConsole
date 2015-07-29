@@ -309,7 +309,7 @@ namespace GitHubConsole.Commands
 
                 issues = new List<Issue>(1) { issue };
             }
-            else if (take.IsSet || drop.IsSet || setLabels.IsSet || remLabels.IsSet || editLabels.IsSet || setTitle.IsSet || setDescription.IsSet)
+            else if (take.IsSet || drop.IsSet || setLabels.IsSet || remLabels.IsSet || editLabels.IsSet || setTitle.IsSet || setDescription.IsSet || edit.IsSet)
             {
                 var allLabels = editLabels.IsSet ? GitHub.Client.Issue.Labels.GetAllForRepository(GitHub.Username, GitHub.Project).Result.ToArray() : new Label[0];
                 for (int i = 0; i < issues.Count; i++)
@@ -319,9 +319,9 @@ namespace GitHubConsole.Commands
                     else if (drop.IsSet) update.Assignee = null;
                     else update.Assignee = issues[i].Assignee?.Login;
 
-                    if (setTitle.IsSet)
+                    if (setTitle.IsSet || edit.IsSet)
                         update.Title = setTitle.Value;
-                    if (setDescription.IsSet)
+                    if (setDescription.IsSet || edit.IsSet)
                         update.Body = setDescription.Value;
 
                     if (editLabels.IsSet)
