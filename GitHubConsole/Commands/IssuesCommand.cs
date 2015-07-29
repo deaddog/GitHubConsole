@@ -46,7 +46,12 @@ namespace GitHubConsole.Commands
         private readonly FlagParameter editLabels = null;
 
         [Name("--create"), Description("Creates a new issue.")]
-        private readonly Parameter<string> create = null;
+        private readonly FlagParameter create = null;
+
+        [Name("--set-title"), Description("Sets the title of an issue.")]
+        private readonly Parameter<string> setTitle = null;
+        [Name("--set-description"), Description("Set the description of an issue.")]
+        private readonly Parameter<string> setDescription = null;
 
         [NoName]
         private readonly Parameter<int[]> issuesIn = null;
@@ -66,7 +71,7 @@ namespace GitHubConsole.Commands
             remLabels.Validator.Add(x => x.Length > 0, "You must specify a set of labels to remove:\n"
                 + "  gihub issues <issues> " + remLabels.Name + " <label1> <label2>...");
 
-            create.Validator.Add(x => x.Trim().Length > 0, "An issue cannot be created with an empty title.");
+            setTitle.Validator.Add(x => x.Trim().Length > 0, "An issue cannot have an empty title.");
 
             this.PreValidator.Add(GitHub.ValidateGitDirectory);
             Validator.AddIfFirstNotRest(assignee, hasAssignee, noAssignee, notAssignee);
@@ -241,7 +246,8 @@ namespace GitHubConsole.Commands
         {
             if (create.IsSet)
             {
-                NewIssue nIssue = new NewIssue(create.Value.Trim());
+                NewIssue nIssue = new NewIssue(setTitle.Value.Trim());
+                nIssue.Body = setDescription.Value.Trim();
 
                 if (take.IsSet)
                     nIssue.Assignee = assignUser;
@@ -249,7 +255,7 @@ namespace GitHubConsole.Commands
                 if (editLabels.IsSet)
                 {
                     var allLabels = GitHub.Client.Issue.Labels.GetAllForRepository(GitHub.Username, GitHub.Project).Result.ToArray();
-                    string header = string.Format("Set labels for the new issue: {0}", create.Value.Trim());
+                    string header = string.Format("Set labels for the new issue: {0}", nIssue.Title);
                     var updateLabels = selectLabels(header, allLabels, new string[0]);
                     foreach (var l in updateLabels.Item1)
                         nIssue.Labels.Add(l);
