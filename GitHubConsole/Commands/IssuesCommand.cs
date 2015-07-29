@@ -2,6 +2,7 @@
 using Octokit;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace GitHubConsole.Commands
@@ -384,6 +385,51 @@ namespace GitHubConsole.Commands
             Console.CursorTop = theader;
 
             return rr;
+        }
+
+        private Message titleAndDescriptionFromFile()
+        {
+            string filepath = Path.GetTempPath() + Guid.NewGuid().ToString() + ".txt";
+            File.WriteAllText(filepath,
+$@"# Edit title and description for your issue.
+# Lines that start with # are comments - they are disregarded.
+# Clearing the file will cancel the current operation.
+# The first line is the title of the issue.
+{setTitle.Value}
+# Remaining lines represent the description for the issue.
+{setDescription.Value}");
+
+            string application = Config.Default["issues.editor"] ?? "%f";
+
+            if (application.Contains("%f"))
+                using (var p = System.Diagnostics.Process.Start(application.Replace("%f", filepath)))
+                    p.WaitForExit();
+            else
+                using (var p = System.Diagnostics.Process.Start(application, filepath))
+                    p.WaitForExit();
+
+            string[] content = File.ReadAllLines(filepath)
+                .Where(x => !x.StartsWith("#"))
+                .SkipWhile(x => x.Trim().Length == 0)
+                .Reverse()
+                .SkipWhile(x => x.Trim().Length == 0)
+                .Reverse()
+                .ToArray();
+            File.Delete(filepath);
+
+            setTitle.Value = content.Length == 0 ? null : content[0];
+            setDescription.Value = content.Length <= 1 ? null : string.Join(Environment.NewLine, content, 1, content.Length - 1);
+
+            Message m = Message.NoError;
+            if (setTitle.Value == null)
+                m = "An issue cannot have an empty title.";
+            else
+                m = setTitle.Validator.Validate(setTitle.Value);
+
+            if (!m.IsError && setDescription.Value != null)
+                m = setDescription.Validator.Validate(setDescription.Value);
+
+            return m;
         }
     }
 }
