@@ -48,9 +48,9 @@ namespace GitHubConsole.Commands
         [Name("--create"), Description("Creates a new issue.")]
         private readonly FlagParameter create = null;
 
-        [Name("--set-title"), Description("Sets the title of an issue.")]
+        [Name("--title"), Description("Sets the title of an issue.")]
         private readonly Parameter<string> setTitle = null;
-        [Name("--set-description"), Description("Set the description of an issue.")]
+        [Name("--description"), Description("Set the description of an issue.")]
         private readonly Parameter<string> setDescription = null;
 
         [NoName]
