@@ -10,6 +10,14 @@ namespace GitHubConsole
 
         static void Main(string[] args)
         {
+            ColorConsole.Colors["Example"] = ConsoleColor.Yellow;
+
+            ColorConsole.Colors["Issue_Closed"] = ConsoleColor.DarkRed;
+            ColorConsole.Colors["Issue_Open"] = ConsoleColor.DarkYellow;
+            ColorConsole.Colors["Issue_User_Self"] = ConsoleColor.Cyan;
+            ColorConsole.Colors["Issue_User"] = ConsoleColor.DarkCyan;
+            ColorConsole.Colors["Issue_Par"] = ConsoleColor.DarkYellow;
+
 #if DEBUG
             Command.SimulateREPL(() => new MainCommand(), "quit", HELP);
 #else

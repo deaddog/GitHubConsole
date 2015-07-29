@@ -332,13 +332,13 @@ namespace GitHubConsole.Commands
                 string labels = "";
                 if (v.Labels.Count > 0 && format.Contains("{5}"))
                 {
-                    labels = string.Format("[DarkYellow:(]{0}[DarkYellow:)]",
+                    labels = string.Format("[Issue_Par:(]{0}[Issue_Par:)]",
                         string.Join(", ", v.Labels.Select(l => "[" + ColorResolver.GetConsoleColor(l.Color) + ":" + l.Name + "]")));
                 }
 
                 ColorConsole.WriteLine(format,
-                    v.Number.ToString().PadLeft(len), v.ClosedAt.HasValue ? "DarkRed" : "DarkYellow",
-                    name.PadRight(namelen), name == GitHub.Client.Credentials.Login ? "Cyan" : "DarkCyan",
+                    v.Number.ToString().PadLeft(len), v.ClosedAt.HasValue ? "Issue_Closed" : "Issue_Open",
+                    name.PadRight(namelen), name == GitHub.Client.Credentials.Login ? "Issue_User_Self" : "Issue_User",
                     v.Title.Trim().Replace("[", "\\[").Replace("]", "\\]"),
                     labels);
             }
