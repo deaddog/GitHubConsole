@@ -131,7 +131,7 @@ namespace GitHubConsole
             return ok;
         }
 
-        private static bool FindGitHubRemote()
+        private static bool findGitHubRemote()
         {
             string domain = @"https://github\.com/|git@github\.com:|git://github\.com/";
             string user = @"[^/]+";
@@ -140,22 +140,33 @@ namespace GitHubConsole
 
             var remotes = findRemotes();
 
-            for (int i = 0; i < remotes.Length; i++)
-            {
-                var m = r.Match(remotes[i].Item2);
-                if (m.Success)
-                {
-                    username = m.Groups["user"].Value;
-                    project = m.Groups["proj"].Value;
-                    return true;
-                }
-            }
+            for (int i = 0; i < remotes.Count; i++)
+                if (!r.Match(remotes[i].Item2).Success)
+                    remotes.RemoveAt(i--);
 
-            username = null;
-            project = null;
-            return false;
+            int index = 0;
+            for (int i = 0; i < remotes.Count; i++)
+                if (remotes[i].Item1 == "origin")
+                {
+                    index = i;
+                    break;
+                }
+
+            var m = r.Match(remotes[index].Item2);
+            if (m.Success)
+            {
+                username = m.Groups["user"].Value;
+                project = m.Groups["proj"].Value;
+                return true;
+            }
+            else
+            {
+                username = null;
+                project = null;
+                return false;
+            }
         }
-        private static Tuple<string, string>[] findRemotes()
+        private static List<Tuple<string, string>> findRemotes()
         {
             System.Diagnostics.Process p = new System.Diagnostics.Process()
             {
@@ -186,7 +197,7 @@ namespace GitHubConsole
                 lines[i] = Tuple.Create(m.Groups["name"].Value, m.Groups["url"].Value);
             }
 
-            return lines.ToArray();
+            return lines;
         }
 
         public static Message ValidateGitDirectory()
@@ -198,7 +209,7 @@ namespace GitHubConsole
                 return validated = "The current directory is not part of a Git repository.\n" +
                     "GitHub commands cannot be executed.";
 
-            if (!FindGitHubRemote())
+            if (!findGitHubRemote())
                 return validated = "The current repository has no GitHub.com remotes.\n" +
                     "GitHub commands cannot be executed.";
 
