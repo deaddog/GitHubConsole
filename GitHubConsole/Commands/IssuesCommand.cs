@@ -69,9 +69,15 @@ namespace GitHubConsole.Commands
             create.Validator.Add(x => x.Trim().Length > 0, "An issue cannot be created with an empty title.");
 
             this.PreValidator.Add(GitHub.ValidateGitDirectory);
-            this.Validator.AddOnlyOne(editLabels, setLabels);
-            this.Validator.AddOnlyOne(editLabels, remLabels);
-            this.Validator.Add(Validate);
+            Validator.AddIfFirstNotRest(assignee, hasAssignee, noAssignee, notAssignee);
+            Validator.AddIfFirstNotRest(notAssignee, hasAssignee, noAssignee);
+
+            Validator.AddOnlyOne(editLabels, setLabels);
+            Validator.AddOnlyOne(editLabels, remLabels);
+
+            Validator.AddOnlyOne(take, drop);
+
+            Validator.Add(Validate);
         }
 
         protected override Message GetHelpMessage()
@@ -87,21 +93,6 @@ namespace GitHubConsole.Commands
 
         protected Message Validate()
         {
-            if (hasAssignee.IsSet || noAssignee.IsSet)
-            {
-                if (assignee.IsSet)
-                    return string.Format("The {0} parameter cannot be used with the {1} or the {2} flag.", assignee.Name, hasAssignee.Name, noAssignee.Name);
-
-                if (notAssignee.IsSet)
-                    return string.Format("The {0} parameter cannot be used with the {1} or the {2} flag.", notAssignee.Name, hasAssignee.Name, noAssignee.Name);
-            }
-
-            if (assignee.IsSet && notAssignee.IsSet)
-                return string.Format("The {0} parameter cannot be used with the {1} parameter.", assignee.Name, notAssignee.Name);
-
-            if (take.IsSet && drop.IsSet)
-                return string.Format("The {0} and {1} parameters cannot be used simultaneously.", take.Name, drop.Name);
-
             if (take.IsSet && issuesIn.Value.Length == 0 && !create.IsSet)
                 return "You must specify which issues # to assign yourself to.\nFor instance: [White:github issues 5 7 " + take.Name + "] will assign you to issue #5 and #7.";
 
