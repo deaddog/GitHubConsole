@@ -167,6 +167,13 @@ namespace GitHubConsole.Commands
 
             if (create.IsSet)
             {
+                if (!setTitle.IsSet)
+                {
+                    var m = titleAndDescriptionFromFile();
+                    if (m.IsError)
+                        return m;
+                }
+
                 assignUser = GitHub.Client.User.Current().Result.Login;
                 return Message.NoError;
             }
@@ -179,6 +186,16 @@ namespace GitHubConsole.Commands
 
                 foreach (var i in issuesIn.Value)
                     if (i > max) return string.Format("The repo does not contain a #{0} issue.", i);
+            }
+
+            if (edit.IsSet)
+            {
+                var iss = issues.Where(x => x.Number == issuesIn.Value[0]).First();
+                setTitle.Value = iss.Title;
+                setDescription.Value = iss.Body;
+                var m = titleAndDescriptionFromFile();
+                if (m.IsError)
+                    return m;
             }
 
             for (int i = 0; i < issues.Count; i++)
