@@ -151,7 +151,7 @@ namespace GitHubConsole.Commands
                 return Message.NoError;
             }
 
-            issues = GitHub.Client.Issue.GetAllForRepository(GitHub.Username, GitHub.Project, new RepositoryIssueRequest() { State = ItemState.All }).Result.ToList();
+            issues = GitHub.Client.Issue.GetAllForRepository(GitHub.Username, GitHub.Project).Result.ToList();
 
             if (issuesIn.Value.Length > 0)
             {
