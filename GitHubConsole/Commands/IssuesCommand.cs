@@ -52,6 +52,8 @@ namespace GitHubConsole.Commands
         private readonly Parameter<string> setTitle = null;
         [Name("--description"), Description("Set the description of an issue.")]
         private readonly Parameter<string> setDescription = null;
+        [Name("--edit"), Description("Opens a text-editor for editing issue title and description.")]
+        private readonly FlagParameter edit = null;
 
         [NoName]
         private readonly Parameter<int[]> issuesIn = null;
@@ -73,9 +75,12 @@ namespace GitHubConsole.Commands
 
             setTitle.Validator.Add(x => x.Trim().Length > 0, "An issue cannot have an empty title.");
 
-            this.PreValidator.Add(GitHub.ValidateGitDirectory);
+            PreValidator.Add(GitHub.ValidateGitDirectory);
             Validator.AddIfFirstNotRest(assignee, hasAssignee, noAssignee, notAssignee);
             Validator.AddIfFirstNotRest(notAssignee, hasAssignee, noAssignee);
+
+            Validator.AddOnlyOne(edit, create);
+            Validator.AddIfFirstNotRest(edit, setTitle, setDescription);
 
             Validator.AddOnlyOne(editLabels, setLabels);
             Validator.AddOnlyOne(editLabels, remLabels);
@@ -123,10 +128,16 @@ namespace GitHubConsole.Commands
                 return "You much specify the issue to which the title is assigned.";
             if (setTitle.IsSet && issuesIn.IsSet && issuesIn.Value.Length > 1)
                 return "Title cannot be assigned to multiple issues at once.";
+
             if (setDescription.IsSet && !issuesIn.IsSet && !create.IsSet)
                 return "You much specify the issue to which the description is assigned.";
             if (setDescription.IsSet && issuesIn.IsSet && issuesIn.Value.Length > 1)
                 return "Description cannot be assigned to multiple issues at once.";
+
+            if (edit.IsSet && !issuesIn.IsSet)
+                return "You much specify which issue you want to edit.";
+            if (edit.IsSet && issuesIn.IsSet && issuesIn.Value.Length > 1)
+                return "You can only specify one issue for editing.";
 
             if (create.IsSet && issuesIn.IsSet)
                 return "You cannot specify issues # when creating a new issue.";
