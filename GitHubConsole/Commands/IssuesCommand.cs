@@ -266,8 +266,8 @@ namespace GitHubConsole.Commands
                     var allLabels = GitHub.Client.Issue.Labels.GetAllForRepository(GitHub.Username, GitHub.Project).Result.ToArray();
                     string header = string.Format("Set labels for the new issue: {0}", nIssue.Title);
                     var updateLabels = selectLabels(header, allLabels, new string[0]);
-                    foreach (var l in updateLabels.Item1)
-                        nIssue.Labels.Add(l);
+                    foreach (var l in updateLabels)
+                        nIssue.Labels.Add(l.Name);
                 }
                 else
                     foreach (var l in setLabels.Value)
@@ -296,10 +296,10 @@ namespace GitHubConsole.Commands
                     {
                         string header = string.Format("Set labels for issue #{0}: {1}", issues[i].Number, issues[i].Title);
                         var updateLabels = selectLabels(header, allLabels, issues[i].Labels.Select(x => x.Name));
-                        foreach (var l in updateLabels.Item1)
-                            update.AddLabel(l);
-                        foreach (var l in updateLabels.Item2)
-                            update.Labels.Remove(l);
+
+                        update.ClearLabels();
+                        foreach (var l in updateLabels)
+                            update.AddLabel(l.Name);
                     }
                     else
                     {
@@ -355,7 +355,7 @@ namespace GitHubConsole.Commands
             }
         }
 
-        private Tuple<string[], string[]> selectLabels(string header, Label[] knownLabelNames, IEnumerable<string> preSelected)
+        private Label[] selectLabels(string header, Label[] knownLabelNames, IEnumerable<string> preSelected)
         {
             int theader = Console.CursorTop;
             if (header != null)
@@ -368,14 +368,11 @@ namespace GitHubConsole.Commands
                 x => "[DarkGray:" + x.Name + "]",
                 x => pre.Contains(x.Name));
 
-            var added = rr.Where(x => !pre.Contains(x.Name)).Select(x => x.Name).ToArray();
-            var removed = pre.Where(x => !rr.Any(l => l.Name == x)).ToArray();
-
             Console.CursorTop = theader;
             Console.WriteLine(new string(' ', header.Length));
             Console.CursorTop = theader;
 
-            return Tuple.Create(added, removed);
+            return rr;
         }
     }
 }
