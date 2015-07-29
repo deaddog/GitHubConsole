@@ -119,6 +119,15 @@ namespace GitHubConsole.Commands
                     return "Issue filtering cannot be applied when specifying specific issues or creating new ones.";
             }
 
+            if (setTitle.IsSet && !issuesIn.IsSet && !create.IsSet)
+                return "You much specify the issue to which the title is assigned.";
+            if (setTitle.IsSet && issuesIn.IsSet && issuesIn.Value.Length > 1)
+                return "Title cannot be assigned to multiple issues at once.";
+            if (setDescription.IsSet && !issuesIn.IsSet && !create.IsSet)
+                return "You much specify the issue to which the description is assigned.";
+            if (setDescription.IsSet && issuesIn.IsSet && issuesIn.Value.Length > 1)
+                return "Description cannot be assigned to multiple issues at once.";
+
             if (create.IsSet && issuesIn.IsSet)
                 return "You cannot specify issues # when creating a new issue.";
 
