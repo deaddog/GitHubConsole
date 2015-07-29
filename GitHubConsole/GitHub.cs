@@ -133,14 +133,16 @@ namespace GitHubConsole
 
         private static bool FindGitHubRemote()
         {
+            string domain = @"https://github\.com/|git@github\.com:|git://github\.com/";
+            string user = @"[^/]+";
+            string proj = @"([^.]|\.[^g]|\.g[^i]|\.gi[^t]|\.git.)+";
+            var r = new Regex($@"^({domain})(?<user>{user})/(?<proj>{proj})(\.git)?$", RegexOptions.IgnoreCase);
+
             var remotes = findRemotes();
 
             for (int i = 0; i < remotes.Length; i++)
             {
-                string domain = @"https://github\.com/|git@github\.com:";
-                string user = @"[^/]+";
-                string proj = @"([^.]|\.[^g]|\.g[^i]|\.gi[^t]|\.git.)+";
-                var m = Regex.Match(remotes[i].Item2, $@"^({domain})(?<user>{user})/(?<proj>{proj})(\.git)?$", RegexOptions.IgnoreCase);
+                var m = r.Match(remotes[i].Item2);
                 if (m.Success)
                 {
                     username = m.Groups["user"].Value;
