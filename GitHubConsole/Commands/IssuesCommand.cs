@@ -2,6 +2,7 @@
 using Octokit;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace GitHubConsole.Commands
@@ -46,7 +47,14 @@ namespace GitHubConsole.Commands
         private readonly FlagParameter editLabels = null;
 
         [Name("--create"), Description("Creates a new issue.")]
-        private readonly Parameter<string> create = null;
+        private readonly FlagParameter create = null;
+
+        [Name("--title"), Description("Sets the title of an issue.")]
+        private readonly Parameter<string> setTitle = null;
+        [Name("--description"), Description("Set the description of an issue.")]
+        private readonly Parameter<string> setDescription = null;
+        [Name("--edit"), Description("Opens a text-editor for editing issue title and description.")]
+        private readonly FlagParameter edit = null;
 
         [NoName]
         private readonly Parameter<int[]> issuesIn = null;
@@ -66,12 +74,21 @@ namespace GitHubConsole.Commands
             remLabels.Validator.Add(x => x.Length > 0, "You must specify a set of labels to remove:\n"
                 + "  gihub issues <issues> " + remLabels.Name + " <label1> <label2>...");
 
-            create.Validator.Add(x => x.Trim().Length > 0, "An issue cannot be created with an empty title.");
+            setTitle.Validator.Add(x => x.Trim().Length > 0, "An issue cannot have an empty title.");
 
-            this.PreValidator.Add(GitHub.ValidateGitDirectory);
-            this.Validator.AddOnlyOne(editLabels, setLabels);
-            this.Validator.AddOnlyOne(editLabels, remLabels);
-            this.Validator.Add(Validate);
+            PreValidator.Add(GitHub.ValidateGitDirectory);
+            Validator.AddIfFirstNotRest(assignee, hasAssignee, noAssignee, notAssignee);
+            Validator.AddIfFirstNotRest(notAssignee, hasAssignee, noAssignee);
+
+            Validator.AddOnlyOne(edit, create);
+            Validator.AddIfFirstNotRest(edit, setTitle, setDescription);
+
+            Validator.AddOnlyOne(editLabels, setLabels);
+            Validator.AddOnlyOne(editLabels, remLabels);
+
+            Validator.AddOnlyOne(take, drop);
+
+            Validator.Add(Validate);
         }
 
         protected override Message GetHelpMessage()
@@ -87,21 +104,6 @@ namespace GitHubConsole.Commands
 
         protected Message Validate()
         {
-            if (hasAssignee.IsSet || noAssignee.IsSet)
-            {
-                if (assignee.IsSet)
-                    return string.Format("The {0} parameter cannot be used with the {1} or the {2} flag.", assignee.Name, hasAssignee.Name, noAssignee.Name);
-
-                if (notAssignee.IsSet)
-                    return string.Format("The {0} parameter cannot be used with the {1} or the {2} flag.", notAssignee.Name, hasAssignee.Name, noAssignee.Name);
-            }
-
-            if (assignee.IsSet && notAssignee.IsSet)
-                return string.Format("The {0} parameter cannot be used with the {1} parameter.", assignee.Name, notAssignee.Name);
-
-            if (take.IsSet && drop.IsSet)
-                return string.Format("The {0} and {1} parameters cannot be used simultaneously.", take.Name, drop.Name);
-
             if (take.IsSet && issuesIn.Value.Length == 0 && !create.IsSet)
                 return "You must specify which issues # to assign yourself to.\nFor instance: [White:github issues 5 7 " + take.Name + "] will assign you to issue #5 and #7.";
 
@@ -122,6 +124,24 @@ namespace GitHubConsole.Commands
                 if (open.IsSet || closed.IsSet || all.IsSet || labels.IsSet || hasAssignee.IsSet || noAssignee.IsSet || assignee.IsSet || notAssignee.IsSet)
                     return "Issue filtering cannot be applied when specifying specific issues or creating new ones.";
             }
+
+            if (setTitle.IsSet && !issuesIn.IsSet && !create.IsSet)
+                return "You much specify the issue to which the title is assigned.";
+            if (setTitle.IsSet && issuesIn.IsSet && issuesIn.Value.Length > 1)
+                return "Title cannot be assigned to multiple issues at once.";
+
+            if (setDescription.IsSet && !issuesIn.IsSet && !create.IsSet)
+                return "You much specify the issue to which the description is assigned.";
+            if (setDescription.IsSet && issuesIn.IsSet && issuesIn.Value.Length > 1)
+                return "Description cannot be assigned to multiple issues at once.";
+
+            if (setDescription.IsSet && !setTitle.IsSet)
+                return $"When using the {setDescription.Name} parameter you must also use the {setTitle.Name} parameter.";
+
+            if (edit.IsSet && !issuesIn.IsSet)
+                return "You much specify which issue you want to edit.";
+            if (edit.IsSet && issuesIn.IsSet && issuesIn.Value.Length > 1)
+                return "You can only specify one issue for editing.";
 
             if (create.IsSet && issuesIn.IsSet)
                 return "You cannot specify issues # when creating a new issue.";
@@ -147,6 +167,13 @@ namespace GitHubConsole.Commands
 
             if (create.IsSet)
             {
+                if (!setTitle.IsSet)
+                {
+                    var m = titleAndDescriptionFromFile();
+                    if (m.IsError)
+                        return m;
+                }
+
                 assignUser = GitHub.Client.User.Current().Result.Login;
                 return Message.NoError;
             }
@@ -159,6 +186,16 @@ namespace GitHubConsole.Commands
 
                 foreach (var i in issuesIn.Value)
                     if (i > max) return string.Format("The repo does not contain a #{0} issue.", i);
+            }
+
+            if (edit.IsSet)
+            {
+                var iss = issues.Where(x => x.Number == issuesIn.Value[0]).First();
+                setTitle.Value = iss.Title;
+                setDescription.Value = iss.Body;
+                var m = titleAndDescriptionFromFile();
+                if (m.IsError)
+                    return m;
             }
 
             for (int i = 0; i < issues.Count; i++)
@@ -250,7 +287,8 @@ namespace GitHubConsole.Commands
         {
             if (create.IsSet)
             {
-                NewIssue nIssue = new NewIssue(create.Value.Trim());
+                NewIssue nIssue = new NewIssue(setTitle.Value.Trim());
+                nIssue.Body = setDescription.Value.Trim();
 
                 if (take.IsSet)
                     nIssue.Assignee = assignUser;
@@ -258,10 +296,10 @@ namespace GitHubConsole.Commands
                 if (editLabels.IsSet)
                 {
                     var allLabels = GitHub.Client.Issue.Labels.GetAllForRepository(GitHub.Username, GitHub.Project).Result.ToArray();
-                    string header = string.Format("Set labels for the new issue: {0}", create.Value.Trim());
+                    string header = string.Format("Set labels for the new issue: {0}", nIssue.Title);
                     var updateLabels = selectLabels(header, allLabels, new string[0]);
-                    foreach (var l in updateLabels.Item1)
-                        nIssue.Labels.Add(l);
+                    foreach (var l in updateLabels)
+                        nIssue.Labels.Add(l.Name);
                 }
                 else
                     foreach (var l in setLabels.Value)
@@ -271,24 +309,29 @@ namespace GitHubConsole.Commands
 
                 issues = new List<Issue>(1) { issue };
             }
-            else if (take.IsSet || drop.IsSet || setLabels.IsSet || remLabels.IsSet || editLabels.IsSet)
+            else if (take.IsSet || drop.IsSet || setLabels.IsSet || remLabels.IsSet || editLabels.IsSet || setTitle.IsSet || setDescription.IsSet || edit.IsSet)
             {
-                var allLabels = GitHub.Client.Issue.Labels.GetAllForRepository(GitHub.Username, GitHub.Project).Result.ToArray();
+                var allLabels = editLabels.IsSet ? GitHub.Client.Issue.Labels.GetAllForRepository(GitHub.Username, GitHub.Project).Result.ToArray() : new Label[0];
                 for (int i = 0; i < issues.Count; i++)
                 {
                     var update = issues[i].ToUpdate();
                     if (take.IsSet) update.Assignee = assignUser;
                     else if (drop.IsSet) update.Assignee = null;
-                    else update.Assignee = issues[i].Assignee == null ? null : issues[i].Assignee.Login;
+                    else update.Assignee = issues[i].Assignee?.Login;
+
+                    if (setTitle.IsSet || edit.IsSet)
+                        update.Title = setTitle.Value;
+                    if (setDescription.IsSet || edit.IsSet)
+                        update.Body = setDescription.Value;
 
                     if (editLabels.IsSet)
                     {
                         string header = string.Format("Set labels for issue #{0}: {1}", issues[i].Number, issues[i].Title);
                         var updateLabels = selectLabels(header, allLabels, issues[i].Labels.Select(x => x.Name));
-                        foreach (var l in updateLabels.Item1)
-                            update.AddLabel(l);
-                        foreach (var l in updateLabels.Item2)
-                            update.Labels.Remove(l);
+
+                        update.ClearLabels();
+                        foreach (var l in updateLabels)
+                            update.AddLabel(l.Name);
                     }
                     else
                     {
@@ -344,7 +387,7 @@ namespace GitHubConsole.Commands
             }
         }
 
-        private Tuple<string[], string[]> selectLabels(string header, Label[] knownLabelNames, IEnumerable<string> preSelected)
+        private Label[] selectLabels(string header, Label[] knownLabelNames, IEnumerable<string> preSelected)
         {
             int theader = Console.CursorTop;
             if (header != null)
@@ -357,14 +400,56 @@ namespace GitHubConsole.Commands
                 x => "[DarkGray:" + x.Name + "]",
                 x => pre.Contains(x.Name));
 
-            var added = rr.Where(x => !pre.Contains(x.Name)).Select(x => x.Name).ToArray();
-            var removed = pre.Where(x => !rr.Any(l => l.Name == x)).ToArray();
-
             Console.CursorTop = theader;
             Console.WriteLine(new string(' ', header.Length));
             Console.CursorTop = theader;
 
-            return Tuple.Create(added, removed);
+            return rr;
+        }
+
+        private Message titleAndDescriptionFromFile()
+        {
+            string filepath = Path.GetTempPath() + Guid.NewGuid().ToString() + ".txt";
+            File.WriteAllText(filepath,
+$@"# Edit title and description for your issue.
+# Lines that start with # are comments - they are disregarded.
+# Clearing the file will cancel the current operation.
+# The first line is the title of the issue.
+{setTitle.Value}
+# Remaining lines represent the description for the issue.
+{setDescription.Value}");
+
+            string application = Config.Default["issues.editor"] ?? "%f";
+
+            if (application.Contains("%f"))
+                using (var p = System.Diagnostics.Process.Start(application.Replace("%f", filepath)))
+                    p.WaitForExit();
+            else
+                using (var p = System.Diagnostics.Process.Start(application, filepath))
+                    p.WaitForExit();
+
+            string[] content = File.ReadAllLines(filepath)
+                .Where(x => !x.StartsWith("#"))
+                .SkipWhile(x => x.Trim().Length == 0)
+                .Reverse()
+                .SkipWhile(x => x.Trim().Length == 0)
+                .Reverse()
+                .ToArray();
+            File.Delete(filepath);
+
+            setTitle.Value = content.Length == 0 ? null : content[0];
+            setDescription.Value = content.Length <= 1 ? null : string.Join(Environment.NewLine, content, 1, content.Length - 1);
+
+            Message m = Message.NoError;
+            if (setTitle.Value == null)
+                m = "An issue cannot have an empty title.";
+            else
+                m = setTitle.Validator.Validate(setTitle.Value);
+
+            if (!m.IsError && setDescription.Value != null)
+                m = setDescription.Validator.Validate(setDescription.Value);
+
+            return m;
         }
     }
 }
