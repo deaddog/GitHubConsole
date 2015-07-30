@@ -379,11 +379,11 @@ namespace GitHubConsole.Commands
                         string.Join(", ", v.Labels.Select(l => "[" + ColorResolver.GetConsoleColor(l.Color) + ":" + l.Name + "]")));
                 }
 
-                ColorConsole.WriteLine(format,
+                ColorConsole.WriteLine(string.Format(format,
                     v.Number.ToString().PadLeft(len), v.ClosedAt.HasValue ? "Issue_Closed" : "Issue_Open",
                     name.PadRight(namelen), name == GitHub.Client.Credentials.Login ? "Issue_User_Self" : "Issue_User",
                     v.Title.Trim().Replace("[", "\\[").Replace("]", "\\]"),
-                    labels);
+                    labels));
             }
         }
 
