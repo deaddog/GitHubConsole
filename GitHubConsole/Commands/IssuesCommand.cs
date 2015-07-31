@@ -378,8 +378,14 @@ namespace GitHubConsole.Commands
                 {
                     switch (m.Value.Substring(1, m.Value.Length - 2))
                     {
-                        case "#": return $"[{(v.ClosedAt.HasValue? "Issue_Closed" : "Issue_Open")}:{v.Number}]";
-                        case "user": return $"[{(name == GitHub.Client.Credentials.Login ? "Issue_User_Self" : "Issue_User")}:{name}]";
+                        case "#": return $"[{issueNumberColor(v)}:{v.Number}]";
+                        case "+#": return $"[{issueNumberColor(v)}:{v.Number.ToString().PadLeft(len)}]";
+                        case "#+": return $"[{issueNumberColor(v)}:{v.Number.ToString().PadRight(len)}]";
+
+                        case "user": return $"[{assigneeColor(name)}:{name}]";
+                        case "+user": return $"[{assigneeColor(name)}:{name.PadLeft(namelen)}]";
+                        case "user+": return $"[{assigneeColor(name)}:{name.PadRight(namelen)}]";
+
                         case "title": return v.Title;
                         case "labels":return labels;
 
@@ -389,6 +395,15 @@ namespace GitHubConsole.Commands
 
                 ColorConsole.WriteLine(output);
             }
+        }
+
+        private string issueNumberColor(Issue issue)
+        {
+            return issue.ClosedAt.HasValue ? "Issue_Closed" : "Issue_Open";
+        }
+        private string assigneeColor(string assignee)
+        {
+            return assignee == GitHub.Client.Credentials.Login ? "Issue_User_Self" : "Issue_User";
         }
 
         private Label[] selectLabels(string header, Label[] knownLabelNames, IEnumerable<string> preSelected)
