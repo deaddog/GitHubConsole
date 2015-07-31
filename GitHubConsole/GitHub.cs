@@ -125,8 +125,8 @@ namespace GitHubConsole
                     repoGitDir = path.ReadLine();
                     repoRoot = path.ReadLine();
                 }
-                repoGitDir = repoGitDir.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
-                repoRoot = repoRoot.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+                repoGitDir = Path.GetFullPath(repoGitDir.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar));
+                repoRoot = Path.GetFullPath(repoRoot.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar));
             }
 
             p.Dispose();
