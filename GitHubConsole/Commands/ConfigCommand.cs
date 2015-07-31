@@ -23,13 +23,13 @@ namespace GitHubConsole.Commands
         {
             set.Validator.Add(x => x.Length == 2,
                 "Setting config values requires exactly two arguments:\n" +
-                "  github config " + set.Name + " <key> <value>");
+                $"  [Example:github config {set.Name} <key> <value>]");
             set.Callback += () => setValues.Add(set.Value[0], set.Value[1]);
 
             remove.Validator.Add(x => x.Length > 0,
                 "Removing config keys requires that you specify at least one key to remove:\n" +
-                "  github config " + remove.Name + " <key>\n" +
-                "  github config " + remove.Name + " <key1> <key2> <key3>...");
+                $"  [Example:github config {remove.Name} <key>]\n" +
+                $"  [Example:github config {remove.Name} <key1> <key2> <key3>...]");
             remove.Callback += () => removeKeys.AddRange(remove.Value);
         }
 
