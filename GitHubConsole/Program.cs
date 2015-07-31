@@ -18,6 +18,13 @@ namespace GitHubConsole
             ColorConsole.Colors["Issue_User"] = ConsoleColor.DarkCyan;
             ColorConsole.Colors["Issue_Par"] = ConsoleColor.DarkYellow;
 
+            var valid = GitHub.ValidateGitDirectory();
+            if (valid.IsError)
+            {
+                ColorConsole.WriteLine(valid.GetMessage());
+                return;
+            }
+
 #if DEBUG
             Command.SimulateREPL(() => new MainCommand(), "quit", HELP);
 #else

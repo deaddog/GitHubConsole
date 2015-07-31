@@ -75,8 +75,7 @@ namespace GitHubConsole.Commands
                 + "  gihub issues <issues> " + remLabels.Name + " <label1> <label2>...");
 
             setTitle.Validator.Add(x => x.Trim().Length > 0, "An issue cannot have an empty title.");
-
-            PreValidator.Add(GitHub.ValidateGitDirectory);
+            
             Validator.AddIfFirstNotRest(assignee, hasAssignee, noAssignee, notAssignee);
             Validator.AddIfFirstNotRest(notAssignee, hasAssignee, noAssignee);
 
