@@ -14,6 +14,7 @@ namespace GitHubConsole
 
         private static CachedGitHubClient client;
         private static Message validated;
+        private static bool accessPath = false;
 
         private static Credentials cred;
         private static string username;
@@ -27,6 +28,37 @@ namespace GitHubConsole
 
         public static string RepositoryRoot => ensureValidated(nameof(RepositoryRoot), repoRoot);
         public static string RepositoryGirDirectory => ensureValidated(nameof(RepositoryGirDirectory), repoGitDir);
+
+        public static string RepositoryStorage
+        {
+            get
+            {
+                if (!accessPath)
+                    throw new InvalidOperationException($"{nameof(RepositoryStorage)} cannot be retrieved before running the {nameof(ValidateGitDirectory)} method.");
+
+                string dir = Path.Combine(RepositoryGirDirectory, "githubconsole");
+                if (!Directory.Exists(dir))
+                    Directory.CreateDirectory(dir);
+
+                return dir;
+            }
+        }
+        public static string GlobalStorage
+        {
+            get
+            {
+                if (!accessPath)
+                    throw new InvalidOperationException($"{nameof(RepositoryStorage)} cannot be retrieved before running the {nameof(ValidateGitDirectory)} method.");
+
+                var roamingPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create);
+
+                string dir = Path.Combine(roamingPath, "DeadDog", "GitHubConsole");
+                if (!Directory.Exists(dir))
+                    Directory.CreateDirectory(dir);
+
+                return dir;
+            }
+        }
 
         private static T ensureValidated<T>(string name, T value)
         {
@@ -171,6 +203,8 @@ namespace GitHubConsole
             if (!isGitRepo())
                 return validated = "The current directory is not part of a Git repository.\n" +
                     "GitHub commands cannot be executed.";
+
+            accessPath = true;
 
             if (!findGitHubRemote())
                 return validated = "The current repository has no GitHub.com remotes.\n" +
