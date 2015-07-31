@@ -26,8 +26,8 @@ namespace GitHubConsole
         public static string Username => ensureValidated(nameof(Username), username);
         public static string Project => ensureValidated(nameof(Project), project);
 
-        public static string RepositoryRoot => ensureValidated(nameof(RepositoryRoot), repoRoot);
-        public static string RepositoryGirDirectory => ensureValidated(nameof(RepositoryGirDirectory), repoGitDir);
+        public static string RepositoryRoot => ensurePath(nameof(RepositoryRoot), repoRoot);
+        public static string RepositoryGirDirectory => ensurePath(nameof(RepositoryGirDirectory), repoGitDir);
 
         public static string RepositoryStorage
         {
@@ -58,6 +58,14 @@ namespace GitHubConsole
 
                 return dir;
             }
+        }
+
+        private static T ensurePath<T>(string name, T value)
+        {
+            if (!accessPath)
+                throw new InvalidOperationException($"{name} cannot be retrieved before running the {nameof(ValidateGitDirectory)} method.");
+
+            return value;
         }
 
         private static T ensureValidated<T>(string name, T value)
