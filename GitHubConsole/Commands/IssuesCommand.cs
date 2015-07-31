@@ -387,6 +387,8 @@ namespace GitHubConsole.Commands
                         case "user+": return $"[{assigneeColor(name)}:{name.PadRight(namelen)}]";
 
                         case "title": return v.Title;
+                        case "description": return v.Body;
+
                         case "labels":return labels;
 
                         default: return m.Value;
