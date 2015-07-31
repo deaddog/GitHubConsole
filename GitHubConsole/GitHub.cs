@@ -22,58 +22,21 @@ namespace GitHubConsole
         private static string repoRoot;
         private static string repoGitDir;
 
-        public static string Username
+        public static string Username => ensureValidated(nameof(Username), username);
+        public static string Project => ensureValidated(nameof(Project), project);
+
+        public static string RepositoryRoot => ensureValidated(nameof(RepositoryRoot), repoRoot);
+        public static string RepositoryGirDirectory => ensureValidated(nameof(RepositoryGirDirectory), repoGitDir);
+
+        private static T ensureValidated<T>(string name, T value)
         {
-            get
-            {
-                if (validated == null)
-                    throw new InvalidOperationException($"{nameof(Username)} cannot be retrieved before running the {nameof(ValidateGitDirectory)} method.");
+            if (validated == null)
+                throw new InvalidOperationException($"{name} cannot be retrieved before running the {nameof(ValidateGitDirectory)} method.");
 
-                if (validated != Message.NoError)
-                    throw new InvalidOperationException($"{nameof(Username)} cannot be retrieved when git validation was not successfull.");
+            if (validated != Message.NoError)
+                throw new InvalidOperationException($"{name} cannot be retrieved when git validation was not successfull.");
 
-                return username;
-            }
-        }
-        public static string Project
-        {
-            get
-            {
-                if (validated == null)
-                    throw new InvalidOperationException($"{nameof(Project)} cannot be retrieved before running the {nameof(ValidateGitDirectory)} method.");
-
-                if (validated != Message.NoError)
-                    throw new InvalidOperationException($"{nameof(Project)} cannot be retrieved when git validation was not successfull.");
-
-                return project;
-            }
-        }
-
-        public static string RepositoryRoot
-        {
-            get
-            {
-                if (validated == null)
-                    throw new InvalidOperationException($"{nameof(RepositoryRoot)} cannot be retrieved before running the {nameof(ValidateGitDirectory)} method.");
-
-                if (validated != Message.NoError)
-                    throw new InvalidOperationException($"{nameof(RepositoryRoot)} cannot be retrieved when git validation was not successfull.");
-
-                return repoRoot;
-            }
-        }
-        public static string RepositoryGirDirectory
-        {
-            get
-            {
-                if (validated == null)
-                    throw new InvalidOperationException($"{nameof(RepositoryGirDirectory)} cannot be retrieved before running the {nameof(ValidateGitDirectory)} method.");
-
-                if (validated != Message.NoError)
-                    throw new InvalidOperationException($"{nameof(RepositoryGirDirectory)} cannot be retrieved when git validation was not successfull.");
-
-                return repoGitDir;
-            }
+            return value;
         }
 
         public static CachedGitHubClient Client
