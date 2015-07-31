@@ -362,11 +362,6 @@ namespace GitHubConsole.Commands
 
             string format = outputFormat.Value;
 
-            format = format.Replace("%#%", "[{1}:{0}]");
-            format = format.Replace("%user%", "[{3}:{2}]");
-            format = format.Replace("%title%", "{4}");
-            format = format.Replace("%labels%", "{5}");
-
             foreach (var v in issues)
             {
                 string name = v.Assignee == null ? "" : v.Assignee.Login;
@@ -378,11 +373,21 @@ namespace GitHubConsole.Commands
                         string.Join(", ", v.Labels.Select(l => "[" + ColorResolver.GetConsoleColor(l.Color) + ":" + l.Name + "]")));
                 }
 
-                ColorConsole.WriteLine(string.Format(format,
-                    v.Number.ToString().PadLeft(len), v.ClosedAt.HasValue ? "Issue_Closed" : "Issue_Open",
-                    name.PadRight(namelen), name == GitHub.Client.Credentials.Login ? "Issue_User_Self" : "Issue_User",
-                    v.Title.Trim().Replace("[", "\\[").Replace("]", "\\]"),
-                    labels));
+                var r = new System.Text.RegularExpressions.Regex("%[^%]+%");
+                string output = r.Replace(format, m =>
+                {
+                    switch (m.Value.Substring(1, m.Value.Length - 2))
+                    {
+                        case "#": return $"[{(v.ClosedAt.HasValue? "Issue_Closed" : "Issue_Open")}:{v.Number}]";
+                        case "user": return $"[{(name == GitHub.Client.Credentials.Login ? "Issue_User_Self" : "Issue_User")}:{name}]";
+                        case "title": return v.Title;
+                        case "labels":return labels;
+
+                        default: return m.Value;
+                    }
+                });
+
+                ColorConsole.WriteLine(output);
             }
         }
 
