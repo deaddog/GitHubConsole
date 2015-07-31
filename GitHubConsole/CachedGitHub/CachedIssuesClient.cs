@@ -11,17 +11,7 @@ namespace GitHubConsole.CachedGitHub
 {
     public class CachedIssuesClient : Fallback<IssuesClient>, IIssuesClient
     {
-        private string path
-        {
-            get
-            {
-                string dir = Path.Combine(GitHub.RepositoryGirDirectory, "gh_caching");
-                if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-
-                return Path.Combine(dir, "issues.xml");
-            }
-        }
+        private string path => Path.Combine(GitHub.RepositoryStorage, "issues.xml");
 
         public CachedIssuesClient(GitHubClient client)
             : base(() => client.Issue as IssuesClient)

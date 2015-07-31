@@ -14,6 +14,7 @@ namespace GitHubConsole
 
         private static CachedGitHubClient client;
         private static Message validated;
+        private static bool accessPath = false;
 
         private static Credentials cred;
         private static string username;
@@ -22,58 +23,60 @@ namespace GitHubConsole
         private static string repoRoot;
         private static string repoGitDir;
 
-        public static string Username
+        public static string Username => ensureValidated(nameof(Username), username);
+        public static string Project => ensureValidated(nameof(Project), project);
+
+        public static string RepositoryRoot => ensurePath(nameof(RepositoryRoot), repoRoot);
+        public static string RepositoryGirDirectory => ensurePath(nameof(RepositoryGirDirectory), repoGitDir);
+
+        public static string RepositoryStorage
         {
             get
             {
-                if (validated == null)
-                    throw new InvalidOperationException($"{nameof(Username)} cannot be retrieved before running the {nameof(ValidateGitDirectory)} method.");
+                if (!accessPath)
+                    throw new InvalidOperationException($"{nameof(RepositoryStorage)} cannot be retrieved before running the {nameof(ValidateGitDirectory)} method.");
 
-                if (validated != Message.NoError)
-                    throw new InvalidOperationException($"{nameof(Username)} cannot be retrieved when git validation was not successfull.");
+                string dir = Path.Combine(RepositoryGirDirectory, "githubconsole");
+                if (!Directory.Exists(dir))
+                    Directory.CreateDirectory(dir);
 
-                return username;
+                return dir;
             }
         }
-        public static string Project
+        public static string GlobalStorage
         {
             get
             {
-                if (validated == null)
-                    throw new InvalidOperationException($"{nameof(Project)} cannot be retrieved before running the {nameof(ValidateGitDirectory)} method.");
+                if (!accessPath)
+                    throw new InvalidOperationException($"{nameof(RepositoryStorage)} cannot be retrieved before running the {nameof(ValidateGitDirectory)} method.");
 
-                if (validated != Message.NoError)
-                    throw new InvalidOperationException($"{nameof(Project)} cannot be retrieved when git validation was not successfull.");
+                var roamingPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create);
 
-                return project;
+                string dir = Path.Combine(roamingPath, "DeadDog", "GitHubConsole");
+                if (!Directory.Exists(dir))
+                    Directory.CreateDirectory(dir);
+
+                return dir;
             }
         }
 
-        public static string RepositoryRoot
+        private static T ensurePath<T>(string name, T value)
         {
-            get
-            {
-                if (validated == null)
-                    throw new InvalidOperationException($"{nameof(RepositoryRoot)} cannot be retrieved before running the {nameof(ValidateGitDirectory)} method.");
+            if (!accessPath)
+                throw new InvalidOperationException($"{name} cannot be retrieved before running the {nameof(ValidateGitDirectory)} method.");
 
-                if (validated != Message.NoError)
-                    throw new InvalidOperationException($"{nameof(RepositoryRoot)} cannot be retrieved when git validation was not successfull.");
-
-                return repoRoot;
-            }
+            return value;
         }
-        public static string RepositoryGirDirectory
+
+        private static T ensureValidated<T>(string name, T value)
         {
-            get
-            {
-                if (validated == null)
-                    throw new InvalidOperationException($"{nameof(RepositoryGirDirectory)} cannot be retrieved before running the {nameof(ValidateGitDirectory)} method.");
+            if (validated == null)
+                throw new InvalidOperationException($"{name} cannot be retrieved before running the {nameof(ValidateGitDirectory)} method.");
 
-                if (validated != Message.NoError)
-                    throw new InvalidOperationException($"{nameof(RepositoryGirDirectory)} cannot be retrieved when git validation was not successfull.");
+            if (validated != Message.NoError)
+                throw new InvalidOperationException($"{name} cannot be retrieved when git validation was not successfull.");
 
-                return repoGitDir;
-            }
+            return value;
         }
 
         public static CachedGitHubClient Client
@@ -122,8 +125,8 @@ namespace GitHubConsole
                     repoGitDir = path.ReadLine();
                     repoRoot = path.ReadLine();
                 }
-                repoGitDir = repoGitDir.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
-                repoRoot = repoRoot.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+                repoGitDir = Path.GetFullPath(repoGitDir.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar));
+                repoRoot = Path.GetFullPath(repoRoot.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar));
             }
 
             p.Dispose();
@@ -208,6 +211,8 @@ namespace GitHubConsole
             if (!isGitRepo())
                 return validated = "The current directory is not part of a Git repository.\n" +
                     "GitHub commands cannot be executed.";
+
+            accessPath = true;
 
             if (!findGitHubRemote())
                 return validated = "The current repository has no GitHub.com remotes.\n" +
