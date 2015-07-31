@@ -44,17 +44,20 @@ namespace GitHubConsole.Commands
 
         protected override void Execute()
         {
+            Configuration conf = global.IsSet ? Config.Global : Config.Local;
+            IConfiguration iconf = all.IsSet ? Config.Default : conf;
+
             if (clear.IsSet)
-                Config.Default.Clear();
+                conf.Clear();
             else
                 foreach (var key in removeKeys)
-                    Config.Default.Remove(key);
+                    conf.Remove(key);
 
             foreach (var set in setValues)
-                Config.Default[set.Key] = set.Value;
+                conf[set.Key] = set.Value;
 
             if (list.IsSet)
-                foreach (var pair in Config.Default.GetAll())
+                foreach (var pair in iconf.GetAll())
                     ColorConsole.WriteLine($"{pair.Key}={pair.Value}");
         }
     }
