@@ -8,18 +8,6 @@ namespace GitHubConsole
     {
         private static Configuration global;
 
-        public static Configuration Default
-        {
-            get
-            {
-                if (global == null)
-                {
-                    var roamingPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create);
-
-                    global = new CommandLineParsing.Configuration(Path.Combine(roamingPath, "DeadDog", "GitHubConsole", "config"));
-                }
-                return global;
-            }
-        }
+        public static Configuration Default => global ?? (global = new Configuration(Path.Combine(GitHub.GlobalStorage, "config")));
     }
 }
