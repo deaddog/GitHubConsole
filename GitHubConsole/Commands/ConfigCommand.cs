@@ -19,6 +19,12 @@ namespace GitHubConsole.Commands
         [Description("Lists all key value combinations in the configuration file.")]
         private readonly FlagParameter list = null;
 
+        [Description("Commands will apply to the global configuration file.")]
+        private readonly FlagParameter global = null;
+
+        [Description("Commands will apply to both the local and the global configuration file.")]
+        private readonly FlagParameter all = null;
+
         public ConfigCommand()
         {
             set.Validator.Add(x => x.Length == 2,
@@ -31,6 +37,9 @@ namespace GitHubConsole.Commands
                 $"  [Example:github config {remove.Name} <key>]\n" +
                 $"  [Example:github config {remove.Name} <key1> <key2> <key3>...]");
             remove.Callback += () => removeKeys.AddRange(remove.Value);
+
+            this.Validator.AddIfFirstNotRest(all, clear, set, remove);
+            this.Validator.AddOnlyOne(global, all);
         }
 
         protected override void Execute()
