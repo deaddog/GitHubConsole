@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace GitHubConsole.Commands
 {
@@ -375,93 +374,26 @@ namespace GitHubConsole.Commands
 
             private readonly int maxNumberWidth;
             private readonly int maxAssigneeWidth;
-            private readonly string format;
 
             public IssuePrinter(int maxNumberWidth, int maxAssigneeWidth, string format)
+                : base(format)
             {
                 this.issue = null;
                 this.label = null;
 
                 this.maxNumberWidth = maxNumberWidth;
                 this.maxAssigneeWidth = maxAssigneeWidth;
-                this.format = format;
             }
 
             public void Print(Issue issue)
             {
                 this.issue = issue;
 
-                string text = handle(format);
+                string text = Handle();
                 ColorConsole.WriteLine(text);
             }
 
-            private string handle(string text)
-            {
-                int index = 0;
-
-                while (index < text.Length)
-                    switch (text[index])
-                    {
-                        case '[': // Coloring
-                            {
-                                int end = findEnd(text, index, '[', ']');
-                                var block = text.Substring(index + 1, end - index - 1);
-                                string replace = colorBlock(block);
-                                text = text.Substring(0, index) + replace + text.Substring(end + 1);
-                                index += replace.Length;
-                            }
-                            break;
-
-                        case '?': // Conditional
-                            {
-                                var match = Regex.Match(text.Substring(index), @"\?[^\{]*");
-                                var end = findEnd(text, index + match.Value.Length, '{', '}');
-                                var block = text.Substring(index + match.Value.Length + 1, end - index - match.Value.Length - 1);
-
-                                string replace = "";
-                                var condition = conditionBlock(match.Value);
-                                if (!condition.HasValue)
-                                    replace = match.Value + "{" + handle(block) + "}";
-                                else if (condition.Value)
-                                    replace = handle(block);
-
-                                text = text.Substring(0, index) + replace + text.Substring(end + 1);
-                                index += replace.Length;
-                            }
-                            break;
-
-                        case '@': // Listing/Function
-                            {
-                                var match = Regex.Match(text.Substring(index), @"\@[^\{]*");
-                                var end = findEnd(text, index + match.Value.Length, '{', '}');
-                                var block = text.Substring(index + match.Value.Length + 1, end - index - match.Value.Length - 1);
-                                string replace = functionBlock(match.Value, block.Split('@'));
-                                text = text.Substring(0, index) + replace + text.Substring(end + 1);
-                                index += replace.Length;
-                            }
-                            break;
-
-                        case '$': // Variable
-                            {
-                                var match = Regex.Match(text.Substring(index), @"^\$[^ ]*");
-                                var end = match.Index + index + match.Length;
-                                var block = match.Value;
-                                string replace = getVariable(block);
-                                text = text.Substring(0, index) + replace + text.Substring(end);
-                                index += replace.Length;
-                            }
-                            break;
-
-                        default: // Skip content
-                            index = text.IndexOfAny(new char[] { '[', '?', '@', '$' }, index);
-                            if (index < 0) index = text.Length;
-                            break;
-                    }
-
-                return text;
-            }
-
-            private string getVariable(string variable)
+            protected override string getVariable(string variable)
             {
                 switch (variable.Substring(1))
                 {
@@ -482,7 +414,7 @@ namespace GitHubConsole.Commands
                         return variable;
                 }
             }
-            private string getAutoColor(string content)
+            protected override string getAutoColor(string content)
             {
                 switch (content.Substring(1))
                 {
@@ -511,39 +443,18 @@ namespace GitHubConsole.Commands
                     default: return string.Empty;
                 }
             }
-
-            private string colorBlock(string format)
-            {
-                Match m = Regex.Match(format, "^(?<color>[^:]+):(?<content>.*)$", RegexOptions.Singleline);
-                if (!m.Success)
-                    return null;
-
-                string color_str = m.Groups["color"].Value;
-                string content = m.Groups["content"].Value;
-
-                if (color_str.ToLower() == "auto")
-                {
-                    Match autoColor = Regex.Match(content, @"\$[^ ]+");
-
-                    if (autoColor.Success)
-                        color_str = getAutoColor(autoColor.Value);
-                    else
-                        color_str = string.Empty;
-                }
-
-                return $"[{color_str}:{handle(content)}]";
-            }
-            private bool? conditionBlock(string format)
+            
+            protected override bool? conditionBlock(string format)
             {
                 switch (format.Substring(1))
                 {
                     case "labels": return issue.Labels.Count > 0;
                     case "assignee": return issue.Assignee != null;
-                    case "description":return issue.Body != null && issue.Body.Length > 0;
+                    case "description": return issue.Body != null && issue.Body.Length > 0;
                     default: return null;
                 }
             }
-            private string functionBlock(string function, string[] args)
+            protected override string functionBlock(string function, string[] args)
             {
                 string def = function + "{" + string.Join("@", args) + "}";
                 switch (function.Substring(1))
@@ -568,7 +479,7 @@ namespace GitHubConsole.Commands
                     return string.Empty;
 
                 label = issue.Labels[0];
-                string res = handle(format);
+                string res = Handle(format);
 
                 if (issue.Labels.Count == 1)
                     return res;
@@ -576,24 +487,10 @@ namespace GitHubConsole.Commands
                 label = issue.Labels[1];
                 for (int i = 2; i < issue.Labels.Count; i++)
                 {
-                    res += separator1 + handle(format);
+                    res += separator1 + Handle(format);
                     label = issue.Labels[i];
                 }
-                return res + separator2 + handle(format);
-            }
-
-            private int findEnd(string text, int index, char open, char close)
-            {
-                int count = 0;
-                do
-                {
-                    if (text[index] == open) count++;
-                    else if (text[index] == close) count--;
-                    index++;
-                } while (count > 0 && index < text.Length);
-                if (count == 0) index--;
-
-                return index;
+                return res + separator2 + Handle(format);
             }
         }
 
