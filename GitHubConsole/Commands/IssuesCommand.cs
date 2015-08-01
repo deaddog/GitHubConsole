@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace GitHubConsole.Commands
 {
@@ -403,6 +404,11 @@ namespace GitHubConsole.Commands
                     {
                         case '[': // Coloring
                             {
+                                int end = findEnd(format, index, '[', ']');
+                                var block = format.Substring(index + 1, end - index - 1);
+                                string replace = colorBlock(block);
+                                format = format.Substring(0, index) + replace + format.Substring(end + 1);
+                                index += replace.Length;
                             }
                             break;
 
@@ -479,6 +485,28 @@ namespace GitHubConsole.Commands
 
                     default: return string.Empty;
                 }
+            }
+
+            private string colorBlock(string format)
+            {
+                Match m = Regex.Match(format, "^(?<color>[^:]+):(?<content>.*)$", RegexOptions.Singleline);
+                if (!m.Success)
+                    return null;
+
+                string color_str = m.Groups["color"].Value;
+                string content = m.Groups["content"].Value;
+
+                if (color_str.ToLower() == "auto")
+                {
+                    Match autoColor = Regex.Match(content, @"\$[^ ]+");
+
+                    if (autoColor.Success)
+                        color_str = getAutoColor(autoColor.Value);
+                    else
+                        color_str = string.Empty;
+                }
+
+                return $"[{color_str}:{handle(content)}]";
             }
 
             private int findEnd(string text, int index, char open, char close)
