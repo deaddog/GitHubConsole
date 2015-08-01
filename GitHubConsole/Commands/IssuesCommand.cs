@@ -424,6 +424,12 @@ namespace GitHubConsole.Commands
 
                         case '$': // Variable
                             {
+                                var match = Regex.Match(format.Substring(index), @"^\$[^ ]*");
+                                var end = match.Index + index + match.Length;
+                                var block = match.Value;
+                                string replace = getVariable(block);
+                                format = format.Substring(0, index) + replace + format.Substring(end);
+                                index += replace.Length;
                             }
                             break;
 
