@@ -368,7 +368,7 @@ namespace GitHubConsole.Commands
                 printer.Print(v);
         }
 
-        private class IssuePrinter
+        private class IssuePrinter : FormattedPrinter
         {
             private Issue issue;
             private Label label;
