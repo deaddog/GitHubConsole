@@ -444,15 +444,35 @@ namespace GitHubConsole.Commands
                         return variable;
                 }
             }
-        }
+            private string getAutoColor(string content)
+            {
+                switch (content.Substring(1))
+                {
+                    case "number":
+                    case "+number":
+                    case "number+":
+                        if (issue == null)
+                            return string.Empty;
+                        else
+                            return issue.ClosedAt.HasValue ? "Issue_Closed" : "Issue_Open";
 
-        private string issueNumberColor(Issue issue)
-        {
-            return issue.ClosedAt.HasValue ? "Issue_Closed" : "Issue_Open";
-        }
-        private string assigneeColor(string assignee)
-        {
-            return assignee == GitHub.Client.Credentials.Login ? "Issue_User_Self" : "Issue_User";
+                    case "assignee":
+                    case "+assignee":
+                    case "assignee+":
+                        if (issue == null)
+                            return string.Empty;
+                        else
+                            return (issue?.Assignee?.Login == GitHub.Client?.Credentials?.Login) ? "Issue_User_Self" : "Issue_User";
+
+                    case "label":
+                        if (label == null)
+                            return string.Empty;
+                        else
+                            return ColorResolver.GetConsoleColor(label.Color).ToString();
+
+                    default: return string.Empty;
+                }
+            }
         }
 
         private Label[] selectLabels(string header, Label[] knownLabelNames, IEnumerable<string> preSelected)
