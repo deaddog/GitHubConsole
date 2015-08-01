@@ -362,41 +362,9 @@ namespace GitHubConsole.Commands
 
             string format = outputFormat.Value.Replace("\\n", "\n");
 
+            IssuePrinter printer = new IssuePrinter(len, namelen, format);
             foreach (var v in issues)
-            {
-                string name = v.Assignee == null ? "" : v.Assignee.Login;
-
-                string labels = "";
-                if (v.Labels.Count > 0 && format.Contains("{5}"))
-                {
-                    labels = string.Format("[Issue_Par:(]{0}[Issue_Par:)]",
-                        string.Join(", ", v.Labels.Select(l => "[" + ColorResolver.GetConsoleColor(l.Color) + ":" + l.Name + "]")));
-                }
-
-                var r = new System.Text.RegularExpressions.Regex("%[^%]+%");
-                string output = r.Replace(format, m =>
-                {
-                    switch (m.Value.Substring(1, m.Value.Length - 2))
-                    {
-                        case "#": return $"[{issueNumberColor(v)}:{v.Number}]";
-                        case "+#": return $"[{issueNumberColor(v)}:{v.Number.ToString().PadLeft(len)}]";
-                        case "#+": return $"[{issueNumberColor(v)}:{v.Number.ToString().PadRight(len)}]";
-
-                        case "user": return $"[{assigneeColor(name)}:{name}]";
-                        case "+user": return $"[{assigneeColor(name)}:{name.PadLeft(namelen)}]";
-                        case "user+": return $"[{assigneeColor(name)}:{name.PadRight(namelen)}]";
-
-                        case "title": return v.Title;
-                        case "description": return v.Body;
-
-                        case "labels":return labels;
-
-                        default: return m.Value;
-                    }
-                });
-
-                ColorConsole.WriteLine(output);
-            }
+                printer.Print(v);
         }
 
         private class IssuePrinter
