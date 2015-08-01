@@ -422,6 +422,28 @@ namespace GitHubConsole.Commands
             {
                 this.issue = issue;
             }
+
+            private string getVariable(string variable)
+            {
+                switch (variable.Substring(1))
+                {
+                    case "number": return issue.Number.ToString();
+                    case "+number": return issue.Number.ToString().PadLeft(maxNumberWidth);
+                    case "number+": return issue.Number.ToString().PadRight(maxNumberWidth);
+
+                    case "assignee": return issue.Assignee?.Login ?? "";
+                    case "+assignee": return (issue.Assignee?.Login ?? "").PadLeft(maxAssigneeWidth);
+                    case "assignee+": return (issue.Assignee?.Login ?? "").PadRight(maxAssigneeWidth);
+
+                    case "title": return issue.Title;
+                    case "description": return issue.Body;
+
+                    case "label": return label.Name;
+
+                    default:
+                        return variable;
+                }
+            }
         }
 
         private string issueNumberColor(Issue issue)
