@@ -432,6 +432,12 @@ namespace GitHubConsole.Commands
 
                         case '@': // Listing/Function
                             {
+                                var match = Regex.Match(format.Substring(index), @"\@[^\{]*");
+                                var end = findEnd(format, index + match.Value.Length, '{', '}');
+                                var block = format.Substring(index + match.Value.Length + 1, end - index - match.Value.Length - 1);
+                                string replace = functionBlock(match.Value, block.Split('@'));
+                                format = format.Substring(0, index) + replace + format.Substring(end + 1);
+                                index += replace.Length;
                             }
                             break;
 
@@ -534,6 +540,44 @@ namespace GitHubConsole.Commands
                     case "labels": return issue.Labels.Count > 0;
                     default: return null;
                 }
+            }
+            private string functionBlock(string function, string[] args)
+            {
+                string def = function + "{" + string.Join("@", args) + "}";
+                switch (function.Substring(1))
+                {
+                    case "labels":
+                        if (args.Length == 1)
+                            return labelsFunction(args[0], " ", " ");
+                        else if (args.Length == 2)
+                            return labelsFunction(args[0], args[1], args[1]);
+                        else if (args.Length >= 3)
+                            return labelsFunction(args[0], args[1], args[2]);
+                        else
+                            return def;
+
+                    default: return def;
+                }
+            }
+
+            private string labelsFunction(string format, string separator1, string separator2)
+            {
+                if (issue.Labels.Count == 0)
+                    return string.Empty;
+
+                label = issue.Labels[0];
+                string res = handle(format);
+
+                if (issue.Labels.Count == 1)
+                    return res;
+
+                label = issue.Labels[1];
+                for (int i = 2; i < issue.Labels.Count; i++)
+                {
+                    res += separator1 + handle(format);
+                    label = issue.Labels[i];
+                }
+                return res + separator2 + handle(format);
             }
 
             private int findEnd(string text, int index, char open, char close)
