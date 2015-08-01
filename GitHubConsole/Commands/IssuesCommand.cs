@@ -421,6 +421,45 @@ namespace GitHubConsole.Commands
             public void Print(Issue issue)
             {
                 this.issue = issue;
+
+                string text = handle(format);
+                ColorConsole.WriteLine(text);
+            }
+
+            private string handle(string format)
+            {
+                int index = 0;
+
+                while (index < format.Length)
+                    switch (format[index])
+                    {
+                        case '[': // Coloring
+                            {
+                            }
+                            break;
+
+                        case '?': // Conditional
+                            {
+                            }
+                            break;
+
+                        case '@': // Listing/Function
+                            {
+                            }
+                            break;
+
+                        case '$': // Variable
+                            {
+                            }
+                            break;
+
+                        default: // Skip content
+                            index = format.IndexOfAny(new char[] { '[', '?', '@', '$' }, index);
+                            if (index < 0) index = format.Length;
+                            break;
+                    }
+
+                return format;
             }
 
             private string getVariable(string variable)
