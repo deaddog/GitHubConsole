@@ -414,6 +414,19 @@ namespace GitHubConsole.Commands
 
                         case '?': // Conditional
                             {
+                                var match = Regex.Match(format.Substring(index), @"\?[^\{]*");
+                                var end = findEnd(format, index + match.Value.Length, '{', '}');
+                                var block = format.Substring(index + match.Value.Length + 1, end - index - match.Value.Length - 1);
+
+                                string replace = "";
+                                var condition = conditionBlock(match.Value);
+                                if (!condition.HasValue)
+                                    replace = match.Value + "{" + handle(block) + "}";
+                                else if (condition.Value)
+                                    replace = handle(block);
+
+                                format = format.Substring(0, index) + replace + format.Substring(end + 1);
+                                index += replace.Length;
                             }
                             break;
 
@@ -513,6 +526,14 @@ namespace GitHubConsole.Commands
                 }
 
                 return $"[{color_str}:{handle(content)}]";
+            }
+            private bool? conditionBlock(string format)
+            {
+                switch (format.Substring(1))
+                {
+                    case "labels": return issue.Labels.Count > 0;
+                    default: return null;
+                }
             }
 
             private int findEnd(string text, int index, char open, char close)
