@@ -538,6 +538,8 @@ namespace GitHubConsole.Commands
                 switch (format.Substring(1))
                 {
                     case "labels": return issue.Labels.Count > 0;
+                    case "assignee": return issue.Assignee != null;
+                    case "description":return issue.Body != null && issue.Body.Length > 0;
                     default: return null;
                 }
             }
