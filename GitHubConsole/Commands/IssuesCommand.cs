@@ -75,7 +75,7 @@ namespace GitHubConsole.Commands
                 + "  gihub issues <issues> " + remLabels.Name + " <label1> <label2>...");
 
             setTitle.Validator.Add(x => x.Trim().Length > 0, "An issue cannot have an empty title.");
-            
+
             Validator.AddIfFirstNotRest(assignee, hasAssignee, noAssignee, notAssignee);
             Validator.AddIfFirstNotRest(notAssignee, hasAssignee, noAssignee);
 
@@ -396,6 +396,31 @@ namespace GitHubConsole.Commands
                 });
 
                 ColorConsole.WriteLine(output);
+            }
+        }
+
+        private class IssuePrinter
+        {
+            private Issue issue;
+            private Label label;
+
+            private readonly int maxNumberWidth;
+            private readonly int maxAssigneeWidth;
+            private readonly string format;
+
+            public IssuePrinter(int maxNumberWidth, int maxAssigneeWidth, string format)
+            {
+                this.issue = null;
+                this.label = null;
+
+                this.maxNumberWidth = maxNumberWidth;
+                this.maxAssigneeWidth = maxAssigneeWidth;
+                this.format = format;
+            }
+
+            public void Print(Issue issue)
+            {
+                this.issue = issue;
             }
         }
 
