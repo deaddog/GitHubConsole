@@ -395,28 +395,28 @@ namespace GitHubConsole.Commands
                 ColorConsole.WriteLine(text);
             }
 
-            private string handle(string format)
+            private string handle(string text)
             {
                 int index = 0;
 
-                while (index < format.Length)
-                    switch (format[index])
+                while (index < text.Length)
+                    switch (text[index])
                     {
                         case '[': // Coloring
                             {
-                                int end = findEnd(format, index, '[', ']');
-                                var block = format.Substring(index + 1, end - index - 1);
+                                int end = findEnd(text, index, '[', ']');
+                                var block = text.Substring(index + 1, end - index - 1);
                                 string replace = colorBlock(block);
-                                format = format.Substring(0, index) + replace + format.Substring(end + 1);
+                                text = text.Substring(0, index) + replace + text.Substring(end + 1);
                                 index += replace.Length;
                             }
                             break;
 
                         case '?': // Conditional
                             {
-                                var match = Regex.Match(format.Substring(index), @"\?[^\{]*");
-                                var end = findEnd(format, index + match.Value.Length, '{', '}');
-                                var block = format.Substring(index + match.Value.Length + 1, end - index - match.Value.Length - 1);
+                                var match = Regex.Match(text.Substring(index), @"\?[^\{]*");
+                                var end = findEnd(text, index + match.Value.Length, '{', '}');
+                                var block = text.Substring(index + match.Value.Length + 1, end - index - match.Value.Length - 1);
 
                                 string replace = "";
                                 var condition = conditionBlock(match.Value);
@@ -425,40 +425,40 @@ namespace GitHubConsole.Commands
                                 else if (condition.Value)
                                     replace = handle(block);
 
-                                format = format.Substring(0, index) + replace + format.Substring(end + 1);
+                                text = text.Substring(0, index) + replace + text.Substring(end + 1);
                                 index += replace.Length;
                             }
                             break;
 
                         case '@': // Listing/Function
                             {
-                                var match = Regex.Match(format.Substring(index), @"\@[^\{]*");
-                                var end = findEnd(format, index + match.Value.Length, '{', '}');
-                                var block = format.Substring(index + match.Value.Length + 1, end - index - match.Value.Length - 1);
+                                var match = Regex.Match(text.Substring(index), @"\@[^\{]*");
+                                var end = findEnd(text, index + match.Value.Length, '{', '}');
+                                var block = text.Substring(index + match.Value.Length + 1, end - index - match.Value.Length - 1);
                                 string replace = functionBlock(match.Value, block.Split('@'));
-                                format = format.Substring(0, index) + replace + format.Substring(end + 1);
+                                text = text.Substring(0, index) + replace + text.Substring(end + 1);
                                 index += replace.Length;
                             }
                             break;
 
                         case '$': // Variable
                             {
-                                var match = Regex.Match(format.Substring(index), @"^\$[^ ]*");
+                                var match = Regex.Match(text.Substring(index), @"^\$[^ ]*");
                                 var end = match.Index + index + match.Length;
                                 var block = match.Value;
                                 string replace = getVariable(block);
-                                format = format.Substring(0, index) + replace + format.Substring(end);
+                                text = text.Substring(0, index) + replace + text.Substring(end);
                                 index += replace.Length;
                             }
                             break;
 
                         default: // Skip content
-                            index = format.IndexOfAny(new char[] { '[', '?', '@', '$' }, index);
-                            if (index < 0) index = format.Length;
+                            index = text.IndexOfAny(new char[] { '[', '?', '@', '$' }, index);
+                            if (index < 0) index = text.Length;
                             break;
                     }
 
-                return format;
+                return text;
             }
 
             private string getVariable(string variable)
