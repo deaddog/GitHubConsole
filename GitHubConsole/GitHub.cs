@@ -143,6 +143,9 @@ namespace GitHubConsole
 
             var remotes = findRemotes();
 
+            if (remotes.Count == 0)
+                return false;
+
             for (int i = 0; i < remotes.Count; i++)
                 if (!r.Match(remotes[i].Item2).Success)
                     remotes.RemoveAt(i--);
