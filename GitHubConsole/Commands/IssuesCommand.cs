@@ -395,7 +395,7 @@ namespace GitHubConsole.Commands
 
             protected override string GetVariable(string variable)
             {
-                switch (variable.Substring(1))
+                switch (variable)
                 {
                     case "number": return issue.Number.ToString();
                     case "+number": return issue.Number.ToString().PadLeft(maxNumberWidth);
@@ -416,7 +416,7 @@ namespace GitHubConsole.Commands
             }
             protected override string GetAutoColor(string variable)
             {
-                switch (variable.Substring(1))
+                switch (variable)
                 {
                     case "number":
                     case "+number":
@@ -443,7 +443,7 @@ namespace GitHubConsole.Commands
                     default: return string.Empty;
                 }
             }
-            
+
             protected override bool? ValidateCondition(string condition)
             {
                 switch (condition)

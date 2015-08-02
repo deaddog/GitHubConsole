@@ -65,8 +65,7 @@ namespace GitHubConsole
                         {
                             var match = Regex.Match(text.Substring(index), @"^\$[^ ]*");
                             var end = match.Index + index + match.Length;
-                            var block = match.Value;
-                            string replace = GetVariable(block);
+                            string replace = GetVariable(match.Value.Substring(1));
                             text = text.Substring(0, index) + replace + text.Substring(end);
                             index += replace.Length;
                         }
@@ -83,7 +82,7 @@ namespace GitHubConsole
 
         protected virtual string GetVariable(string variable)
         {
-            return variable;
+            return "$" + variable;
         }
         protected virtual string GetAutoColor(string variable)
         {
@@ -104,7 +103,7 @@ namespace GitHubConsole
                 Match autoColor = Regex.Match(content, @"\$[^ ]+");
 
                 if (autoColor.Success)
-                    color_str = GetAutoColor(autoColor.Value) ?? string.Empty;
+                    color_str = GetAutoColor(autoColor.Value.Substring(1)) ?? string.Empty;
                 else
                     color_str = string.Empty;
             }
