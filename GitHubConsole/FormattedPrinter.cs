@@ -65,7 +65,7 @@ namespace GitHubConsole
                         {
                             var match = Regex.Match(text.Substring(index), @"^\$[^ ]*");
                             var end = match.Index + index + match.Length;
-                            string replace = GetVariable(match.Value.Substring(1));
+                            string replace = getVariable(match.Value.Substring(1));
                             text = text.Substring(0, index) + replace + text.Substring(end);
                             index += replace.Length;
                         }
@@ -80,9 +80,42 @@ namespace GitHubConsole
             return text;
         }
 
+        private string getVariable(string variable)
+        {
+            bool padLeft = variable[0] == '+';
+            bool padRight = variable[variable.Length - 1] == '+';
+
+            if (padLeft) variable = variable.Substring(1);
+            if (padRight) variable = variable.Substring(0, variable.Length - 1);
+
+            string res = GetVariable(variable);
+            if (res == null)
+                return "$" + (padLeft ? "+" : "") + variable + (padRight ? "+" : "");
+
+            if (padLeft || padRight)
+            {
+                int? size = GetAlignedLength(variable);
+                if (size.HasValue)
+                {
+                    if (padLeft && padRight)
+                        res = res.PadLeft(size.Value / 2).PadRight(size.Value - (size.Value / 2));
+                    else if (padLeft)
+                        res = res.PadLeft(size.Value);
+                    else
+                        res = res.PadRight(size.Value);
+                }
+            }
+
+            return res;
+        }
+
+        protected virtual int? GetAlignedLength(string variable)
+        {
+            return null;
+        }
         protected virtual string GetVariable(string variable)
         {
-            return "$" + variable;
+            return null;
         }
         protected virtual string GetAutoColor(string variable)
         {
@@ -103,7 +136,13 @@ namespace GitHubConsole
                 Match autoColor = Regex.Match(content, @"\$[^ ]+");
 
                 if (autoColor.Success)
-                    color_str = GetAutoColor(autoColor.Value.Substring(1)) ?? string.Empty;
+                {
+                    string variable = autoColor.Value.Substring(1);
+                    if (variable[0] == '+') variable = variable.Substring(1);
+                    if (variable[variable.Length - 1] == '+') variable = variable.Substring(0, variable.Length - 1);
+
+                    color_str = GetAutoColor(variable) ?? string.Empty;
+                }
                 else
                     color_str = string.Empty;
             }
