@@ -61,6 +61,11 @@ namespace GitHubConsole.Commands
 
             if (edit.IsSet)
             {
+                string path = global.IsSet ? Config.GlobalPath : Config.LocalPath;
+                if (!System.IO.File.Exists(path))
+                    System.IO.File.WriteAllText(path, "");
+
+                FileEditing.OpenAndEdit(path, Config.Default["config.editor"]);
             }
 
             if (list.IsSet)
