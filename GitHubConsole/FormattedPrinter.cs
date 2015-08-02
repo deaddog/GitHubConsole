@@ -55,7 +55,7 @@ namespace GitHubConsole
                             var match = Regex.Match(text.Substring(index), @"\@[^\{]*");
                             var end = findEnd(text, index + match.Value.Length, '{', '}');
                             var block = text.Substring(index + match.Value.Length + 1, end - index - match.Value.Length - 1);
-                            string replace = EvaluateFunction(match.Value, block.Split('@'));
+                            string replace = EvaluateFunction(match.Value.Substring(1), block.Split('@'));
                             text = text.Substring(0, index) + replace + text.Substring(end + 1);
                             index += replace.Length;
                         }
@@ -117,7 +117,7 @@ namespace GitHubConsole
         }
         protected virtual string EvaluateFunction(string function, string[] args)
         {
-            return function + "{" + string.Join("@", args) + "}";
+            return "@" + function + "{" + string.Join("@", args) + "}";
         }
 
         private int findEnd(string text, int index, char open, char close)

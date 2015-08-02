@@ -456,8 +456,7 @@ namespace GitHubConsole.Commands
             }
             protected override string EvaluateFunction(string function, string[] args)
             {
-                string def = function + "{" + string.Join("@", args) + "}";
-                switch (function.Substring(1))
+                switch (function)
                 {
                     case "labels":
                         if (args.Length == 1)
@@ -467,9 +466,9 @@ namespace GitHubConsole.Commands
                         else if (args.Length >= 3)
                             return labelsFunction(args[0], args[1], args[2]);
                         else
-                            return def;
+                            return base.EvaluateFunction(function, args);
 
-                    default: return def;
+                    default: return base.EvaluateFunction(function, args);
                 }
             }
 
