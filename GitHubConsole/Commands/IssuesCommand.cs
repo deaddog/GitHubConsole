@@ -414,6 +414,16 @@ namespace GitHubConsole.Commands
                         return base.GetVariable(variable);
                 }
             }
+            protected override int? GetAlignedLength(string variable)
+            {
+                switch (variable)
+                {
+                    case "number": return maxNumberWidth;
+                    case "assignee": return maxAssigneeWidth;
+
+                    default: return base.GetAlignedLength(variable);
+                }
+            }
             protected override string GetAutoColor(string variable)
             {
                 switch (variable)
