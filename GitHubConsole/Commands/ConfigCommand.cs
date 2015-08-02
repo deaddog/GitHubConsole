@@ -58,7 +58,7 @@ namespace GitHubConsole.Commands
 
             if (list.IsSet)
                 foreach (var pair in iconf.GetAll())
-                    ColorConsole.WriteLine($"{pair.Key}={pair.Value}");
+                    ColorConsole.WriteLine($"{pair.Key}={ColorConsole.EscapeColor(pair.Value)}");
         }
     }
 }
