@@ -19,7 +19,7 @@ namespace GitHubConsole
             double closest = double.PositiveInfinity;
             ConsoleColor res = ConsoleColor.Gray;
 
-            foreach (var c in consoleColors)
+            foreach (var c in getSaturation(color) < 0.2 ? grays : colors)
             {
                 double dist = manhattanDistance(getColor(c), color);
                 if (dist < closest)
