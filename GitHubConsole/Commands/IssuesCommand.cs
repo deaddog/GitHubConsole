@@ -398,12 +398,8 @@ namespace GitHubConsole.Commands
                 switch (variable)
                 {
                     case "number": return issue.Number.ToString();
-                    case "+number": return issue.Number.ToString().PadLeft(maxNumberWidth);
-                    case "number+": return issue.Number.ToString().PadRight(maxNumberWidth);
 
                     case "assignee": return issue.Assignee?.Login ?? "";
-                    case "+assignee": return (issue.Assignee?.Login ?? "").PadLeft(maxAssigneeWidth);
-                    case "assignee+": return (issue.Assignee?.Login ?? "").PadRight(maxAssigneeWidth);
 
                     case "title": return issue.Title;
                     case "description": return issue.Body;
@@ -428,27 +424,11 @@ namespace GitHubConsole.Commands
             {
                 switch (variable)
                 {
-                    case "number":
-                    case "+number":
-                    case "number+":
-                        if (issue == null)
-                            return string.Empty;
-                        else
-                            return issue.ClosedAt.HasValue ? "Issue_Closed" : "Issue_Open";
+                    case "number": return (issue?.ClosedAt == null) ? "Issue_Open" : "Issue_Closed";
 
-                    case "assignee":
-                    case "+assignee":
-                    case "assignee+":
-                        if (issue == null)
-                            return string.Empty;
-                        else
-                            return (issue?.Assignee?.Login == GitHub.CurrentUser?.Login) ? "Issue_User_Self" : "Issue_User";
+                    case "assignee": return (issue?.Assignee?.Login == GitHub.CurrentUser?.Login) ? "Issue_User_Self" : "Issue_User";
 
-                    case "label":
-                        if (label == null)
-                            return string.Empty;
-                        else
-                            return ColorResolver.GetConsoleColor(label).ToString();
+                    case "label": return label == null ? string.Empty : ColorResolver.GetConsoleColor(label).ToString();
 
                     default: return base.GetAutoColor(variable);
                 }
