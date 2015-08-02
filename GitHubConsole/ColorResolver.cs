@@ -51,6 +51,13 @@ namespace GitHubConsole
             }
         }
 
+        private static double getSaturation(Color color)
+        {
+            int max = Math.Max(color.R, Math.Max(color.G, color.B));
+            int min = Math.Min(color.R, Math.Min(color.G, color.B));
+
+            return (max == 0) ? 0 : 1.0 - (1.0 * min / max);
+        }
         private static Color getColor(ConsoleColor color)
         {
             switch (color)
