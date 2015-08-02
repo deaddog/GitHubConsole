@@ -82,6 +82,15 @@ namespace GitHubConsole
 
             return value;
         }
+        private static T ensureValidated<T>(string name, ref T value, Func<T> create) where T : class
+        {
+            ensureValidated(name);
+
+            if (value == null)
+                value = create();
+
+            return value;
+        }
 
         public static CachedGitHubClient Client
         {
