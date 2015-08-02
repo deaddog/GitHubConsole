@@ -39,9 +39,9 @@ namespace GitHubConsole
                             var block = text.Substring(index + match.Value.Length + 1, end - index - match.Value.Length - 1);
 
                             string replace = "";
-                            var condition = ValidateCondition(match.Value);
+                            var condition = ValidateCondition(match.Value.Substring(1));
                             if (!condition.HasValue)
-                                replace = match.Value + "{" + Handle(block) + "}";
+                                replace = "?" + match.Value + "{" + Handle(block) + "}";
                             else if (condition.Value)
                                 replace = Handle(block);
 

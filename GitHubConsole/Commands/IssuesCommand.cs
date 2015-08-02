@@ -446,7 +446,7 @@ namespace GitHubConsole.Commands
             
             protected override bool? ValidateCondition(string condition)
             {
-                switch (condition.Substring(1))
+                switch (condition)
                 {
                     case "labels": return issue.Labels.Count > 0;
                     case "assignee": return issue.Assignee != null;
