@@ -68,13 +68,17 @@ namespace GitHubConsole
             return value;
         }
 
-        private static T ensureValidated<T>(string name, T value)
+        private static void ensureValidated(string name)
         {
             if (validated == null)
                 throw new InvalidOperationException($"{name} cannot be retrieved before running the {nameof(ValidateGitDirectory)} method.");
 
             if (validated != Message.NoError)
                 throw new InvalidOperationException($"{name} cannot be retrieved when git validation was not successfull.");
+        }
+        private static T ensureValidated<T>(string name, T value)
+        {
+            ensureValidated(name);
 
             return value;
         }
