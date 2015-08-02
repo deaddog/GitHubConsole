@@ -92,22 +92,7 @@ namespace GitHubConsole
             return value;
         }
 
-        public static CachedGitHubClient Client
-        {
-            get
-            {
-                if (validated == null)
-                    throw new InvalidOperationException($"{nameof(Client)} cannot be retrieved before running the {nameof(ValidateGitDirectory)} method.");
-
-                if (validated != Message.NoError)
-                    throw new InvalidOperationException($"{nameof(Client)} cannot be retrieved when git validation was not successfull.");
-
-                if (client == null)
-                    client = new CachedGitHubClient(new ProductHeaderValue(clientHeader), cred);
-
-                return client;
-            }
-        }
+        public static CachedGitHubClient Client => ensureValidated(nameof(Client), ref client, () => new CachedGitHubClient(new ProductHeaderValue(clientHeader), cred));
 
         private static bool isGitRepo()
         {
