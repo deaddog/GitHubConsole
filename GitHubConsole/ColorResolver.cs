@@ -7,14 +7,14 @@ namespace GitHubConsole
 {
     public static class ColorResolver
     {
-        public static ConsoleColor GetConsoleColor(Label label)
+        public static string GetConsoleColor(Label label)
         {
             if (label == null)
                 throw new ArgumentNullException(nameof(label));
 
             return GetConsoleColor(ColorTranslator.FromHtml("#ff" + label.Color));
         }
-        public static ConsoleColor GetConsoleColor(Color color)
+        public static string GetConsoleColor(Color color)
         {
             double closest = double.PositiveInfinity;
             ConsoleColor res = ConsoleColor.Gray;
@@ -29,7 +29,7 @@ namespace GitHubConsole
                 }
             }
 
-            return res;
+            return res.ToString();
         }
 
         private static IEnumerable<ConsoleColor> consoleColors
