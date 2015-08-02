@@ -534,8 +534,8 @@ $@"# Edit title and description for your issue.
                 .ToArray();
             File.Delete(filepath);
 
-            setTitle.Value = content.Length == 0 ? null : content[0];
-            setDescription.Value = content.Length <= 1 ? null : string.Join(Environment.NewLine, content, 1, content.Length - 1);
+            setTitle.Value = content.Length == 0 ? null : content[0].Trim();
+            setDescription.Value = content.Length <= 1 ? null : string.Join(Environment.NewLine, content, 1, content.Length - 1).Trim();
 
             Message m = Message.NoError;
             if (setTitle.Value == null)
