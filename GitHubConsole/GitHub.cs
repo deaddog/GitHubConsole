@@ -103,7 +103,7 @@ namespace GitHubConsole
                     throw new InvalidOperationException($"{nameof(Client)} cannot be retrieved when git validation was not successfull.");
 
                 if (client == null)
-                    client = new CachedGitHub.CachedGitHubClient(new GitHubClient(new ProductHeaderValue(clientHeader)) { Credentials = cred });
+                    client = new CachedGitHubClient(new ProductHeaderValue(clientHeader), cred);
 
                 return client;
             }
