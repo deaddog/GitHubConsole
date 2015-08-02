@@ -11,14 +11,7 @@ namespace GitHubConsole
             string filepath = Path.GetTempPath() + Guid.NewGuid().ToString() + ".txt";
             File.WriteAllText(filepath, initialText);
 
-            string application = editorConfigKey ?? Config.Default["generic.editor"] ?? "%f";
-
-            if (application.Contains("%f"))
-                using (var p = System.Diagnostics.Process.Start(application.Replace("%f", filepath)))
-                    p.WaitForExit();
-            else
-                using (var p = System.Diagnostics.Process.Start(application, filepath))
-                    p.WaitForExit();
+            OpenAndEdit(filepath, editorConfigKey);
 
             string[] content = File.ReadAllLines(filepath)
                 .Where(x => !x.StartsWith("#"))
@@ -30,6 +23,18 @@ namespace GitHubConsole
             File.Delete(filepath);
 
             return content;
+        }
+
+        public static void OpenAndEdit(string filepath, string editorConfigKey = null)
+        {
+            string application = editorConfigKey ?? Config.Default["generic.editor"] ?? "%f";
+
+            if (application.Contains("%f"))
+                using (var p = System.Diagnostics.Process.Start(application.Replace("%f", filepath)))
+                    p.WaitForExit();
+            else
+                using (var p = System.Diagnostics.Process.Start(application, filepath))
+                    p.WaitForExit();
         }
     }
 }
