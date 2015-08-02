@@ -432,7 +432,7 @@ namespace GitHubConsole.Commands
                         if (issue == null)
                             return string.Empty;
                         else
-                            return (issue?.Assignee?.Login == GitHub.Client?.Credentials?.Login) ? "Issue_User_Self" : "Issue_User";
+                            return (issue?.Assignee?.Login == GitHub.CurrentUser?.Login) ? "Issue_User_Self" : "Issue_User";
 
                     case "label":
                         if (label == null)

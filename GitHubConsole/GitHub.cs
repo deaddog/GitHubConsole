@@ -13,6 +13,7 @@ namespace GitHubConsole
         private static readonly string clientHeader = "GitHubC#Console";
 
         private static CachedGitHubClient client;
+        private static User currentUser;
         private static Message validated;
         private static bool accessPath = false;
 
@@ -93,6 +94,7 @@ namespace GitHubConsole
         }
 
         public static CachedGitHubClient Client => ensureValidated(nameof(Client), ref client, () => new CachedGitHubClient(new ProductHeaderValue(clientHeader), cred));
+        public static User CurrentUser => ensureValidated(nameof(CurrentUser), ref currentUser, () => Client?.User?.Current().Result);
 
         private static bool isGitRepo()
         {
