@@ -428,7 +428,7 @@ namespace GitHubConsole.Commands
 
                     case "assignee": return (issue?.Assignee?.Login == GitHub.CurrentUser?.Login) ? "Issue_User_Self" : "Issue_User";
 
-                    case "label": return label == null ? string.Empty : ColorResolver.GetConsoleColor(label).ToString();
+                    case "label": return label == null ? string.Empty : ColorResolver.GetConsoleColor(label);
 
                     default: return base.GetAutoColor(variable);
                 }
