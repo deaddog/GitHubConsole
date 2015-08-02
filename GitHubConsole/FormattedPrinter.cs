@@ -63,7 +63,7 @@ namespace GitHubConsole
 
                     case '$': // Variable
                         {
-                            var match = Regex.Match(text.Substring(index), @"^\$[^ ]*");
+                            var match = Regex.Match(text.Substring(index), @"^\$([a-z]|\+)+");
                             var end = match.Index + index + match.Length;
                             string replace = getVariable(match.Value.Substring(1));
                             text = text.Substring(0, index) + replace + text.Substring(end);
@@ -133,7 +133,7 @@ namespace GitHubConsole
 
             if (color_str.ToLower() == "auto")
             {
-                Match autoColor = Regex.Match(content, @"\$[^ ]+");
+                Match autoColor = Regex.Match(content, @"\$([a-z]|\+)+");
 
                 if (autoColor.Success)
                 {
