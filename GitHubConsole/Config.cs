@@ -18,6 +18,12 @@ namespace GitHubConsole
             get { return Path.Combine(GitHub.GlobalStorage, "config"); }
         }
 
+        public static void Reset()
+        {
+            local = global = null;
+            group = null;
+        }
+
         public static Configuration Local => local ?? (local = new Configuration(LocalPath));
         public static Configuration Global => global ?? (global = new Configuration(GlobalPath));
 

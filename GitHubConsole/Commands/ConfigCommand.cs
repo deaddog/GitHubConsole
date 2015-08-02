@@ -66,6 +66,8 @@ namespace GitHubConsole.Commands
                     System.IO.File.WriteAllText(path, "");
 
                 FileEditing.OpenAndEdit(path, Config.Default["config.editor"]);
+
+                Config.Reset();
             }
 
             if (list.IsSet)
