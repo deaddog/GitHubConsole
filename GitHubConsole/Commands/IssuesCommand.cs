@@ -401,8 +401,8 @@ namespace GitHubConsole.Commands
 
                     case "assignee": return issue.Assignee?.Login ?? "";
 
-                    case "title": return ColorConsole.EscapeColor(issue.Title);
-                    case "description": return ColorConsole.EscapeColor(issue.Body);
+                    case "title": return issue.Title == null ? "" : ColorConsole.EscapeColor(issue.Title);
+                    case "description": return issue.Body == null ? "" : ColorConsole.EscapeColor(issue.Body);
 
                     case "label": return label.Name;
 
