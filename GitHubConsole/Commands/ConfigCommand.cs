@@ -14,6 +14,8 @@ namespace GitHubConsole.Commands
         [Description("Removes a key from the configuration file.")]
         private readonly Parameter<string[]> remove = null;
 
+        [Description("Opens the configuration file in an editor.")]
+        private readonly FlagParameter edit = null;
         [Description("Removes all keys from the configuration file.")]
         private readonly FlagParameter clear = null;
         [Description("Lists all key value combinations in the configuration file.")]
@@ -38,7 +40,8 @@ namespace GitHubConsole.Commands
                 $"  [Example:github config {remove.Name} <key1> <key2> <key3>...]");
             remove.Callback += () => removeKeys.AddRange(remove.Value);
 
-            this.Validator.AddIfFirstNotRest(all, clear, set, remove);
+            this.Validator.AddIfFirstNotRest(all, clear, set, remove, edit);
+            this.Validator.AddIfFirstNotRest(edit, clear, set, remove, list);
             this.Validator.AddOnlyOne(global, all);
         }
 
@@ -55,6 +58,17 @@ namespace GitHubConsole.Commands
 
             foreach (var set in setValues)
                 conf[set.Key] = set.Value;
+
+            if (edit.IsSet)
+            {
+                string path = global.IsSet ? Config.GlobalPath : Config.LocalPath;
+                if (!System.IO.File.Exists(path))
+                    System.IO.File.WriteAllText(path, "");
+
+                FileEditing.OpenAndEdit(path, Config.Default["config.editor"]);
+
+                Config.Reset();
+            }
 
             if (list.IsSet)
                 foreach (var pair in iconf.GetAll())
