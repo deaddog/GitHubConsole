@@ -11,8 +11,8 @@ namespace GitHubConsole
         {
             if (label == null)
                 throw new ArgumentNullException(nameof(label));
-
-            return GetConsoleColor(ColorTranslator.FromHtml("#ff" + label.Color));
+            
+            return Config.Default["labels.color." + label.Name] ?? GetConsoleColor(ColorTranslator.FromHtml("#ff" + label.Color));
         }
         public static string GetConsoleColor(Color color)
         {
