@@ -32,22 +32,32 @@ namespace GitHubConsole
             return res.ToString();
         }
 
-        private static IEnumerable<ConsoleColor> consoleColors
+        private static IEnumerable<ConsoleColor> colors
         {
             get
             {
-                foreach (ConsoleColor c in Enum.GetValues(typeof(ConsoleColor)))
-                {
-                    switch (c)
-                    {
-                        case ConsoleColor.Black:
-                        case ConsoleColor.DarkGray:
-                        case ConsoleColor.Gray:
-                        case ConsoleColor.White:
-                            continue;
-                    }
-                    yield return c;
-                }
+                yield return ConsoleColor.DarkBlue;
+                yield return ConsoleColor.DarkGreen;
+                yield return ConsoleColor.DarkCyan;
+                yield return ConsoleColor.DarkRed;
+                yield return ConsoleColor.DarkMagenta;
+                yield return ConsoleColor.DarkYellow;
+                yield return ConsoleColor.Blue;
+                yield return ConsoleColor.Green;
+                yield return ConsoleColor.Cyan;
+                yield return ConsoleColor.Red;
+                yield return ConsoleColor.Magenta;
+                yield return ConsoleColor.Yellow;
+            }
+        }
+        private static IEnumerable<ConsoleColor> grays
+        {
+            get
+            {
+                yield return ConsoleColor.Black;
+                yield return ConsoleColor.DarkGray;
+                yield return ConsoleColor.Gray;
+                yield return ConsoleColor.White;
             }
         }
 
