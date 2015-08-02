@@ -448,7 +448,7 @@ namespace GitHubConsole.Commands
                         if (label == null)
                             return string.Empty;
                         else
-                            return ColorResolver.GetConsoleColor(label.Color).ToString();
+                            return ColorResolver.GetConsoleColor(label).ToString();
 
                     default: return base.GetAutoColor(variable);
                 }
@@ -512,7 +512,7 @@ namespace GitHubConsole.Commands
             List<string> pre = new List<string>(preSelected);
 
             var rr = knownLabelNames.MenuSelectMultiple(new MenuSettings() { Cleanup = MenuCleanup.RemoveMenu },
-                x => "[" + ColorResolver.GetConsoleColor(x.Color) + ":" + x.Name + "]",
+                x => "[" + ColorResolver.GetConsoleColor(x) + ":" + x.Name + "]",
                 x => "[DarkGray:" + x.Name + "]",
                 x => pre.Contains(x.Name));
 
