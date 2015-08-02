@@ -411,7 +411,7 @@ namespace GitHubConsole.Commands
                     case "label": return label.Name;
 
                     default:
-                        return variable;
+                        return base.GetVariable(variable);
                 }
             }
             protected override string GetAutoColor(string variable)
@@ -440,7 +440,7 @@ namespace GitHubConsole.Commands
                         else
                             return ColorResolver.GetConsoleColor(label.Color).ToString();
 
-                    default: return string.Empty;
+                    default: return base.GetAutoColor(variable);
                 }
             }
 
@@ -451,7 +451,7 @@ namespace GitHubConsole.Commands
                     case "labels": return issue.Labels.Count > 0;
                     case "assignee": return issue.Assignee != null;
                     case "description": return issue.Body != null && issue.Body.Length > 0;
-                    default: return null;
+                    default: return base.ValidateCondition(condition);
                 }
             }
             protected override string EvaluateFunction(string function, string[] args)
