@@ -11,7 +11,7 @@ namespace GitHubConsole
             string filepath = Path.GetTempPath() + Guid.NewGuid().ToString() + ".txt";
             File.WriteAllText(filepath, initialText);
 
-            string application = editorConfigKey ?? "%f";
+            string application = editorConfigKey ?? Config.Default["generic.editor"] ?? "%f";
 
             if (application.Contains("%f"))
                 using (var p = System.Diagnostics.Process.Start(application.Replace("%f", filepath)))
