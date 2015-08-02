@@ -39,7 +39,7 @@ namespace GitHubConsole
                             var block = text.Substring(index + match.Value.Length + 1, end - index - match.Value.Length - 1);
 
                             string replace = "";
-                            var condition = conditionBlock(match.Value);
+                            var condition = ValidateCondition(match.Value);
                             if (!condition.HasValue)
                                 replace = match.Value + "{" + Handle(block) + "}";
                             else if (condition.Value)
@@ -55,7 +55,7 @@ namespace GitHubConsole
                             var match = Regex.Match(text.Substring(index), @"\@[^\{]*");
                             var end = findEnd(text, index + match.Value.Length, '{', '}');
                             var block = text.Substring(index + match.Value.Length + 1, end - index - match.Value.Length - 1);
-                            string replace = functionBlock(match.Value, block.Split('@'));
+                            string replace = EvaluateFunction(match.Value, block.Split('@'));
                             text = text.Substring(0, index) + replace + text.Substring(end + 1);
                             index += replace.Length;
                         }
@@ -66,7 +66,7 @@ namespace GitHubConsole
                             var match = Regex.Match(text.Substring(index), @"^\$[^ ]*");
                             var end = match.Index + index + match.Length;
                             var block = match.Value;
-                            string replace = getVariable(block);
+                            string replace = GetVariable(block);
                             text = text.Substring(0, index) + replace + text.Substring(end);
                             index += replace.Length;
                         }
@@ -81,11 +81,11 @@ namespace GitHubConsole
             return text;
         }
 
-        protected virtual string getVariable(string variable)
+        protected virtual string GetVariable(string variable)
         {
             return variable;
         }
-        protected virtual string getAutoColor(string content)
+        protected virtual string GetAutoColor(string variable)
         {
             return string.Empty;
         }
@@ -104,18 +104,18 @@ namespace GitHubConsole
                 Match autoColor = Regex.Match(content, @"\$[^ ]+");
 
                 if (autoColor.Success)
-                    color_str = getAutoColor(autoColor.Value) ?? string.Empty;
+                    color_str = GetAutoColor(autoColor.Value) ?? string.Empty;
                 else
                     color_str = string.Empty;
             }
 
             return $"[{color_str}:{Handle(content)}]";
         }
-        protected virtual bool? conditionBlock(string format)
+        protected virtual bool? ValidateCondition(string condition)
         {
             return null;
         }
-        protected virtual string functionBlock(string function, string[] args)
+        protected virtual string EvaluateFunction(string function, string[] args)
         {
             return function + "{" + string.Join("@", args) + "}";
         }

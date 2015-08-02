@@ -393,7 +393,7 @@ namespace GitHubConsole.Commands
                 ColorConsole.WriteLine(text);
             }
 
-            protected override string getVariable(string variable)
+            protected override string GetVariable(string variable)
             {
                 switch (variable.Substring(1))
                 {
@@ -414,9 +414,9 @@ namespace GitHubConsole.Commands
                         return variable;
                 }
             }
-            protected override string getAutoColor(string content)
+            protected override string GetAutoColor(string variable)
             {
-                switch (content.Substring(1))
+                switch (variable.Substring(1))
                 {
                     case "number":
                     case "+number":
@@ -444,9 +444,9 @@ namespace GitHubConsole.Commands
                 }
             }
             
-            protected override bool? conditionBlock(string format)
+            protected override bool? ValidateCondition(string condition)
             {
-                switch (format.Substring(1))
+                switch (condition.Substring(1))
                 {
                     case "labels": return issue.Labels.Count > 0;
                     case "assignee": return issue.Assignee != null;
@@ -454,7 +454,7 @@ namespace GitHubConsole.Commands
                     default: return null;
                 }
             }
-            protected override string functionBlock(string function, string[] args)
+            protected override string EvaluateFunction(string function, string[] args)
             {
                 string def = function + "{" + string.Join("@", args) + "}";
                 switch (function.Substring(1))
