@@ -1,24 +1,25 @@
-﻿using System;
+﻿using Octokit;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GitHubConsole
 {
     public static class ColorResolver
     {
-        public static ConsoleColor GetConsoleColor(string color)
+        public static ConsoleColor GetConsoleColor(Label label)
         {
-            return GetConsoleColor(ColorTranslator.FromHtml("#ff" + color));
+            if (label == null)
+                throw new ArgumentNullException(nameof(label));
+
+            return GetConsoleColor(ColorTranslator.FromHtml("#ff" + label.Color));
         }
         public static ConsoleColor GetConsoleColor(Color color)
         {
             double closest = double.PositiveInfinity;
             ConsoleColor res = ConsoleColor.Gray;
 
-            foreach(var c in consoleColors)
+            foreach (var c in consoleColors)
             {
                 double dist = manhattanDistance(getColor(c), color);
                 if (dist < closest)

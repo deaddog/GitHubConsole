@@ -64,7 +64,7 @@ namespace GitHubConsole.Commands
 
         public IssuesCommand()
         {
-            outputFormat.SetDefault(Config.Default["issues.format"] ?? "%#% %user% %title% %labels%");
+            outputFormat.SetDefault(Config.Default["issues.format"] ?? "[auto:$+number] [auto:$assignee+] $title ?labels{[DarkYellow:(]@labels{[auto:$label]@,@,}[DarkYellow:)]}");
             assignee.Validator.Add(x => x.Length > 0, "A user must be specified for the " + assignee.Name + " parameter.");
             notAssignee.Validator.Add(x => x.Length > 0, "A user must be specified for the " + assignee.Name + " parameter.");
             labels.Validator.Add(x => x.Length > 0, "At least one label name must be supplied for the " + labels.Name + " parameter.");
@@ -75,7 +75,7 @@ namespace GitHubConsole.Commands
                 + "  gihub issues <issues> " + remLabels.Name + " <label1> <label2>...");
 
             setTitle.Validator.Add(x => x.Trim().Length > 0, "An issue cannot have an empty title.");
-            
+
             Validator.AddIfFirstNotRest(assignee, hasAssignee, noAssignee, notAssignee);
             Validator.AddIfFirstNotRest(notAssignee, hasAssignee, noAssignee);
 
@@ -360,29 +360,127 @@ namespace GitHubConsole.Commands
                            let n = v.Assignee == null ? "" : v.Assignee.Login
                            select n.Length).Max();
 
-            string format = outputFormat.Value;
+            string format = outputFormat.Value.Replace("\\n", "\n");
 
-            format = format.Replace("%#%", "[{1}:{0}]");
-            format = format.Replace("%user%", "[{3}:{2}]");
-            format = format.Replace("%title%", "{4}");
-            format = format.Replace("%labels%", "{5}");
-
+            IssuePrinter printer = new IssuePrinter(len, namelen, format);
             foreach (var v in issues)
+                printer.Print(v);
+        }
+
+        private class IssuePrinter : FormattedPrinter
+        {
+            private Issue issue;
+            private Label label;
+
+            private readonly int maxNumberWidth;
+            private readonly int maxAssigneeWidth;
+
+            public IssuePrinter(int maxNumberWidth, int maxAssigneeWidth, string format)
+                : base(format)
             {
-                string name = v.Assignee == null ? "" : v.Assignee.Login;
+                this.issue = null;
+                this.label = null;
 
-                string labels = "";
-                if (v.Labels.Count > 0 && format.Contains("{5}"))
+                this.maxNumberWidth = maxNumberWidth;
+                this.maxAssigneeWidth = maxAssigneeWidth;
+            }
+
+            public void Print(Issue issue)
+            {
+                this.issue = issue;
+
+                string text = Handle();
+                ColorConsole.WriteLine(text);
+            }
+
+            protected override string GetVariable(string variable)
+            {
+                switch (variable)
                 {
-                    labels = string.Format("[Issue_Par:(]{0}[Issue_Par:)]",
-                        string.Join(", ", v.Labels.Select(l => "[" + ColorResolver.GetConsoleColor(l.Color) + ":" + l.Name + "]")));
-                }
+                    case "number": return issue.Number.ToString();
 
-                ColorConsole.WriteLine(string.Format(format,
-                    v.Number.ToString().PadLeft(len), v.ClosedAt.HasValue ? "Issue_Closed" : "Issue_Open",
-                    name.PadRight(namelen), name == GitHub.Client.Credentials.Login ? "Issue_User_Self" : "Issue_User",
-                    v.Title.Trim().Replace("[", "\\[").Replace("]", "\\]"),
-                    labels));
+                    case "assignee": return issue.Assignee?.Login ?? "";
+
+                    case "title": return ColorConsole.EscapeColor(issue.Title);
+                    case "description": return ColorConsole.EscapeColor(issue.Body);
+
+                    case "label": return label.Name;
+
+                    default:
+                        return base.GetVariable(variable);
+                }
+            }
+            protected override int? GetAlignedLength(string variable)
+            {
+                switch (variable)
+                {
+                    case "number": return maxNumberWidth;
+                    case "assignee": return maxAssigneeWidth;
+
+                    default: return base.GetAlignedLength(variable);
+                }
+            }
+            protected override string GetAutoColor(string variable)
+            {
+                switch (variable)
+                {
+                    case "number": return (issue?.ClosedAt == null) ? "Issue_Open" : "Issue_Closed";
+
+                    case "assignee": return (issue?.Assignee?.Login == GitHub.CurrentUser?.Login) ? "Issue_User_Self" : "Issue_User";
+
+                    case "label": return label == null ? string.Empty : ColorResolver.GetConsoleColor(label).ToString();
+
+                    default: return base.GetAutoColor(variable);
+                }
+            }
+
+            protected override bool? ValidateCondition(string condition)
+            {
+                switch (condition)
+                {
+                    case "labels": return issue.Labels.Count > 0;
+                    case "assignee": return issue.Assignee != null;
+                    case "mine": return issue?.Assignee?.Login == GitHub.CurrentUser?.Login;
+                    case "description": return issue.Body != null && issue.Body.Length > 0;
+                    default: return base.ValidateCondition(condition);
+                }
+            }
+            protected override string EvaluateFunction(string function, string[] args)
+            {
+                switch (function)
+                {
+                    case "labels":
+                        if (args.Length == 1)
+                            return labelsFunction(args[0], " ", " ");
+                        else if (args.Length == 2)
+                            return labelsFunction(args[0], args[1], args[1]);
+                        else if (args.Length >= 3)
+                            return labelsFunction(args[0], args[1], args[2]);
+                        else
+                            return base.EvaluateFunction(function, args);
+
+                    default: return base.EvaluateFunction(function, args);
+                }
+            }
+
+            private string labelsFunction(string format, string separator1, string separator2)
+            {
+                if (issue.Labels.Count == 0)
+                    return string.Empty;
+
+                label = issue.Labels[0];
+                string res = Handle(format);
+
+                if (issue.Labels.Count == 1)
+                    return res;
+
+                label = issue.Labels[1];
+                for (int i = 2; i < issue.Labels.Count; i++)
+                {
+                    res += separator1 + Handle(format);
+                    label = issue.Labels[i];
+                }
+                return res + separator2 + Handle(format);
             }
         }
 
@@ -395,7 +493,7 @@ namespace GitHubConsole.Commands
             List<string> pre = new List<string>(preSelected);
 
             var rr = knownLabelNames.MenuSelectMultiple(new MenuSettings() { Cleanup = MenuCleanup.RemoveMenu },
-                x => "[" + ColorResolver.GetConsoleColor(x.Color) + ":" + x.Name + "]",
+                x => "[" + ColorResolver.GetConsoleColor(x) + ":" + x.Name + "]",
                 x => "[DarkGray:" + x.Name + "]",
                 x => pre.Contains(x.Name));
 

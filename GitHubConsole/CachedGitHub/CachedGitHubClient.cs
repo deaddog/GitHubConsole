@@ -6,14 +6,12 @@ namespace GitHubConsole.CachedGitHub
     public class CachedGitHubClient : Fallback<GitHubClient>, IGitHubClient
     {
         private CachedIssuesClient issues;
-        public CachedGitHubClient(GitHubClient client)
-            :base(client)
+        public CachedGitHubClient(ProductHeaderValue productInformation, Credentials credentials)
+            :base(new GitHubClient(productInformation) { Credentials = credentials })
         {
-            this.issues = new CachedIssuesClient(client);
+            this.issues = new CachedIssuesClient(this.fallback);
         }
-
-        public Credentials Credentials => fallback.Credentials;
-
+        
         public IConnection Connection => fallback.Connection;
         public IAuthorizationsClient Authorization => fallback.Authorization;
         public IActivitiesClient Activity => fallback.Activity;

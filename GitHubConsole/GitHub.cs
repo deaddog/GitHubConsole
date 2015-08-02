@@ -13,6 +13,7 @@ namespace GitHubConsole
         private static readonly string clientHeader = "GitHubC#Console";
 
         private static CachedGitHubClient client;
+        private static User currentUser;
         private static Message validated;
         private static bool accessPath = false;
 
@@ -68,33 +69,32 @@ namespace GitHubConsole
             return value;
         }
 
-        private static T ensureValidated<T>(string name, T value)
+        private static void ensureValidated(string name)
         {
             if (validated == null)
                 throw new InvalidOperationException($"{name} cannot be retrieved before running the {nameof(ValidateGitDirectory)} method.");
 
             if (validated != Message.NoError)
                 throw new InvalidOperationException($"{name} cannot be retrieved when git validation was not successfull.");
+        }
+        private static T ensureValidated<T>(string name, T value)
+        {
+            ensureValidated(name);
+
+            return value;
+        }
+        private static T ensureValidated<T>(string name, ref T value, Func<T> create) where T : class
+        {
+            ensureValidated(name);
+
+            if (value == null)
+                value = create();
 
             return value;
         }
 
-        public static CachedGitHubClient Client
-        {
-            get
-            {
-                if (validated == null)
-                    throw new InvalidOperationException($"{nameof(Client)} cannot be retrieved before running the {nameof(ValidateGitDirectory)} method.");
-
-                if (validated != Message.NoError)
-                    throw new InvalidOperationException($"{nameof(Client)} cannot be retrieved when git validation was not successfull.");
-
-                if (client == null)
-                    client = new CachedGitHub.CachedGitHubClient(new GitHubClient(new ProductHeaderValue(clientHeader)) { Credentials = cred });
-
-                return client;
-            }
-        }
+        public static CachedGitHubClient Client => ensureValidated(nameof(Client), ref client, () => new CachedGitHubClient(new ProductHeaderValue(clientHeader), cred));
+        public static User CurrentUser => ensureValidated(nameof(CurrentUser), ref currentUser, () => Client?.User?.Current().Result);
 
         private static bool isGitRepo()
         {
