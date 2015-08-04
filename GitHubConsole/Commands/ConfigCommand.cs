@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 namespace GitHubConsole.Commands
 {
+    [Description("Sets configuration for the application")]
     public class ConfigCommand : Command
     {
         private Dictionary<string, string> setValues = new Dictionary<string, string>();

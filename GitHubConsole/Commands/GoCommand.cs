@@ -2,6 +2,7 @@
 
 namespace GitHubConsole.Commands
 {
+    [Description("Launches various links to GitHub.com in your default browser")]
     public class GoCommand : Command
     {
         private const string GITHUBCOM = "Github.com";

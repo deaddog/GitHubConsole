@@ -7,6 +7,7 @@ using System.Linq;
 
 namespace GitHubConsole.Commands
 {
+    [Description("Lists, modifies and creates github issues for this repository")]
     public class IssuesCommand : Command
     {
         private RepositoryIssueRequest request = new RepositoryIssueRequest();
