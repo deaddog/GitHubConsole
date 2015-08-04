@@ -65,7 +65,7 @@ namespace GitHubConsole.Commands
 
         public IssuesCommand()
         {
-            outputFormat.SetDefault(Config.Default["issues.format"] ?? "[auto:$+number] [auto:$assignee+] $title ?labels{[DarkYellow:(]@labels{[auto:$label]@,@,}[DarkYellow:)]}");
+            outputFormat.SetDefault(Config.Default["issues.format"] ?? "[auto:$+number] [auto:$assignee+] $title ?labels{[DarkYellow:(]@labels{[auto:$label]@ }[DarkYellow:)]}");
             assignee.Validator.Add(x => x.Length > 0, "A user must be specified for the " + assignee.Name + " parameter.");
             notAssignee.Validator.Add(x => x.Length > 0, "A user must be specified for the " + assignee.Name + " parameter.");
             labels.Validator.Add(x => x.Length > 0, "At least one label name must be supplied for the " + labels.Name + " parameter.");
