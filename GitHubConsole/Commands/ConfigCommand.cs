@@ -42,7 +42,7 @@ namespace GitHubConsole.Commands
             remove.Callback += () => removeKeys.AddRange(remove.Value);
 
             this.Validator.AddIfFirstNotRest(all, clear, set, remove, edit);
-            this.Validator.AddIfFirstNotRest(edit, clear, set, remove, list);
+            this.Validator.AddIfFirstNotRest(edit, clear, set, remove);
             this.Validator.AddOnlyOne(global, all);
         }
 
@@ -50,6 +50,10 @@ namespace GitHubConsole.Commands
         {
             Configuration conf = global.IsSet ? Config.Global : Config.Local;
             IConfiguration iconf = all.IsSet ? Config.Default : conf;
+
+            bool shouldList = list.IsSet;
+            if (!(set.IsSet || remove.IsSet || clear.IsSet || edit.IsSet))
+                shouldList = true;
 
             if (clear.IsSet)
                 conf.Clear();
@@ -71,7 +75,8 @@ namespace GitHubConsole.Commands
                 Config.Reset();
             }
 
-            if (list.IsSet)
+            if (shouldList)
+            {
                 foreach (var pair in iconf.GetAll())
                     ColorConsole.WriteLine($"{pair.Key}={ColorConsole.EscapeColor(pair.Value)}");
         }
