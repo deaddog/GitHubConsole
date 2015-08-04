@@ -77,8 +77,17 @@ namespace GitHubConsole.Commands
 
             if (shouldList)
             {
+                bool any = false;
                 foreach (var pair in iconf.GetAll())
+                {
+                    any = true;
                     ColorConsole.WriteLine($"{pair.Key}={ColorConsole.EscapeColor(pair.Value)}");
+                }
+                if (!any && all.IsSet)
+                    ColorConsole.WriteLine("[DarkCyan:Both local and global configuration files are empty.");
+                else if (!any)
+                    ColorConsole.WriteLine($"[DarkCyan:{(global.IsSet ? "Global" : "Local")} configuration file is empty.]");
+            }
         }
     }
 }
