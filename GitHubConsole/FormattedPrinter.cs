@@ -70,9 +70,12 @@ namespace GitHubConsole
                             index += replace.Length;
                         }
                         break;
+                    case '\\':
+                        index += 2;
+                        break;
 
                     default: // Skip content
-                        index = text.IndexOfAny(new char[] { '[', '?', '@', '$' }, index);
+                        index = text.IndexOfAny(new char[] { '[', '?', '@', '$', '\\' }, index);
                         if (index < 0) index = text.Length;
                         break;
                 }
@@ -163,6 +166,7 @@ namespace GitHubConsole
             int count = 0;
             do
             {
+                if (text[index] == '\\') { index += 2; continue; }
                 if (text[index] == open) count++;
                 else if (text[index] == close) count--;
                 index++;
