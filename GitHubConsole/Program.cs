@@ -50,6 +50,12 @@ namespace GitHubConsole
 
                 Validator.Add(GetHelpMessage);
             }
+
+            protected override bool HandleAlias(string alias, out string replaceby)
+            {
+                replaceby = Config.Default["alias." + alias];
+                return replaceby != null;
+            }
         }
     }
 }
