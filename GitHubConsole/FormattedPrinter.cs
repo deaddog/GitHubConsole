@@ -71,7 +71,15 @@ namespace GitHubConsole
                         }
                         break;
                     case '\\':
-                        index += 2;
+                        if (text.Length == index + 1)
+                            index++;
+                        else if (text[index + 1] == '[' || text[index + 1] == ']')
+                            index += 2;
+                        else
+                        {
+                            text = text.Substring(0, index) + text.Substring(index + 1);
+                            index++;
+                        }
                         break;
 
                     default: // Skip content
