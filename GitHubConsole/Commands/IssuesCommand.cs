@@ -439,6 +439,8 @@ namespace GitHubConsole.Commands
                 {
                     case "labels": return issue.Labels.Count > 0;
                     case "assignee": return issue.Assignee != null;
+                    case "open": return issue.State == ItemState.Open;
+                    case "closed":return issue.State == ItemState.Closed;
                     case "mine": return issue?.Assignee?.Login == GitHub.CurrentUser?.Login;
                     case "description": return issue.Body != null && issue.Body.Length > 0;
                     default: return base.ValidateCondition(condition);
