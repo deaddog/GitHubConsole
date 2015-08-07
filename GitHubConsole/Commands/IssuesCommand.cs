@@ -389,9 +389,7 @@ namespace GitHubConsole.Commands
             public void Print(Issue issue)
             {
                 this.issue = issue;
-
-                string text = Handle();
-                ColorConsole.WriteLine(text);
+                PrintFormatLine();
             }
 
             protected override string GetVariable(string variable)
@@ -470,7 +468,7 @@ namespace GitHubConsole.Commands
                     return string.Empty;
 
                 label = issue.Labels[0];
-                string res = Handle(format);
+                string res = Evaluate(format);
 
                 if (issue.Labels.Count == 1)
                     return res;
@@ -478,10 +476,10 @@ namespace GitHubConsole.Commands
                 label = issue.Labels[1];
                 for (int i = 2; i < issue.Labels.Count; i++)
                 {
-                    res += separator1 + Handle(format);
+                    res += separator1 + Evaluate(format);
                     label = issue.Labels[i];
                 }
-                return res + separator2 + Handle(format);
+                return res + separator2 + Evaluate(format);
             }
         }
 

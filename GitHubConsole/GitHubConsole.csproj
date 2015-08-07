@@ -58,7 +58,6 @@
     <Compile Include="Commands\IssuesCommand.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="FileEditing.cs" />
-    <Compile Include="FormattedPrinter.cs" />
     <Compile Include="GitHub.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
