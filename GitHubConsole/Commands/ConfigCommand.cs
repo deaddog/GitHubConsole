@@ -22,6 +22,9 @@ namespace GitHubConsole.Commands
         [Description("Lists all key value combinations in the configuration file.")]
         private readonly FlagParameter list = null;
 
+        [Name("--format", "-f"), Description("Allows for describing an output format when listing configuration files.")]
+        private readonly Parameter<string> format = null;
+
         [Description("Commands will apply to the global configuration file.")]
         private readonly FlagParameter global = null;
 
@@ -30,6 +33,8 @@ namespace GitHubConsole.Commands
 
         public ConfigCommand()
         {
+            format.SetDefault(Config.Default["config.format"] ?? "$key=$value");
+
             set.Validator.Add(x => x.Length == 2,
                 "Setting config values requires exactly two arguments:\n" +
                 $"  [Example:github config {set.Name} <key> <value>]");
@@ -78,7 +83,7 @@ namespace GitHubConsole.Commands
             if (shouldList)
             {
                 bool any = false;
-                ConfigPrinter printer = new ConfigPrinter("$key=$value");
+                ConfigPrinter printer = new ConfigPrinter(format.Value);
 
                 foreach (var pair in iconf.GetAll())
                 {
