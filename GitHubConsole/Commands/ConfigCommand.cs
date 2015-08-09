@@ -78,15 +78,45 @@ namespace GitHubConsole.Commands
             if (shouldList)
             {
                 bool any = false;
+                ConfigPrinter printer = new ConfigPrinter("$key=$value");
+
                 foreach (var pair in iconf.GetAll())
                 {
                     any = true;
-                    ColorConsole.WriteLine($"{pair.Key}={ColorConsole.EscapeColor(pair.Value)}");
+                    printer.Print(pair);
                 }
+
                 if (!any && all.IsSet)
                     ColorConsole.WriteLine("[DarkCyan:Both local and global configuration files are empty.");
                 else if (!any)
                     ColorConsole.WriteLine($"[DarkCyan:{(global.IsSet ? "Global" : "Local")} configuration file is empty.]");
+            }
+        }
+
+        private class ConfigPrinter : FormattedPrinter
+        {
+            private KeyValuePair<string, string> pair;
+
+            public ConfigPrinter(string format)
+                :base(format)
+            {
+            }
+
+            public void Print(KeyValuePair<string,string> pair)
+            {
+                this.pair = pair;
+                PrintFormatLine();
+            }
+
+            protected override string GetVariable(string variable)
+            {
+                switch (variable)
+                {
+                    case "key":return pair.Key;
+                    case "value":return ColorConsole.EscapeColor(pair.Value);
+
+                    default: return base.GetVariable(variable);
+                }
             }
         }
     }
