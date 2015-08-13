@@ -291,7 +291,7 @@ namespace GitHubConsole.Commands
             if (create.IsSet)
             {
                 NewIssue nIssue = new NewIssue(setTitle.Value.Trim());
-                nIssue.Body = setDescription.Value.Trim();
+                nIssue.Body = setDescription.Value?.Trim();
 
                 if (take.IsSet)
                     nIssue.Assignee = assignUser;
@@ -323,9 +323,9 @@ namespace GitHubConsole.Commands
                     else update.Assignee = issues[i].Assignee?.Login;
 
                     if (setTitle.IsSet || edit.IsSet)
-                        update.Title = setTitle.Value;
+                        update.Title = setTitle.Value.Trim();
                     if (setDescription.IsSet || edit.IsSet)
-                        update.Body = setDescription.Value;
+                        update.Body = setDescription.Value?.Trim();
 
                     if (editLabels.IsSet)
                     {
