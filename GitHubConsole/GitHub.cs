@@ -136,7 +136,7 @@ namespace GitHubConsole
 
         private static bool findGitHubRemote()
         {
-            string domain = @"https://github\.com/|git@github\.com:|git://github\.com/";
+            string domain = @"https?://github\.com/|git@github\.com:|git://github\.com/";
             string user = @"[^/]+";
             string proj = @"([^.]|\.[^g]|\.g[^i]|\.gi[^t]|\.git.)+";
             var r = new Regex($@"^({domain})(?<user>{user})/(?<proj>{proj})(\.git)?$", RegexOptions.IgnoreCase);
@@ -157,6 +157,9 @@ namespace GitHubConsole
                     index = i;
                     break;
                 }
+
+            if (remotes.Count == 0)
+                return false;
 
             var m = r.Match(remotes[index].Item2);
             if (m.Success)
