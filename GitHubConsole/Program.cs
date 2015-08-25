@@ -26,7 +26,7 @@ namespace GitHubConsole
             }
 
 #if DEBUG
-            Command.SimulateREPL(() => new MainCommand(),"github", "quit", HELP);
+            Command.SimulateREPL(() => new MainCommand(), "github", "quit", HELP);
 #else
             try { new MainCommand().RunCommand(args, HELP); }
             catch (AggregateException aggex) when (aggex.InnerExceptions.Count == 1 && aggex.InnerException is Octokit.AuthorizationException)
@@ -46,6 +46,7 @@ namespace GitHubConsole
             {
                 SubCommands.Add("config", new ConfigCommand());
                 SubCommands.Add("issues", new IssuesCommand());
+                SubCommands.Add("labels", new LabelsCommand());
                 SubCommands.Add("go", new GoCommand());
 
                 Validator.Add(GetHelpMessage);
