@@ -271,14 +271,16 @@ namespace GitHubConsole.Commands
         {
             if (!labels.IsSet)
                 return true;
+            
+            List<string> lc = lbls.Select(x => x.ToLower()).ToList();
 
-            var par = new Stack<string>(labels.Value);
+            var par = new Stack<string>(labels.Value.Select(x => x.ToLower()));
             while (par.Count > 0)
             {
                 var p = par.Pop();
-                if (p.StartsWith("^") && lbls.Contains(p.Substring(1)))
+                if (p.StartsWith("^") && lc.Contains(p.Substring(1)))
                     return false;
-                else if (!p.StartsWith("^") && !lbls.Contains(p))
+                else if (!p.StartsWith("^") && !lc.Contains(p))
                     return false;
             }
             return true;
