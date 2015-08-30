@@ -84,6 +84,8 @@ namespace GitHubConsole.Commands
         private readonly FlagParameter delete = null;
         [Name("--force", "-f"), Description("Used to force the execution of a command, despite warnings.")]
         private readonly FlagParameter force = null;
+        [Description("Deletes all un-used labels.")]
+        private readonly FlagParameter prune = null;
 
         [NoName]
         private readonly Parameter<string[]> labels = null;
@@ -96,8 +98,12 @@ namespace GitHubConsole.Commands
 
             labels.Validator.AddForeach(x => ExistingLabels.Exists(x), x => $"The label {x} does not exist.");
 
-            Validator.AddOnlyOne(create, delete);
+            Validator.AddOnlyOne(create, delete, prune);
+
             Validator.AddIfFirstNotRest(delete, name, color);
+            Validator.AddOnlyOne(prune, force);
+            Validator.AddIfFirstNotRest(prune, name, color);
+
             Validator.Add(() => delete.IsSet && labels.Value.Length == 0 ? "You must specify which labels to delete: \n    [Example:github issues --delete bug]" : Message.NoError);
 
             Validator.Add(() => name.IsSet && labels.Value.Length > 1 ? "Label name can only be set for a single label." : Message.NoError);
@@ -173,6 +179,20 @@ namespace GitHubConsole.Commands
                 {
                     GitHub.Client.Issue.Labels.Delete(GitHub.Username, GitHub.Project, n).Wait();
                     ColorConsole.WriteLine($"Label [{ColorResolver.GetConsoleColor(l)}:{l.Name}] has been deleted.");
+                }
+            }
+        }
+        private void PruneLabels()
+        {
+            foreach (var lbl in ExistingLabels.GetLabels())
+            {
+                var rir = new RepositoryIssueRequest();
+                rir.Labels.Add(lbl.Name);
+
+                if (!GitHub.Client.Issue.GetAllForRepository(GitHub.Username, GitHub.Project, rir).Result.Any())
+                {
+                    GitHub.Client.Issue.Labels.Delete(GitHub.Username, GitHub.Project, lbl.Name).Wait();
+                    ColorConsole.WriteLine($"Label [{ColorResolver.GetConsoleColor(lbl)}:{lbl.Name}] has been deleted.");
                 }
             }
         }
