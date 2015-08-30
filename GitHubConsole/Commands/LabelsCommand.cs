@@ -73,18 +73,18 @@ namespace GitHubConsole.Commands
         #endregion
 
         [Description("Creates a new label.")]
-        private readonly FlagParameter create;
+        private readonly FlagParameter create = null;
 
         [Description("Sets the name of a label.")]
-        private readonly Parameter<string> name;
+        private readonly Parameter<string> name = null;
         [Description("Sets the color of a label.")]
-        private readonly Parameter<string> color;
+        private readonly Parameter<string> color = null;
 
         [Description("Deletes one or more labels.")]
-        private readonly FlagParameter delete;
+        private readonly FlagParameter delete = null;
 
         [NoName]
-        private readonly Parameter<string[]> labels;
+        private readonly Parameter<string[]> labels = null;
 
         public LabelsCommand()
         {
