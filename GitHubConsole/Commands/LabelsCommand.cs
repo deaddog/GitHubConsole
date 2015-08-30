@@ -2,22 +2,53 @@
 using Octokit;
 using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace GitHubConsole.Commands
 {
     [Description("Lists, modifies, creates and deletes github labels for this repository")]
     public class LabelsCommand : Command
     {
+        [Description("Sets the name of a label.")]
+        private readonly Parameter<string> name;
+        [Description("Sets the color of a label.")]
+        private readonly Parameter<string> color;
+
+        [NoName]
+        private readonly Parameter<string[]> labels;
+
         private Label[] _allLabels = null;
         private Label[] allLabels => _allLabels ?? (_allLabels = GitHub.Client.Issue.Labels.GetAllForRepository(GitHub.Username, GitHub.Project).Result.ToArray());
 
         public LabelsCommand()
         {
+            name.Validator.Add(x => !Exists(x), x => $"A label called {x} already exists.");
+            color.Validator.Add(x => x.Length == 0 || Regex.IsMatch(x, "#?[0-9a-f]{6}") || Exists(x), "You must specify a valid hex color value.");
+            color.Callback += () => color.Value = color.Value.TrimStart('#');
+
+            labels.Validator.AddForeach(x => Exists(x), x => $"The label {x} does not exist.");
+
+            Validator.Add(() => name.IsSet && labels.Value.Length > 1 ? "Label name can only be set for a single label." : Message.NoError);
+        }
+
+        protected override Message GetHelpMessage()
+        {
+            return
+                "Provides information about and operations on labels on GitHub.com.\n" +
+                "To modify a specific label use:\n\n" +
+                $"  [Example:github labels bug {name.Name} <newname> {color.Name} <newcolor>]\n\n" +
+                "Below is a complete list of all parameters for this command:" +
+
+            base.GetParametersMessage(2);
         }
 
         private bool Exists(string labelname)
         {
             return allLabels.Any(x => x.Name.Equals(labelname, StringComparison.InvariantCultureIgnoreCase));
+        }
+        private bool ColorInUse(string color)
+        {
+            return allLabels.Any(x => x.Color.Equals(color, StringComparison.InvariantCultureIgnoreCase));
         }
         private Label Find(string labelname)
         {
@@ -26,8 +57,19 @@ namespace GitHubConsole.Commands
 
         protected override void Execute()
         {
-            foreach (var l in allLabels)
-                ColorConsole.WriteLine($"[{ColorResolver.GetConsoleColor(l)}:{l.Name}]");
+            if (name.IsSet || color.IsSet)
+            {
+                foreach (var n in labels.Value)
+                {
+                    var l = Find(n);
+                    var l2 = GitHub.Client.Issue.Labels.Update(GitHub.Username, GitHub.Project, l.Name,
+                        new LabelUpdate(name.IsSet ? name.Value : l.Name, color.IsSet ? color.Value : l.Color)).Result;
+                    ColorConsole.WriteLine($"Updated [{ColorResolver.GetConsoleColor(l)}:{l.Name}] -> [{ColorResolver.GetConsoleColor(l2)}:{l2.Name}].");
+                }
+            }
+            else
+                foreach (var l in allLabels)
+                    ColorConsole.WriteLine($"[{ColorResolver.GetConsoleColor(l)}:{l.Name}]");
         }
     }
 }
