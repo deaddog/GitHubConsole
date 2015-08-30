@@ -82,6 +82,8 @@ namespace GitHubConsole.Commands
 
         [Description("Deletes one or more labels.")]
         private readonly FlagParameter delete = null;
+        [Name("--force", "-f"), Description("Used to force the execution of a command, despite warnings.")]
+        private readonly FlagParameter force = null;
 
         [NoName]
         private readonly Parameter<string[]> labels = null;
@@ -165,8 +167,8 @@ namespace GitHubConsole.Commands
                 var rir = new RepositoryIssueRequest();
                 rir.Labels.Add(n);
 
-                if (GitHub.Client.Issue.GetAllForRepository(GitHub.Username, GitHub.Project, rir).Result.Any())
-                    ColorConsole.WriteLine($"Label [{ColorResolver.GetConsoleColor(l)}:{l.Name}] is in use.");
+                if (!force.IsSet && GitHub.Client.Issue.GetAllForRepository(GitHub.Username, GitHub.Project, rir).Result.Any())
+                    ColorConsole.WriteLine($"Label [{ColorResolver.GetConsoleColor(l)}:{l.Name}] is in use. Use force to remove:\n  [Example:github labels {delete.Name} {l.Name} {force.Name}]");
                 else
                 {
                     GitHub.Client.Issue.Labels.Delete(GitHub.Username, GitHub.Project, n).Wait();
