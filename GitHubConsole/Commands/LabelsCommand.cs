@@ -65,6 +65,9 @@ namespace GitHubConsole.Commands
 
         #endregion
 
+        [Description("Creates a new label.")]
+        private readonly FlagParameter create;
+
         [Description("Sets the name of a label.")]
         private readonly Parameter<string> name;
         [Description("Sets the color of a label.")]
@@ -100,7 +103,9 @@ namespace GitHubConsole.Commands
 
         protected override void Execute()
         {
-            if (name.IsSet || color.IsSet)
+            if (create.IsSet)
+                CreateLabel();
+            else if (name.IsSet || color.IsSet)
             {
                 foreach (var n in labels.Value)
                 {
@@ -113,6 +118,33 @@ namespace GitHubConsole.Commands
             else
                 foreach (var l in allLabels)
                     ColorConsole.WriteLine($"[{ColorResolver.GetConsoleColor(l)}:{l.Name}]");
+        }
+
+        private void CreateLabel()
+        {
+            if (!name.IsSet)
+                name.Value = ColorConsole.ReadLine("Label name: ", validator: name.Validator);
+            name.Value = name.Value?.Trim();
+
+            if (name.Value == null || name.Value.Length == 0)
+            {
+                ColorConsole.WriteLine("No name specified. Aborting.");
+                return;
+            }
+
+            if (!name.IsSet && !color.IsSet)
+            {
+                ColorConsole.WriteLine("\nSpecify a label color (in hex-form) or the name of another label from which color should be copied.");
+                ColorConsole.WriteLine("Leave this empty to select a random color.");
+                color.Value = ColorConsole.ReadLine("Label color: ", validator: color.Validator);
+            }
+            if (color.Value == null || color.Value == string.Empty)
+                color.Value = LabelColors.GetUnusedOrRandom();
+            else if (!Regex.IsMatch(color.Value, "#?[0-9a-f]{6}"))
+                color.Value = allLabels.First(x => x.Name == color.Value).Color;
+
+            var l = GitHub.Client.Issue.Labels.Create(GitHub.Username, GitHub.Project, new NewLabel(name.Value, color.Value)).Result;
+            ColorConsole.WriteLine($"Created label [{ColorResolver.GetConsoleColor(l)}:{l.Name}].");
         }
     }
 }
