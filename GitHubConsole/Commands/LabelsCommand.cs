@@ -42,6 +42,29 @@ namespace GitHubConsole.Commands
 
         #endregion
 
+        #region Labels
+
+        private static class ExistingLabels
+        {
+            private static Label[] labels;
+
+            static ExistingLabels()
+            {
+                labels = GitHub.Client.Issue.Labels.GetAllForRepository(GitHub.Username, GitHub.Project).Result.ToArray();
+            }
+
+            public static bool Exists(string labelname)
+            {
+                return labels.Any(x => x.Name.Equals(labelname, StringComparison.InvariantCultureIgnoreCase));
+            }
+            public static Label Find(string labelname)
+            {
+                return labels.FirstOrDefault(x => x.Name.Equals(labelname, StringComparison.InvariantCultureIgnoreCase));
+            }
+        }
+
+        #endregion
+
         [Description("Sets the name of a label.")]
         private readonly Parameter<string> name;
         [Description("Sets the color of a label.")]
@@ -55,11 +78,11 @@ namespace GitHubConsole.Commands
 
         public LabelsCommand()
         {
-            name.Validator.Add(x => !Exists(x), x => $"A label called {x} already exists.");
-            color.Validator.Add(x => x.Length == 0 || Regex.IsMatch(x, "#?[0-9a-f]{6}") || Exists(x), "You must specify a valid hex color value.");
+            name.Validator.Add(x => !ExistingLabels.Exists(x), x => $"A label called {x} already exists.");
+            color.Validator.Add(x => x.Length == 0 || Regex.IsMatch(x, "#?[0-9a-f]{6}") || ExistingLabels.Exists(x), "You must specify a valid hex color value (or the name of an existing label).");
             color.Callback += () => color.Value = color.Value.TrimStart('#');
 
-            labels.Validator.AddForeach(x => Exists(x), x => $"The label {x} does not exist.");
+            labels.Validator.AddForeach(x => ExistingLabels.Exists(x), x => $"The label {x} does not exist.");
 
             Validator.Add(() => name.IsSet && labels.Value.Length > 1 ? "Label name can only be set for a single label." : Message.NoError);
         }
@@ -75,17 +98,9 @@ namespace GitHubConsole.Commands
             base.GetParametersMessage(2);
         }
 
-        private bool Exists(string labelname)
-        {
-            return allLabels.Any(x => x.Name.Equals(labelname, StringComparison.InvariantCultureIgnoreCase));
-        }
         private bool ColorInUse(string color)
         {
             return allLabels.Any(x => x.Color.Equals(color, StringComparison.InvariantCultureIgnoreCase));
-        }
-        private Label Find(string labelname)
-        {
-            return allLabels.FirstOrDefault(x => x.Name.Equals(labelname, StringComparison.InvariantCultureIgnoreCase));
         }
 
         protected override void Execute()
@@ -94,7 +109,7 @@ namespace GitHubConsole.Commands
             {
                 foreach (var n in labels.Value)
                 {
-                    var l = Find(n);
+                    var l = ExistingLabels.Find(n);
                     var l2 = GitHub.Client.Issue.Labels.Update(GitHub.Username, GitHub.Project, l.Name,
                         new LabelUpdate(name.IsSet ? name.Value : l.Name, color.IsSet ? color.Value : l.Color)).Result;
                     ColorConsole.WriteLine($"Updated [{ColorResolver.GetConsoleColor(l)}:{l.Name}] -> [{ColorResolver.GetConsoleColor(l2)}:{l2.Name}].");
