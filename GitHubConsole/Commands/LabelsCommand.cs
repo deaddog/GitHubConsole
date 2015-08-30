@@ -9,6 +9,39 @@ namespace GitHubConsole.Commands
     [Description("Lists, modifies, creates and deletes github labels for this repository")]
     public class LabelsCommand : Command
     {
+        #region Colors
+
+        private static class LabelColors
+        {
+            private static Random rnd = new Random();
+            private static string[] defaultColors = new string[]
+            {
+                "e11d21",
+                "eb6420",
+                "fbca04",
+                "009800",
+                "006b75",
+                "207de5",
+                "0052cc",
+                "5319e7",
+                "f7c6c7",
+                "fad8c7",
+                "fef2c0",
+                "bfe5bf",
+                "bfdadc",
+                "c7def8",
+                "bfd4f2",
+                "d4c5f9"
+            };
+
+            public static string GetUnusedOrRandom(Func<string, bool> inUse)
+            {
+                return defaultColors.FirstOrDefault(x => !inUse(x)) ?? defaultColors[rnd.Next(defaultColors.Length)];
+            }
+        }
+
+        #endregion
+
         [Description("Sets the name of a label.")]
         private readonly Parameter<string> name;
         [Description("Sets the color of a label.")]
