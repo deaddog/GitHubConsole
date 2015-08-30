@@ -1,5 +1,6 @@
 ﻿using CommandLineParsing;
 using Octokit;
+using System;
 using System.Linq;
 
 namespace GitHubConsole.Commands
@@ -12,6 +13,15 @@ namespace GitHubConsole.Commands
 
         public LabelsCommand()
         {
+        }
+
+        private bool Exists(string labelname)
+        {
+            return allLabels.Any(x => x.Name.Equals(labelname, StringComparison.InvariantCultureIgnoreCase));
+        }
+        private Label Find(string labelname)
+        {
+            return allLabels.FirstOrDefault(x => x.Name.Equals(labelname, StringComparison.InvariantCultureIgnoreCase));
         }
 
         protected override void Execute()
