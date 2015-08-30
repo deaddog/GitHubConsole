@@ -1,6 +1,7 @@
 ﻿using CommandLineParsing;
 using Octokit;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -61,6 +62,12 @@ namespace GitHubConsole.Commands
             {
                 return labels.FirstOrDefault(x => x.Name.Equals(labelname, StringComparison.InvariantCultureIgnoreCase));
             }
+
+            public static IEnumerable<Label> GetLabels()
+            {
+                foreach (var l in labels)
+                    yield return l;
+            }
         }
 
         #endregion
@@ -75,9 +82,6 @@ namespace GitHubConsole.Commands
 
         [NoName]
         private readonly Parameter<string[]> labels;
-
-        private Label[] _allLabels = null;
-        private Label[] allLabels => _allLabels ?? (_allLabels = GitHub.Client.Issue.Labels.GetAllForRepository(GitHub.Username, GitHub.Project).Result.ToArray());
 
         public LabelsCommand()
         {
@@ -116,7 +120,7 @@ namespace GitHubConsole.Commands
                 }
             }
             else
-                foreach (var l in allLabels)
+                foreach (var l in ExistingLabels.GetLabels())
                     ColorConsole.WriteLine($"[{ColorResolver.GetConsoleColor(l)}:{l.Name}]");
         }
 
@@ -141,7 +145,7 @@ namespace GitHubConsole.Commands
             if (color.Value == null || color.Value == string.Empty)
                 color.Value = LabelColors.GetUnusedOrRandom();
             else if (!Regex.IsMatch(color.Value, "#?[0-9a-f]{6}"))
-                color.Value = allLabels.First(x => x.Name == color.Value).Color;
+                color.Value = ExistingLabels.Find(color.Value).Color;
 
             var l = GitHub.Client.Issue.Labels.Create(GitHub.Username, GitHub.Project, new NewLabel(name.Value, color.Value)).Result;
             ColorConsole.WriteLine($"Created label [{ColorResolver.GetConsoleColor(l)}:{l.Name}].");
