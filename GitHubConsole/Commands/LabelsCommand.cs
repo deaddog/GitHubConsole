@@ -80,6 +80,9 @@ namespace GitHubConsole.Commands
         [Description("Sets the color of a label.")]
         private readonly Parameter<string> color;
 
+        [Description("Deletes one or more labels.")]
+        private readonly FlagParameter delete;
+
         [NoName]
         private readonly Parameter<string[]> labels;
 
@@ -90,6 +93,10 @@ namespace GitHubConsole.Commands
             color.Callback += () => color.Value = color.Value.TrimStart('#');
 
             labels.Validator.AddForeach(x => ExistingLabels.Exists(x), x => $"The label {x} does not exist.");
+
+            Validator.AddOnlyOne(create, delete);
+            Validator.AddIfFirstNotRest(delete, name, color);
+            Validator.Add(() => delete.IsSet && labels.Value.Length == 0 ? "You must specify which labels to delete: \n    [Example:github issues --delete bug]" : Message.NoError);
 
             Validator.Add(() => name.IsSet && labels.Value.Length > 1 ? "Label name can only be set for a single label." : Message.NoError);
         }
@@ -149,6 +156,23 @@ namespace GitHubConsole.Commands
 
             var l = GitHub.Client.Issue.Labels.Create(GitHub.Username, GitHub.Project, new NewLabel(name.Value, color.Value)).Result;
             ColorConsole.WriteLine($"Created label [{ColorResolver.GetConsoleColor(l)}:{l.Name}].");
+        }
+        private void DeleteLabel()
+        {
+            foreach (var n in labels.Value)
+            {
+                var l = ExistingLabels.Find(n);
+                var rir = new RepositoryIssueRequest();
+                rir.Labels.Add(n);
+
+                if (GitHub.Client.Issue.GetAllForRepository(GitHub.Username, GitHub.Project, rir).Result.Any())
+                    ColorConsole.WriteLine($"Label [{ColorResolver.GetConsoleColor(l)}:{l.Name}] is in use.");
+                else
+                {
+                    GitHub.Client.Issue.Labels.Delete(GitHub.Username, GitHub.Project, n).Wait();
+                    ColorConsole.WriteLine($"Label [{ColorResolver.GetConsoleColor(l)}:{l.Name}] has been deleted.");
+                }
+            }
         }
     }
 }
