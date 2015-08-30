@@ -34,9 +34,9 @@ namespace GitHubConsole.Commands
                 "d4c5f9"
             };
 
-            public static string GetUnusedOrRandom(Func<string, bool> inUse)
+            public static string GetUnusedOrRandom()
             {
-                return defaultColors.FirstOrDefault(x => !inUse(x)) ?? defaultColors[rnd.Next(defaultColors.Length)];
+                return defaultColors.FirstOrDefault(x => !ExistingLabels.Exists(x)) ?? defaultColors[rnd.Next(defaultColors.Length)];
             }
         }
 
@@ -96,11 +96,6 @@ namespace GitHubConsole.Commands
                 "Below is a complete list of all parameters for this command:" +
 
             base.GetParametersMessage(2);
-        }
-
-        private bool ColorInUse(string color)
-        {
-            return allLabels.Any(x => x.Color.Equals(color, StringComparison.InvariantCultureIgnoreCase));
         }
 
         protected override void Execute()
