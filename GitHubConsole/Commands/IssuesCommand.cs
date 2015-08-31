@@ -381,6 +381,8 @@ namespace GitHubConsole.Commands
             formatter.Conditions.Add<Issue>("mine", x => x?.Assignee?.Login == GitHub.CurrentUser?.Login);
             formatter.Conditions.Add<Issue>("description", x => x.Body != null && x.Body.Length > 0);
 
+            formatter.Functions.AddList("labels", (Issue x) => x.Labels, " ");
+
             formatter.WriteLines(issues, outputFormat.Value.Replace("\\n", "\n"));
         }
 
@@ -406,44 +408,6 @@ namespace GitHubConsole.Commands
             {
                 this.issue = issue;
                 PrintFormatLine();
-            }
-
-            protected override string EvaluateFunction(string function, string[] args)
-            {
-                switch (function)
-                {
-                    case "labels":
-                        if (args.Length == 1)
-                            return labelsFunction(args[0], " ", " ");
-                        else if (args.Length == 2)
-                            return labelsFunction(args[0], args[1], args[1]);
-                        else if (args.Length >= 3)
-                            return labelsFunction(args[0], args[1], args[2]);
-                        else
-                            return base.EvaluateFunction(function, args);
-
-                    default: return base.EvaluateFunction(function, args);
-                }
-            }
-
-            private string labelsFunction(string format, string separator1, string separator2)
-            {
-                if (issue.Labels.Count == 0)
-                    return string.Empty;
-
-                label = issue.Labels[0];
-                string res = Evaluate(format);
-
-                if (issue.Labels.Count == 1)
-                    return res;
-
-                label = issue.Labels[1];
-                for (int i = 2; i < issue.Labels.Count; i++)
-                {
-                    res += separator1 + Evaluate(format);
-                    label = issue.Labels[i];
-                }
-                return res + separator2 + Evaluate(format);
             }
         }
 
