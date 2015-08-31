@@ -374,6 +374,13 @@ namespace GitHubConsole.Commands
             formatter.Variables.Add<Issue>("description", x => ColorConsole.EscapeColor(x.Body), null, null);
             formatter.Variables.Add<Label>("label", x => x.Name, x => ColorResolver.GetConsoleColor(x), null);
 
+            formatter.Conditions.Add<Issue>("labels", x => x.Labels.Count > 0);
+            formatter.Conditions.Add<Issue>("assignee", x => x.Assignee != null);
+            formatter.Conditions.Add<Issue>("open", x => x.State == ItemState.Open);
+            formatter.Conditions.Add<Issue>("closed", x => x.State == ItemState.Closed);
+            formatter.Conditions.Add<Issue>("mine", x => x?.Assignee?.Login == GitHub.CurrentUser?.Login);
+            formatter.Conditions.Add<Issue>("description", x => x.Body != null && x.Body.Length > 0);
+
             formatter.WriteLines(issues, outputFormat.Value.Replace("\\n", "\n"));
         }
 
@@ -401,19 +408,6 @@ namespace GitHubConsole.Commands
                 PrintFormatLine();
             }
 
-            protected override bool? ValidateCondition(string condition)
-            {
-                switch (condition)
-                {
-                    case "labels": return issue.Labels.Count > 0;
-                    case "assignee": return issue.Assignee != null;
-                    case "open": return issue.State == ItemState.Open;
-                    case "closed": return issue.State == ItemState.Closed;
-                    case "mine": return issue?.Assignee?.Login == GitHub.CurrentUser?.Login;
-                    case "description": return issue.Body != null && issue.Body.Length > 0;
-                    default: return base.ValidateCondition(condition);
-                }
-            }
             protected override string EvaluateFunction(string function, string[] args)
             {
                 switch (function)
