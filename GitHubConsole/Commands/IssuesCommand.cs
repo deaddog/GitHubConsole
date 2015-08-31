@@ -271,7 +271,7 @@ namespace GitHubConsole.Commands
         {
             if (!labels.IsSet)
                 return true;
-            
+
             List<string> lc = lbls.Select(x => x.ToLower()).ToList();
 
             var par = new Stack<string>(labels.Value.Select(x => x.ToLower()));
@@ -366,11 +366,10 @@ namespace GitHubConsole.Commands
                            let n = v.Assignee == null ? "" : v.Assignee.Login
                            select n.Length).Max();
 
-            string format = outputFormat.Value.Replace("\\n", "\n");
+            Formatter formatter = new Formatter();
 
-            IssuePrinter printer = new IssuePrinter(len, namelen, format);
-            foreach (var v in issues)
-                printer.Print(v);
+
+            formatter.WriteLines(issues, outputFormat.Value.Replace("\\n", "\n"));
         }
 
         private class IssuePrinter : FormattedPrinter
