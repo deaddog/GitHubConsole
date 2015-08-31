@@ -47,7 +47,7 @@ namespace GitHubConsole.CachedGitHub
         }
         public Task<IReadOnlyList<Issue>> GetAllForRepository(string owner, string name, RepositoryIssueRequest request)
         {
-            throw new NotSupportedException($"{nameof(RepositoryIssueRequest)} is not supported in the {nameof(CachedIssuesClient)}.");
+            return fallback.GetAllForRepository(owner, name, request);
         }
         public Task<Issue> Update(string owner, string name, int number, IssueUpdate issueUpdate) => fallback.Update(owner, name, number, issueUpdate);
 
