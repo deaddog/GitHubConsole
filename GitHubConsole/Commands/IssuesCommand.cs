@@ -386,31 +386,6 @@ namespace GitHubConsole.Commands
             formatter.WriteLines(issues, outputFormat.Value.Replace("\\n", "\n"));
         }
 
-        private class IssuePrinter : FormattedPrinter
-        {
-            private Issue issue;
-            private Label label;
-
-            private readonly int maxNumberWidth;
-            private readonly int maxAssigneeWidth;
-
-            public IssuePrinter(int maxNumberWidth, int maxAssigneeWidth, string format)
-                : base(format)
-            {
-                this.issue = null;
-                this.label = null;
-
-                this.maxNumberWidth = maxNumberWidth;
-                this.maxAssigneeWidth = maxAssigneeWidth;
-            }
-
-            public void Print(Issue issue)
-            {
-                this.issue = issue;
-                PrintFormatLine();
-            }
-        }
-
         private Label[] selectLabels(string header, Label[] knownLabelNames, IEnumerable<string> preSelected)
         {
             int theader = Console.CursorTop;
