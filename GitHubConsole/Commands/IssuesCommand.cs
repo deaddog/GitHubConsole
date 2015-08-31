@@ -271,7 +271,7 @@ namespace GitHubConsole.Commands
         {
             if (!labels.IsSet)
                 return true;
-            
+
             List<string> lc = lbls.Select(x => x.ToLower()).ToList();
 
             var par = new Stack<string>(labels.Value.Select(x => x.ToLower()));
@@ -366,128 +366,24 @@ namespace GitHubConsole.Commands
                            let n = v.Assignee == null ? "" : v.Assignee.Login
                            select n.Length).Max();
 
-            string format = outputFormat.Value.Replace("\\n", "\n");
+            Formatter formatter = new Formatter();
 
-            IssuePrinter printer = new IssuePrinter(len, namelen, format);
-            foreach (var v in issues)
-                printer.Print(v);
-        }
+            formatter.Variables.Add<Issue>("number", x => x.Number, x => (x?.ClosedAt == null) ? "Issue_Open" : "Issue_Closed", len);
+            formatter.Variables.Add<Issue>("assignee", x => x.Assignee?.Login ?? "", x => (x?.Assignee?.Login == GitHub.CurrentUser?.Login) ? "Issue_User_Self" : "Issue_User", namelen);
+            formatter.Variables.Add<Issue>("title", x => ColorConsole.EscapeColor(x.Title), null, null);
+            formatter.Variables.Add<Issue>("description", x => ColorConsole.EscapeColor(x.Body), null, null);
+            formatter.Variables.Add<Label>("label", x => x.Name, x => ColorResolver.GetConsoleColor(x), null);
 
-        private class IssuePrinter : FormattedPrinter
-        {
-            private Issue issue;
-            private Label label;
+            formatter.Conditions.Add<Issue>("labels", x => x.Labels.Count > 0);
+            formatter.Conditions.Add<Issue>("assignee", x => x.Assignee != null);
+            formatter.Conditions.Add<Issue>("open", x => x.State == ItemState.Open);
+            formatter.Conditions.Add<Issue>("closed", x => x.State == ItemState.Closed);
+            formatter.Conditions.Add<Issue>("mine", x => x?.Assignee?.Login == GitHub.CurrentUser?.Login);
+            formatter.Conditions.Add<Issue>("description", x => x.Body != null && x.Body.Length > 0);
 
-            private readonly int maxNumberWidth;
-            private readonly int maxAssigneeWidth;
+            formatter.Functions.AddList("labels", (Issue x) => x.Labels, " ");
 
-            public IssuePrinter(int maxNumberWidth, int maxAssigneeWidth, string format)
-                : base(format)
-            {
-                this.issue = null;
-                this.label = null;
-
-                this.maxNumberWidth = maxNumberWidth;
-                this.maxAssigneeWidth = maxAssigneeWidth;
-            }
-
-            public void Print(Issue issue)
-            {
-                this.issue = issue;
-                PrintFormatLine();
-            }
-
-            protected override string GetVariable(string variable)
-            {
-                switch (variable)
-                {
-                    case "number": return issue.Number.ToString();
-
-                    case "assignee": return issue.Assignee?.Login ?? "";
-
-                    case "title": return issue.Title == null ? "" : ColorConsole.EscapeColor(issue.Title);
-                    case "description": return issue.Body == null ? "" : ColorConsole.EscapeColor(issue.Body);
-
-                    case "label": return label.Name;
-
-                    default:
-                        return base.GetVariable(variable);
-                }
-            }
-            protected override int? GetAlignedLength(string variable)
-            {
-                switch (variable)
-                {
-                    case "number": return maxNumberWidth;
-                    case "assignee": return maxAssigneeWidth;
-
-                    default: return base.GetAlignedLength(variable);
-                }
-            }
-            protected override string GetAutoColor(string variable)
-            {
-                switch (variable)
-                {
-                    case "number": return (issue?.ClosedAt == null) ? "Issue_Open" : "Issue_Closed";
-
-                    case "assignee": return (issue?.Assignee?.Login == GitHub.CurrentUser?.Login) ? "Issue_User_Self" : "Issue_User";
-
-                    case "label": return label == null ? string.Empty : ColorResolver.GetConsoleColor(label);
-
-                    default: return base.GetAutoColor(variable);
-                }
-            }
-
-            protected override bool? ValidateCondition(string condition)
-            {
-                switch (condition)
-                {
-                    case "labels": return issue.Labels.Count > 0;
-                    case "assignee": return issue.Assignee != null;
-                    case "open": return issue.State == ItemState.Open;
-                    case "closed": return issue.State == ItemState.Closed;
-                    case "mine": return issue?.Assignee?.Login == GitHub.CurrentUser?.Login;
-                    case "description": return issue.Body != null && issue.Body.Length > 0;
-                    default: return base.ValidateCondition(condition);
-                }
-            }
-            protected override string EvaluateFunction(string function, string[] args)
-            {
-                switch (function)
-                {
-                    case "labels":
-                        if (args.Length == 1)
-                            return labelsFunction(args[0], " ", " ");
-                        else if (args.Length == 2)
-                            return labelsFunction(args[0], args[1], args[1]);
-                        else if (args.Length >= 3)
-                            return labelsFunction(args[0], args[1], args[2]);
-                        else
-                            return base.EvaluateFunction(function, args);
-
-                    default: return base.EvaluateFunction(function, args);
-                }
-            }
-
-            private string labelsFunction(string format, string separator1, string separator2)
-            {
-                if (issue.Labels.Count == 0)
-                    return string.Empty;
-
-                label = issue.Labels[0];
-                string res = Evaluate(format);
-
-                if (issue.Labels.Count == 1)
-                    return res;
-
-                label = issue.Labels[1];
-                for (int i = 2; i < issue.Labels.Count; i++)
-                {
-                    res += separator1 + Evaluate(format);
-                    label = issue.Labels[i];
-                }
-                return res + separator2 + Evaluate(format);
-            }
+            formatter.WriteLines(issues, outputFormat.Value.Replace("\\n", "\n"));
         }
 
         private Label[] selectLabels(string header, Label[] knownLabelNames, IEnumerable<string> preSelected)

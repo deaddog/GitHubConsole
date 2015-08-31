@@ -1,5 +1,5 @@
 ﻿using CommandLineParsing;
-using System;
+using System.Linq;
 using System.Collections.Generic;
 
 namespace GitHubConsole.Commands
@@ -82,46 +82,18 @@ namespace GitHubConsole.Commands
 
             if (shouldList)
             {
-                bool any = false;
-                ConfigPrinter printer = new ConfigPrinter(format.Value);
+                var confList = iconf.GetAll().ToArray();
 
-                foreach (var pair in iconf.GetAll())
-                {
-                    any = true;
-                    printer.Print(pair);
-                }
+                Formatter formatter = new Formatter();
+                formatter.Variables.Add<KeyValuePair<string, string>>("key", x => x.Key, null, null);
+                formatter.Variables.Add<KeyValuePair<string, string>>("value", x => ColorConsole.EscapeColor(x.Value), null, null);
 
-                if (!any && all.IsSet)
+                formatter.WriteLines(confList, format.Value);
+
+                if (confList.Length == 0 && all.IsSet)
                     ColorConsole.WriteLine("[DarkCyan:Both local and global configuration files are empty.");
-                else if (!any)
+                else if (confList.Length == 0)
                     ColorConsole.WriteLine($"[DarkCyan:{(global.IsSet ? "Global" : "Local")} configuration file is empty.]");
-            }
-        }
-
-        private class ConfigPrinter : FormattedPrinter
-        {
-            private KeyValuePair<string, string> pair;
-
-            public ConfigPrinter(string format)
-                :base(format)
-            {
-            }
-
-            public void Print(KeyValuePair<string,string> pair)
-            {
-                this.pair = pair;
-                PrintFormatLine();
-            }
-
-            protected override string GetVariable(string variable)
-            {
-                switch (variable)
-                {
-                    case "key":return pair.Key;
-                    case "value":return ColorConsole.EscapeColor(pair.Value);
-
-                    default: return base.GetVariable(variable);
-                }
             }
         }
     }
