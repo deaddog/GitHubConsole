@@ -368,6 +368,11 @@ namespace GitHubConsole.Commands
 
             Formatter formatter = new Formatter();
 
+            formatter.Variables.Add<Issue>("number", x => x.Number, x => (x?.ClosedAt == null) ? "Issue_Open" : "Issue_Closed", len);
+            formatter.Variables.Add<Issue>("assignee", x => x.Assignee?.Login ?? "", x => (x?.Assignee?.Login == GitHub.CurrentUser?.Login) ? "Issue_User_Self" : "Issue_User", namelen);
+            formatter.Variables.Add<Issue>("title", x => ColorConsole.EscapeColor(x.Title), null, null);
+            formatter.Variables.Add<Issue>("description", x => ColorConsole.EscapeColor(x.Body), null, null);
+            formatter.Variables.Add<Label>("label", x => x.Name, x => ColorResolver.GetConsoleColor(x), null);
 
             formatter.WriteLines(issues, outputFormat.Value.Replace("\\n", "\n"));
         }
@@ -394,47 +399,6 @@ namespace GitHubConsole.Commands
             {
                 this.issue = issue;
                 PrintFormatLine();
-            }
-
-            protected override string GetVariable(string variable)
-            {
-                switch (variable)
-                {
-                    case "number": return issue.Number.ToString();
-
-                    case "assignee": return issue.Assignee?.Login ?? "";
-
-                    case "title": return issue.Title == null ? "" : ColorConsole.EscapeColor(issue.Title);
-                    case "description": return issue.Body == null ? "" : ColorConsole.EscapeColor(issue.Body);
-
-                    case "label": return label.Name;
-
-                    default:
-                        return base.GetVariable(variable);
-                }
-            }
-            protected override int? GetAlignedLength(string variable)
-            {
-                switch (variable)
-                {
-                    case "number": return maxNumberWidth;
-                    case "assignee": return maxAssigneeWidth;
-
-                    default: return base.GetAlignedLength(variable);
-                }
-            }
-            protected override string GetAutoColor(string variable)
-            {
-                switch (variable)
-                {
-                    case "number": return (issue?.ClosedAt == null) ? "Issue_Open" : "Issue_Closed";
-
-                    case "assignee": return (issue?.Assignee?.Login == GitHub.CurrentUser?.Login) ? "Issue_User_Self" : "Issue_User";
-
-                    case "label": return label == null ? string.Empty : ColorResolver.GetConsoleColor(label);
-
-                    default: return base.GetAutoColor(variable);
-                }
             }
 
             protected override bool? ValidateCondition(string condition)
