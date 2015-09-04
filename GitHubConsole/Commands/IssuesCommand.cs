@@ -82,6 +82,7 @@ namespace GitHubConsole.Commands
             Validator.AddIfFirstNotRest(assignee, hasAssignee, noAssignee, notAssignee);
             Validator.AddIfFirstNotRest(notAssignee, hasAssignee, noAssignee);
 
+            Validator.AddOnlyOne(close, create);
             Validator.AddOnlyOne(edit, create);
             Validator.AddIfFirstNotRest(edit, setTitle, setDescription);
 
@@ -126,6 +127,9 @@ namespace GitHubConsole.Commands
                 if (open.IsSet || closed.IsSet || all.IsSet || labels.IsSet || hasAssignee.IsSet || noAssignee.IsSet || assignee.IsSet || notAssignee.IsSet)
                     return "Issue filtering cannot be applied when specifying specific issues or creating new ones.";
             }
+
+            if (issuesIn.Value.Length == 0 && close.IsSet)
+                return $"You must specify which issue to close:\n  [Example:github issues 2 {close.Name}]";
 
             if (setTitle.IsSet && !issuesIn.IsSet && !create.IsSet)
                 return "You much specify the issue to which the title is assigned.";
