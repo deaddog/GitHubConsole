@@ -49,6 +49,8 @@ namespace GitHubConsole.Commands
 
         [Name("--create"), Description("Creates a new issue.")]
         private readonly FlagParameter create = null;
+        [Name("--close"), Description("Closes an issue.")]
+        private readonly FlagParameter close = null;
 
         [Name("--title"), Description("Sets the title of an issue.")]
         private readonly Parameter<string> setTitle = null;
@@ -80,6 +82,7 @@ namespace GitHubConsole.Commands
             Validator.AddIfFirstNotRest(assignee, hasAssignee, noAssignee, notAssignee);
             Validator.AddIfFirstNotRest(notAssignee, hasAssignee, noAssignee);
 
+            Validator.AddOnlyOne(close, create);
             Validator.AddOnlyOne(edit, create);
             Validator.AddIfFirstNotRest(edit, setTitle, setDescription);
 
@@ -124,6 +127,9 @@ namespace GitHubConsole.Commands
                 if (open.IsSet || closed.IsSet || all.IsSet || labels.IsSet || hasAssignee.IsSet || noAssignee.IsSet || assignee.IsSet || notAssignee.IsSet)
                     return "Issue filtering cannot be applied when specifying specific issues or creating new ones.";
             }
+
+            if (issuesIn.Value.Length == 0 && close.IsSet)
+                return $"You must specify which issue to close:\n  [Example:github issues 2 {close.Name}]";
 
             if (setTitle.IsSet && !issuesIn.IsSet && !create.IsSet)
                 return "You much specify the issue to which the title is assigned.";
@@ -314,7 +320,7 @@ namespace GitHubConsole.Commands
 
                 issues = new List<Issue>(1) { issue };
             }
-            else if (take.IsSet || drop.IsSet || setLabels.IsSet || remLabels.IsSet || editLabels.IsSet || setTitle.IsSet || setDescription.IsSet || edit.IsSet)
+            else if (close.IsSet || take.IsSet || drop.IsSet || setLabels.IsSet || remLabels.IsSet || editLabels.IsSet || setTitle.IsSet || setDescription.IsSet || edit.IsSet)
             {
                 var allLabels = editLabels.IsSet ? GitHub.Client.Issue.Labels.GetAllForRepository(GitHub.Username, GitHub.Project).Result.ToArray() : new Label[0];
                 for (int i = 0; i < issues.Count; i++)
@@ -323,6 +329,7 @@ namespace GitHubConsole.Commands
                     if (take.IsSet) update.Assignee = assignUser;
                     else if (drop.IsSet) update.Assignee = null;
                     else update.Assignee = issues[i].Assignee?.Login;
+                    if (close.IsSet) update.State = ItemState.Closed;
 
                     if (setTitle.IsSet || edit.IsSet)
                         update.Title = setTitle.Value.Trim();
