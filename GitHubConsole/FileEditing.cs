@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -30,10 +31,10 @@ namespace GitHubConsole
             string application = editorConfigKey ?? Config.Default["generic.editor"] ?? "%f";
 
             if (application.Contains("%f"))
-                using (var p = System.Diagnostics.Process.Start(application.Replace("%f", filepath)))
+                using (var p = Process.Start(application.Replace("%f", filepath)))
                     p.WaitForExit();
             else
-                using (var p = System.Diagnostics.Process.Start(application, filepath))
+                using (var p = Process.Start(application, filepath))
                     p.WaitForExit();
         }
     }
