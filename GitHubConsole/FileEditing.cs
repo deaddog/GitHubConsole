@@ -32,6 +32,11 @@ namespace GitHubConsole
             filepath = "\"" + filepath + "\"";
 
             if (application.Contains("%f"))
+                application = application.Replace("%f", filepath);
+            else
+                application = application + " " + filepath;
+
+            if (application.Contains("%f"))
                 using (var p = Process.Start(application.Replace("%f", filepath)))
                     p.WaitForExit();
             else
