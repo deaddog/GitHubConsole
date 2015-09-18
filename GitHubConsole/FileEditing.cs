@@ -29,6 +29,7 @@ namespace GitHubConsole
         public static void OpenAndEdit(string filepath, string editorConfigKey = null)
         {
             string application = editorConfigKey ?? Config.Default["generic.editor"] ?? "%f";
+            filepath = "\"" + filepath + "\"";
 
             if (application.Contains("%f"))
                 using (var p = Process.Start(application.Replace("%f", filepath)))
