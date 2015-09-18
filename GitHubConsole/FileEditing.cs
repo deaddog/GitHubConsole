@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -28,13 +29,16 @@ namespace GitHubConsole
         public static void OpenAndEdit(string filepath, string editorConfigKey = null)
         {
             string application = editorConfigKey ?? Config.Default["generic.editor"] ?? "%f";
+            filepath = "\"" + filepath + "\"";
 
             if (application.Contains("%f"))
-                using (var p = System.Diagnostics.Process.Start(application.Replace("%f", filepath)))
-                    p.WaitForExit();
+                application = application.Replace("%f", filepath);
             else
-                using (var p = System.Diagnostics.Process.Start(application, filepath))
-                    p.WaitForExit();
+                application = application + " " + filepath;
+
+            var parts = CommandLineParsing.Command.SimulateParse(application);
+            using (var p = Process.Start(parts[0], string.Join(" ", parts.Skip(1))))
+                p.WaitForExit();
         }
     }
 }
