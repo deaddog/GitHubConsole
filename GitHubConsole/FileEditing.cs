@@ -36,12 +36,9 @@ namespace GitHubConsole
             else
                 application = application + " " + filepath;
 
-            if (application.Contains("%f"))
-                using (var p = Process.Start(application.Replace("%f", filepath)))
-                    p.WaitForExit();
-            else
-                using (var p = Process.Start(application, filepath))
-                    p.WaitForExit();
+            var parts = CommandLineParsing.Command.SimulateParse(application);
+            using (var p = Process.Start(parts[0], string.Join(" ", parts.Skip(1))))
+                p.WaitForExit();
         }
     }
 }
