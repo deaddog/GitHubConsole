@@ -38,6 +38,11 @@ namespace GitHubConsole.Commands
             set.Validator.Add(x => x.Length == 2,
                 "Setting config values requires exactly two arguments:\n" +
                 $"  [Example:github config {set.Name} <key> <value>]");
+            set.Validator.Add(x => Configuration.IsKeyValid(x[0]), "Configuration keys must start with a letter and be letter and numbers only.\n\n" +
+                "   <key>.<subkey> = <value>\n" +
+                "   [Example:abc.def = <value>]\n" +
+                "   <key>.<subkey>.<subkey> = <value>\n" +
+                "   [Example:a12.b34.c56 = <value>]");
             set.Callback += () => setValues.Add(set.Value[0], set.Value[1]);
 
             remove.Validator.Add(x => x.Length > 0,
