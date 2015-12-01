@@ -48,9 +48,6 @@ namespace GitHubConsole
         {
             get
             {
-                if (!accessPath ?? false)
-                    throw new InvalidOperationException($"{nameof(RepositoryStorage)} cannot be retrieved before running the {nameof(ValidateGitDirectory)} method.");
-
                 var roamingPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create);
 
                 string dir = Path.Combine(roamingPath, "DeadDog", "GitHubConsole");
