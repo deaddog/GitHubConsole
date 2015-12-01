@@ -15,8 +15,8 @@ namespace GitHubConsole.Commands
         [Name("--format", "-f"), Description("Allows for describing an output format when listing issues.")]
         private readonly Parameter<string> outputFormat = null;
 
-        [Name("--open", "-o"), Description("List issues that are currently open.")]
-        private readonly FlagParameter open = null;
+        [Name("--opened", "-o"), Description("List issues that are currently open.")]
+        private readonly FlagParameter opened = null;
         [Name("--closed", "-c"), Description("List issues that are currently closed.")]
         private readonly FlagParameter closed = null;
         [Name("--all", "-a"), Description("List issues that are currently either open or closed.")]
@@ -126,7 +126,7 @@ namespace GitHubConsole.Commands
 
             if (issuesIn.Value.Length > 0 || create.IsSet)
             {
-                if (open.IsSet || closed.IsSet || all.IsSet || labels.IsSet || hasAssignee.IsSet || noAssignee.IsSet || assignee.IsSet || notAssignee.IsSet)
+                if (opened.IsSet || closed.IsSet || all.IsSet || labels.IsSet || hasAssignee.IsSet || noAssignee.IsSet || assignee.IsSet || notAssignee.IsSet)
                     return "Issue filtering cannot be applied when specifying specific issues or creating new ones.";
             }
 
@@ -258,7 +258,7 @@ namespace GitHubConsole.Commands
             switch (state)
             {
                 case ItemState.Closed: return all.IsSet || closed.IsSet;
-                case ItemState.Open: return all.IsSet || open.IsSet || !closed.IsSet;
+                case ItemState.Open: return all.IsSet || opened.IsSet || !closed.IsSet;
             }
             return false;
         }
