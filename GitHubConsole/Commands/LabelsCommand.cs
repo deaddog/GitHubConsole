@@ -92,6 +92,8 @@ namespace GitHubConsole.Commands
 
         public LabelsCommand()
         {
+            Validator.Add(GitHub.ValidateGitDirectory);
+
             name.Validator.Add(x => !ExistingLabels.Exists(x), x => $"A label called {x} already exists.");
             color.Validator.Add(x => x.Length == 0 || Regex.IsMatch(x, "#?[0-9a-f]{6}") || ExistingLabels.Exists(x), "You must specify a valid hex color value (or the name of an existing label).");
             color.Callback += () => color.Value = color.Value.TrimStart('#');

@@ -67,6 +67,8 @@ namespace GitHubConsole.Commands
 
         public IssuesCommand()
         {
+            Validator.Add(GitHub.ValidateGitDirectory);
+
             outputFormat.SetDefault(Config.Default["issues.format"] ?? "[auto:$+number] [auto:$assignee+] $title ?labels{[DarkYellow:(]@labels{[auto:$label]@ }[DarkYellow:)]}");
             assignee.Validator.Add(x => x.Length > 0, "A user must be specified for the " + assignee.Name + " parameter.");
             notAssignee.Validator.Add(x => x.Length > 0, "A user must be specified for the " + assignee.Name + " parameter.");
