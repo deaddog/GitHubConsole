@@ -19,6 +19,7 @@ namespace GitHubConsole.Commands
 
         public GoCommand()
         {
+            Validator.Add(GitHub.ValidateGitDirectory);
             Validator.AddOnlyOne(issues, issue, labels, wiki);
         }
 

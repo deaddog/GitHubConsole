@@ -54,6 +54,8 @@ namespace GitHubConsole.Commands
             this.Validator.AddIfFirstNotRest(all, clear, set, remove, edit);
             this.Validator.AddIfFirstNotRest(edit, clear, set, remove);
             this.Validator.AddOnlyOne(global, all);
+            this.Validator.Add(() => global.IsSet || GitHub.IsGitRepository(), "Unable to use local configuration of non-git directory.\n" +
+                "Use the [example:--global] parameter to use global configuration instead.");
         }
 
         protected override void Execute()

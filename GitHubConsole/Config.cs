@@ -24,9 +24,22 @@ namespace GitHubConsole
             group = null;
         }
 
-        public static Configuration Local => local ?? (local = new Configuration(LocalPath));
+        public static Configuration Local => local ?? (local = GitHub.IsGitRepository() ? new Configuration(LocalPath) : null);
         public static Configuration Global => global ?? (global = new Configuration(GlobalPath));
 
-        public static IConfiguration Default => group ?? (group = new ConfigurationGroup(Local, Global));
+        public static IConfiguration Default
+        {
+            get
+            {
+                if (group == null)
+                {
+                    if (Local == null)
+                        group = Global;
+                    else
+                        group = new ConfigurationGroup(Local, Global);
+                }
+                return group;
+            }
+        }
     }
 }

@@ -15,7 +15,7 @@ namespace GitHubConsole
         private static CachedGitHubClient client;
         private static User currentUser;
         private static Message validated;
-        private static bool accessPath = false;
+        private static bool? accessPath = null;
 
         private static Credentials cred;
         private static string username;
@@ -28,16 +28,16 @@ namespace GitHubConsole
         public static string Project => ensureValidated(nameof(Project), project);
 
         public static string RepositoryRoot => ensurePath(nameof(RepositoryRoot), repoRoot);
-        public static string RepositoryGirDirectory => ensurePath(nameof(RepositoryGirDirectory), repoGitDir);
+        public static string RepositoryGitDirectory => ensurePath(nameof(RepositoryGitDirectory), repoGitDir);
 
         public static string RepositoryStorage
         {
             get
             {
-                if (!accessPath)
+                if (!accessPath ?? false)
                     throw new InvalidOperationException($"{nameof(RepositoryStorage)} cannot be retrieved before running the {nameof(ValidateGitDirectory)} method.");
 
-                string dir = Path.Combine(RepositoryGirDirectory, "githubconsole");
+                string dir = Path.Combine(RepositoryGitDirectory, "githubconsole");
                 if (!Directory.Exists(dir))
                     Directory.CreateDirectory(dir);
 
@@ -48,9 +48,6 @@ namespace GitHubConsole
         {
             get
             {
-                if (!accessPath)
-                    throw new InvalidOperationException($"{nameof(RepositoryStorage)} cannot be retrieved before running the {nameof(ValidateGitDirectory)} method.");
-
                 var roamingPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create);
 
                 string dir = Path.Combine(roamingPath, "DeadDog", "GitHubConsole");
@@ -63,7 +60,7 @@ namespace GitHubConsole
 
         private static T ensurePath<T>(string name, T value)
         {
-            if (!accessPath)
+            if (!accessPath ?? false)
                 throw new InvalidOperationException($"{name} cannot be retrieved before running the {nameof(ValidateGitDirectory)} method.");
 
             return value;
@@ -96,11 +93,14 @@ namespace GitHubConsole
         public static CachedGitHubClient Client => ensureValidated(nameof(Client), ref client, () => new CachedGitHubClient(new ProductHeaderValue(clientHeader), cred));
         public static User CurrentUser => ensureValidated(nameof(CurrentUser), ref currentUser, () => Client?.User?.Current().Result);
 
-        private static bool isGitRepo()
+        public static bool IsGitRepository()
         {
 #if DEBUG
             Directory.SetCurrentDirectory(@"C:\Users\Mikkel\Documents\Git\ghconsole_test");
 #endif
+            if (accessPath.HasValue)
+                return accessPath.Value;
+
             System.Diagnostics.Process p = new System.Diagnostics.Process()
             {
                 StartInfo = new System.Diagnostics.ProcessStartInfo("git.exe", "rev-parse --git-dir --show-toplevel")
@@ -130,6 +130,7 @@ namespace GitHubConsole
             }
 
             p.Dispose();
+            accessPath = ok;
 
             return ok;
         }
@@ -214,11 +215,9 @@ namespace GitHubConsole
             if (validated != null)
                 return validated;
 
-            if (!isGitRepo())
+            if (!IsGitRepository())
                 return validated = "The current directory is not part of a Git repository.\n" +
                     "GitHub commands cannot be executed.";
-
-            accessPath = true;
 
             if (!findGitHubRemote())
                 return validated = "The current repository has no GitHub.com remotes.\n" +
