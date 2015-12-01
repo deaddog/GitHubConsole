@@ -49,6 +49,8 @@ namespace GitHubConsole.Commands
 
         [Name("--create"), Description("Creates a new issue.")]
         private readonly FlagParameter create = null;
+        [Name("--open"), Description("Opens an issue.")]
+        private readonly FlagParameter open = null;
         [Name("--close"), Description("Closes an issue.")]
         private readonly FlagParameter close = null;
 
@@ -84,7 +86,7 @@ namespace GitHubConsole.Commands
             Validator.AddIfFirstNotRest(assignee, hasAssignee, noAssignee, notAssignee);
             Validator.AddIfFirstNotRest(notAssignee, hasAssignee, noAssignee);
 
-            Validator.AddOnlyOne(close, create);
+            Validator.AddOnlyOne(close, open, create);
             Validator.AddOnlyOne(edit, create);
             Validator.AddIfFirstNotRest(edit, setTitle, setDescription);
 
@@ -132,6 +134,8 @@ namespace GitHubConsole.Commands
 
             if (issuesIn.Value.Length == 0 && close.IsSet)
                 return $"You must specify which issue to close:\n  [Example:github issues 2 {close.Name}]";
+            if (issuesIn.Value.Length == 0 && open.IsSet)
+                return $"You must specify which issue to open:\n  [Example:github issues 2 {open.Name}]";
 
             if (setTitle.IsSet && !issuesIn.IsSet && !create.IsSet)
                 return "You much specify the issue to which the title is assigned.";
@@ -322,7 +326,7 @@ namespace GitHubConsole.Commands
 
                 issues = new List<Issue>(1) { issue };
             }
-            else if (close.IsSet || take.IsSet || drop.IsSet || setLabels.IsSet || remLabels.IsSet || editLabels.IsSet || setTitle.IsSet || setDescription.IsSet || edit.IsSet)
+            else if (close.IsSet || open.IsSet || take.IsSet || drop.IsSet || setLabels.IsSet || remLabels.IsSet || editLabels.IsSet || setTitle.IsSet || setDescription.IsSet || edit.IsSet)
             {
                 var allLabels = editLabels.IsSet ? GitHub.Client.Issue.Labels.GetAllForRepository(GitHub.Username, GitHub.Project).Result.ToArray() : new Label[0];
                 for (int i = 0; i < issues.Count; i++)
@@ -332,6 +336,7 @@ namespace GitHubConsole.Commands
                     else if (drop.IsSet) update.Assignee = null;
                     else update.Assignee = issues[i].Assignee?.Login;
                     if (close.IsSet) update.State = ItemState.Closed;
+                    if (open.IsSet) update.State = ItemState.Open;
 
                     if (setTitle.IsSet || edit.IsSet)
                         update.Title = setTitle.Value.Trim();
