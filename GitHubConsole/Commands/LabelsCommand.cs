@@ -136,6 +136,8 @@ namespace GitHubConsole.Commands
                     ColorConsole.WriteLine($"Updated [{ColorResolver.GetConsoleColor(l)}:{l.Name}] -> [{ColorResolver.GetConsoleColor(l2)}:{l2.Name}].");
                 }
             }
+            else if (prune.IsSet)
+                PruneLabels();
             else
                 foreach (var l in ExistingLabels.GetLabels())
                     ColorConsole.WriteLine($"[{ColorResolver.GetConsoleColor(l)}:{l.Name}]");
