@@ -354,6 +354,10 @@ namespace GitHubConsole.Commands
                     }
                     else
                     {
+                        if (setLabels.Value.Length > 0 || remLabels.Value.Length > 0)
+                            foreach (var l in issues[i].Labels)
+                                update.AddLabel(l.Name);
+
                         foreach (var l in setLabels.Value)
                             if (update.Labels == null || !update.Labels.Contains(l))
                                 update.AddLabel(l);
