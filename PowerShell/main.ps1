@@ -30,3 +30,16 @@ function script:githubCommands($command)
 {
   @("config", "issues", "go", "labels") | Where { $_ -match "^" + $command }
 }
+function script:githubCommandsFromApp([string]$dummy)
+{
+  $output = github help
+  foreach ($line in $output) {
+    if ($line -match '^  ([^ ]+)') {
+      #$line = $matches[1]
+      #if ($line -match "^" + $command) {
+        #$line
+      #}
+      $matches[1]
+    }
+  }
+}
