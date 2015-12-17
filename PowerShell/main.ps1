@@ -28,7 +28,7 @@ function GitHubTabExpansion($lastBlock) {
 
 function script:githubCommands($command)
 {
-  @("config", "issues", "go", "labels") | Where { $_ -match "^" + $command }
+  githubCommandsFromApp "" | Where { $_ -match "^" + $command }
 }
 function script:githubCommandsFromApp([string]$dummy)
 {
