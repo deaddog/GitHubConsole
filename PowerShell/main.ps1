@@ -26,9 +26,13 @@ function GitHubTabExpansion($lastBlock) {
   }
 }
 
+$global:githubListOfAvailableCommands = $null
 function script:githubCommands($command)
 {
-  githubCommandsFromApp "" | Where { $_ -match "^" + $command }
+  if ($global:githubListOfAvailableCommands -eq $null) {
+    $global:githubListOfAvailableCommands = githubCommandsFromApp ""
+  }
+  $global:githubListOfAvailableCommands | Where { $_ -match "^" + $command }
 }
 function script:githubCommandsFromApp([string]$dummy)
 {
