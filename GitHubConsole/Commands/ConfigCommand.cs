@@ -35,26 +35,26 @@ namespace GitHubConsole.Commands
         {
             format.SetDefault(Config.Default["config.format"] ?? "$key=$value");
 
-            set.Validator.Add(x => x.Length == 2,
+            set.Validator.Ensure.That(x => x.Length == 2,
                 "Setting config values requires exactly two arguments:\n" +
                 $"  [Example:github config {set.Name} <key> <value>]");
-            set.Validator.Add(x => Configuration.IsKeyValid(x[0]), "Configuration keys must start with a letter and be letter and numbers only.\n\n" +
+            set.Validator.Ensure.That(x => Configuration.IsKeyValid(x[0]), "Configuration keys must start with a letter and be letter and numbers only.\n\n" +
                 "   <key>.<subkey> = <value>\n" +
                 "   [Example:abc.def = <value>]\n" +
                 "   <key>.<subkey>.<subkey> = <value>\n" +
                 "   [Example:a12.b34.c56 = <value>]");
             set.Callback += () => setValues.Add(set.Value[0], set.Value[1]);
 
-            remove.Validator.Add(x => x.Length > 0,
+            remove.Validator.Fail.If(x => x.Length == 0,
                 "Removing config keys requires that you specify at least one key to remove:\n" +
                 $"  [Example:github config {remove.Name} <key>]\n" +
                 $"  [Example:github config {remove.Name} <key1> <key2> <key3>...]");
             remove.Callback += () => removeKeys.AddRange(remove.Value);
 
-            this.Validator.AddIfFirstNotRest(all, clear, set, remove, edit);
-            this.Validator.AddIfFirstNotRest(edit, clear, set, remove);
-            this.Validator.AddOnlyOne(global, all);
-            this.Validator.Add(() => global.IsSet || GitHub.IsGitRepository(), "Unable to use local configuration of non-git directory.\n" +
+            this.Validator.Ensure.IfFirstNotRest(all, clear, set, remove, edit);
+            this.Validator.Ensure.IfFirstNotRest(edit, clear, set, remove);
+            this.Validator.Ensure.ZeroOrOne(global, all);
+            this.Validator.Ensure.That(() => global.IsSet || GitHub.IsGitRepository(), "Unable to use local configuration of non-git directory.\n" +
                 "Use the [example:--global] parameter to use global configuration instead.");
         }
 

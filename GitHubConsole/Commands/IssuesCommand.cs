@@ -72,28 +72,28 @@ namespace GitHubConsole.Commands
             PreValidator.Add(GitHub.ValidateGitDirectory);
 
             outputFormat.SetDefault(Config.Default["issues.format"] ?? "[auto:$+number] [auto:$assignee+] $title ?labels{[DarkYellow:(]@labels{[auto:$label]@ }[DarkYellow:)]}");
-            assignee.Validator.Add(x => x.Length > 0, "A user must be specified for the " + assignee.Name + " parameter.");
-            notAssignee.Validator.Add(x => x.Length > 0, "A user must be specified for the " + assignee.Name + " parameter.");
-            labels.Validator.Add(x => x.Length > 0, "At least one label name must be supplied for the " + labels.Name + " parameter.");
+            assignee.Validator.Fail.If(x => x.Length == 0, "A user must be specified for the " + assignee.Name + " parameter.");
+            notAssignee.Validator.Fail.If(x => x.Length == 0, "A user must be specified for the " + assignee.Name + " parameter.");
+            labels.Validator.Fail.If(x => x.Length == 0, "At least one label name must be supplied for the " + labels.Name + " parameter.");
 
-            setLabels.Validator.Add(x => x.Length > 0, "You must specify a set of labels to set:\n"
+            setLabels.Validator.Fail.If(x => x.Length == 0, "You must specify a set of labels to set:\n"
                 + "  gihub issues <issues> " + setLabels.Name + " <label1> <label2>...");
-            remLabels.Validator.Add(x => x.Length > 0, "You must specify a set of labels to remove:\n"
+            remLabels.Validator.Fail.If(x => x.Length == 0, "You must specify a set of labels to remove:\n"
                 + "  gihub issues <issues> " + remLabels.Name + " <label1> <label2>...");
 
-            setTitle.Validator.Add(x => x.Trim().Length > 0, "An issue cannot have an empty title.");
+            setTitle.Validator.Fail.If(x => x.Trim().Length == 0, "An issue cannot have an empty title.");
 
-            Validator.AddIfFirstNotRest(assignee, hasAssignee, noAssignee, notAssignee);
-            Validator.AddIfFirstNotRest(notAssignee, hasAssignee, noAssignee);
+            Validator.Ensure.IfFirstNotRest(assignee, hasAssignee, noAssignee, notAssignee);
+            Validator.Ensure.IfFirstNotRest(notAssignee, hasAssignee, noAssignee);
 
-            Validator.AddOnlyOne(close, open, create);
-            Validator.AddOnlyOne(edit, create);
-            Validator.AddIfFirstNotRest(edit, setTitle, setDescription);
+            Validator.Ensure.ZeroOrOne(close, open, create);
+            Validator.Ensure.ZeroOrOne(edit, create);
+            Validator.Ensure.IfFirstNotRest(edit, setTitle, setDescription);
 
-            Validator.AddOnlyOne(editLabels, setLabels);
-            Validator.AddOnlyOne(editLabels, remLabels);
+            Validator.Ensure.ZeroOrOne(editLabels, setLabels);
+            Validator.Ensure.ZeroOrOne(editLabels, remLabels);
 
-            Validator.AddOnlyOne(take, drop);
+            Validator.Ensure.ZeroOrOne(take, drop);
 
             Validator.Add(Validate);
         }

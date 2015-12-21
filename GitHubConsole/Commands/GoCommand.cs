@@ -20,7 +20,7 @@ namespace GitHubConsole.Commands
         public GoCommand()
         {
             PreValidator.Add(GitHub.ValidateGitDirectory);
-            Validator.AddOnlyOne(issues, issue, labels, wiki);
+            Validator.Ensure.ZeroOrOne(issues, issue, labels, wiki);
         }
 
         protected override void Execute()

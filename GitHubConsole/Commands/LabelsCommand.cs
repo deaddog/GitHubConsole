@@ -94,23 +94,24 @@ namespace GitHubConsole.Commands
         {
             PreValidator.Add(GitHub.ValidateGitDirectory);
 
-            name.Validator.Add(x => !ExistingLabels.Exists(x), x => $"A label called {x} already exists.");
-            name.Validator.Add(x => x.Trim().Length > 0, "You must provide a label name.");
+            name.Validator.Fail.If(x => ExistingLabels.Exists(x), x => $"A label called {x} already exists.");
+            name.Validator.Fail.If(x => x.Trim().Length == 0, "You must provide a label name.");
             name.Callback += () => name.Value = name.Value.Trim();
-            color.Validator.Add(x => x.Length == 0 || Regex.IsMatch(x, "#?[0-9a-f]{6}") || ExistingLabels.Exists(x), "You must specify a valid hex color value (or the name of an existing label).");
+            color.Validator.Ensure.That(x =>
+                x.Length == 0 || Regex.IsMatch(x, "#?[0-9a-f]{6}") || ExistingLabels.Exists(x), "You must specify a valid hex color value (or the name of an existing label).");
             color.Callback += () => color.Value = color.Value.TrimStart('#');
 
             labels.Validator.AddForeach(x => ExistingLabels.Exists(x), x => $"The label {x} does not exist.");
 
-            Validator.AddOnlyOne(create, delete, prune);
+            Validator.Ensure.ZeroOrOne(create, delete, prune);
 
-            Validator.AddIfFirstNotRest(delete, name, color);
-            Validator.AddOnlyOne(prune, force);
-            Validator.AddIfFirstNotRest(prune, name, color);
+            Validator.Ensure.IfFirstNotRest(delete, name, color);
+            Validator.Ensure.ZeroOrOne(prune, force);
+            Validator.Ensure.IfFirstNotRest(prune, name, color);
 
-            Validator.Add(() => delete.IsSet && labels.Value.Length == 0 ? "You must specify which labels to delete: \n    [Example:github issues --delete bug]" : Message.NoError);
+            Validator.Fail.If(() => delete.IsSet && labels.Value.Length == 0, "You must specify which labels to delete: \n    [Example:github issues --delete bug]");
 
-            Validator.Add(() => name.IsSet && labels.Value.Length > 1 ? "Label name can only be set for a single label." : Message.NoError);
+            Validator.Fail.If(() => name.IsSet && labels.Value.Length > 1, "Label name can only be set for a single label.");
         }
 
         protected override Message GetHelpMessage()
