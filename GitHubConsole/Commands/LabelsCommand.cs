@@ -94,7 +94,7 @@ namespace GitHubConsole.Commands
         {
             PreValidator.Add(GitHub.ValidateGitDirectory);
 
-            name.Validator.Fail.If(x => ExistingLabels.Exists(x), x => $"A label called {x} already exists.");
+            name.Validator.Fail.If(x => ExistingLabels.Exists(x.Trim()), x => $"A label called {x.Trim()} already exists.");
             name.Validator.Fail.If(x => x.Trim().Length == 0, "You must provide a label name.");
             name.Callback += () => name.Value = name.Value.Trim();
             color.Validator.Ensure.That(x =>
@@ -149,21 +149,16 @@ namespace GitHubConsole.Commands
         private void CreateLabel()
         {
             if (!name.IsSet)
-                name.Value = ColorConsole.ReadLine("Label name: ", validator: name.Validator);
-            name.Value = name.Value?.Trim();
-
-            if (name.Value == null || name.Value.Length == 0)
             {
-                ColorConsole.WriteLine("No name specified. Aborting.");
-                return;
+                name.Prompt("Label name: ");
+                if (!color.IsSet)
+                {
+                    ColorConsole.WriteLine("\nSpecify a label color (in hex-form) or the name of another label from which color should be copied.");
+                    ColorConsole.WriteLine("Leave this empty to select a random color.");
+                    color.Prompt("Label color: ");
+                }
             }
 
-            if (!name.IsSet && !color.IsSet)
-            {
-                ColorConsole.WriteLine("\nSpecify a label color (in hex-form) or the name of another label from which color should be copied.");
-                ColorConsole.WriteLine("Leave this empty to select a random color.");
-                color.Value = ColorConsole.ReadLine("Label color: ", validator: color.Validator);
-            }
             if (color.Value == null || color.Value == string.Empty)
                 color.Value = LabelColors.GetUnusedOrRandom();
             else if (!Regex.IsMatch(color.Value, "#?[0-9a-f]{6}"))
