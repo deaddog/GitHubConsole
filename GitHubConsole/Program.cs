@@ -17,6 +17,8 @@ namespace GitHubConsole
             ColorConsole.Colors["Issue_User_Self"] = ConsoleColor.Cyan;
             ColorConsole.Colors["Issue_User"] = ConsoleColor.DarkCyan;
             ColorConsole.Colors["Issue_Par"] = ConsoleColor.DarkYellow;
+
+            Console.CancelKeyPress += (s, e) => { Console.ResetColor(); Console.CursorVisible = true; };
 #if DEBUG
             Command.SimulateREPL(() => new MainCommand(), "github", "quit", HELP);
 #else
