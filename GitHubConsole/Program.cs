@@ -29,7 +29,7 @@ namespace GitHubConsole
 
                 ColorConsole.WriteLine("GitHub responded to your request with an authentication error:");
                 ColorConsole.WriteLine($"[Red:[{credex.Message}] {credex.StatusCode}]");
-                ColorConsole.WriteLine("Run [Yellow:github config --set authtoken <token>] to set authentication token.");
+                ColorConsole.WriteLine("Run [Yellow:github config --global --set authtoken <token>] to set authentication token.");
             }
 #endif
         }
