@@ -129,6 +129,8 @@ namespace GitHubConsole.Commands
         {
             if (create.IsSet)
                 CreateLabel();
+            else if (delete.IsSet)
+                DeleteLabel();
             else if (name.IsSet || color.IsSet)
             {
                 foreach (var n in labels.Value)
