@@ -26,7 +26,11 @@ namespace GitHubConsole.Commands
         protected override void Execute()
         {
             string url = string.Format("https://github.com/{0}/{1}", GitHub.Username, GitHub.Project) + getPage();
-            System.Diagnostics.Process.Start(url);
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true
+            });
         }
 
         private string getPage()
