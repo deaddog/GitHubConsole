@@ -259,9 +259,9 @@ namespace GitHubConsole.Commands
                 validateIssueAssignee(issue.Assignee) &&
                 validateIssueLabels(issue.Labels.Select(x => x.Name).ToList());
         }
-        private bool validateIssueState(ItemState state)
+        private bool validateIssueState(StringEnum<ItemState> state)
         {
-            switch (state)
+            switch (state.Value)
             {
                 case ItemState.Closed: return all.IsSet || closed.IsSet;
                 case ItemState.Open: return all.IsSet || opened.IsSet || !closed.IsSet;
@@ -310,7 +310,7 @@ namespace GitHubConsole.Commands
                 nIssue.Body = setDescription.Value?.Trim();
 
                 if (take.IsSet)
-                    nIssue.Assignee = assignUser;
+                    nIssue.Assignees.Add(assignUser);
 
                 if (editLabels.IsSet)
                 {
@@ -334,9 +334,9 @@ namespace GitHubConsole.Commands
                 for (int i = 0; i < issues.Count; i++)
                 {
                     var update = issues[i].ToUpdate();
-                    if (take.IsSet) update.Assignee = assignUser;
-                    else if (drop.IsSet) update.Assignee = null;
-                    else update.Assignee = issues[i].Assignee?.Login;
+                    if (take.IsSet) update.AddAssignee(assignUser);
+                    else if (drop.IsSet) update.RemoveAssignee(assignUser);
+
                     if (close.IsSet) update.State = ItemState.Closed;
                     if (open.IsSet) update.State = ItemState.Open;
 
