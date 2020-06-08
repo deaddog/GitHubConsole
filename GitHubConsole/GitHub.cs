@@ -1,5 +1,4 @@
 ﻿using CommandLineParsing;
-using GitHubConsole.CachedGitHub;
 using Octokit;
 using System;
 using System.Collections.Generic;
@@ -12,7 +11,7 @@ namespace GitHubConsole
     {
         private static readonly string clientHeader = "GitHubC#Console";
 
-        private static CachedGitHubClient client;
+        private static IGitHubClient client;
         private static User currentUser;
         private static Message validated;
         private static bool? accessPath = null;
@@ -90,7 +89,7 @@ namespace GitHubConsole
             return value;
         }
 
-        public static CachedGitHubClient Client => ensureValidated(nameof(Client), ref client, () => new CachedGitHubClient(new ProductHeaderValue(clientHeader), cred));
+        public static IGitHubClient Client => ensureValidated(nameof(Client), ref client, () => new GitHubClient(new ProductHeaderValue(clientHeader)) { Credentials = cred });
         public static User CurrentUser => ensureValidated(nameof(CurrentUser), ref currentUser, () => Client?.User?.Current().Result);
 
         public static bool IsGitRepository()
