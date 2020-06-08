@@ -1,4 +1,6 @@
 ﻿using CommandLineParsing;
+using CommandLineParsing.Output;
+using CommandLineParsing.Output.Formatting;
 using Octokit;
 using System;
 using System.Collections.Generic;
@@ -71,7 +73,7 @@ namespace GitHubConsole.Commands
         {
             PreValidator.Add(GitHub.ValidateGitDirectory);
 
-            outputFormat.SetDefault(Config.Default["issues.format"] ?? "[auto:$+number] [auto:$assignee+] $title ?labels{[DarkYellow:(]@labels{[auto:$label]@ }[DarkYellow:)]}");
+            outputFormat.SetDefault(Config.Default["issues.format"] ?? "[auto:$+number] [auto:$assignee+] $title ?labels{[DarkYellow:(]@labels{[auto:$label], }[DarkYellow:)]}");
             assignee.Validator.Fail.If(x => x.Length == 0, "A user must be specified for the " + assignee.Name + " parameter.");
             notAssignee.Validator.Fail.If(x => x.Length == 0, "A user must be specified for the " + assignee.Name + " parameter.");
             labels.Validator.Fail.If(x => x.Length == 0, "At least one label name must be supplied for the " + labels.Name + " parameter.");
@@ -384,24 +386,34 @@ namespace GitHubConsole.Commands
                            let n = v.Assignee == null ? "" : v.Assignee.Login
                            select n.Length).Max();
 
-            Formatter formatter = new Formatter();
+            var formatter = FormatterComposer.Create<Issue>()
+                .With("number", x => x.Number)
+                    .WithAutoColor(x => x.ClosedAt is null ? "Issue_Open" : "Issue_Closed")
+                    .WithPaddedLengthFrom(issues)
+                .With("assignee", x => x.Assignee?.Login ?? "")
+                    .WithAutoColor(x => x.Assignee?.Login == GitHub.CurrentUser?.Login ? "Issue_User_Self" : "Issue_User")
+                    .WithPaddedLengthFrom(issues)
+                .With("title", x => x.Title)
+                .With("description", x => x.Body)
 
-            formatter.Variables.Add<Issue>("number", x => x.Number, x => (x?.ClosedAt == null) ? "Issue_Open" : "Issue_Closed", len);
-            formatter.Variables.Add<Issue>("assignee", x => x.Assignee?.Login ?? "", x => (x?.Assignee?.Login == GitHub.CurrentUser?.Login) ? "Issue_User_Self" : "Issue_User", namelen);
-            formatter.Variables.Add<Issue>("title", x => ColorConsole.EscapeColor(x.Title), null, null);
-            formatter.Variables.Add<Issue>("description", x => ColorConsole.EscapeColor(x.Body), null, null);
-            formatter.Variables.Add<Label>("label", x => x.Name, x => ColorResolver.GetConsoleColor(x), null);
+                .WithListFunction("labels", x => x.Labels, FormatterComposer.Create<Label>()
+                    .With("label", x => x.Name)
+                        .WithAutoColor(ColorResolver.GetConsoleColor)
+                )
 
-            formatter.Conditions.Add<Issue>("labels", x => x.Labels.Count > 0);
-            formatter.Conditions.Add<Issue>("assignee", x => x.Assignee != null);
-            formatter.Conditions.Add<Issue>("open", x => x.State == ItemState.Open);
-            formatter.Conditions.Add<Issue>("closed", x => x.State == ItemState.Closed);
-            formatter.Conditions.Add<Issue>("mine", x => x?.Assignee?.Login == GitHub.CurrentUser?.Login);
-            formatter.Conditions.Add<Issue>("description", x => x.Body != null && x.Body.Length > 0);
+                .WithPredicate("labels", x => x.Labels.Count > 0)
+                .WithPredicate("assignee", x => x.Assignee != null)
+                .WithPredicate("open", x => x.State.Value == ItemState.Open)
+                .WithPredicate("closed", x => x.State.Value == ItemState.Closed)
+                .WithPredicate("mine", x => x.Assignee?.Login == GitHub.CurrentUser?.Login)
+                .WithPredicate("description", x => !string.IsNullOrWhiteSpace(x.Body))
 
-            formatter.Functions.AddList("labels", (Issue x) => x.Labels, " ");
+                .GetFormatter();
 
-            formatter.WriteLines(issues, outputFormat.Value.Replace("\\n", "\n"));
+            var parsedFormat = CommandLineParsing.Output.Formatting.Structure.FormatElement.Parse(outputFormat.Value.Replace("\\n", "\n"));
+
+            foreach (var i in issues)
+                ColorConsole.WriteLine(formatter.Format(parsedFormat, i));
         }
 
         private Label[] selectLabels(string header, Label[] knownLabelNames, IEnumerable<string> preSelected)
@@ -412,10 +424,13 @@ namespace GitHubConsole.Commands
 
             List<string> pre = new List<string>(preSelected);
 
-            var rr = knownLabelNames.MenuSelectMultiple(new MenuSettings() { Cleanup = MenuCleanup.RemoveMenu },
-                x => "[" + ColorResolver.GetConsoleColor(x) + ":" + x.Name + "]",
-                x => "[DarkGray:" + x.Name + "]",
-                x => pre.Contains(x.Name));
+            var rr = knownLabelNames.MenuSelectMultiple
+            (
+                cleanup: MenuCleanup.RemoveMenu,
+                onKeySelector: x => "[" + ColorResolver.GetConsoleColor(x) + ":" + x.Name + "]",
+                offKeySelector: x => "[DarkGray:" + x.Name + "]",
+                selected: x => pre.Contains(x.Name)
+            );
 
             Console.CursorTop = theader;
             Console.WriteLine(new string(' ', header.Length));

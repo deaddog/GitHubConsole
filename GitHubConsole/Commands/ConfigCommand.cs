@@ -1,6 +1,8 @@
 ﻿using CommandLineParsing;
 using System.Linq;
 using System.Collections.Generic;
+using CommandLineParsing.Output.Formatting;
+using CommandLineParsing.Output;
 
 namespace GitHubConsole.Commands
 {
@@ -91,11 +93,15 @@ namespace GitHubConsole.Commands
             {
                 var confList = iconf.GetAll().ToArray();
 
-                Formatter formatter = new Formatter();
-                formatter.Variables.Add<KeyValuePair<string, string>>("key", x => x.Key, null, null);
-                formatter.Variables.Add<KeyValuePair<string, string>>("value", x => ColorConsole.EscapeColor(x.Value), null, null);
+                var formatter = FormatterComposer.Create<KeyValuePair<string, string>>()
+                    .With("key", x => x.Key)
+                    .With("value", x => x.Value)
+                    .GetFormatter();
 
-                formatter.WriteLines(confList, format.Value);
+                var parsedFormat = CommandLineParsing.Output.Formatting.Structure.FormatElement.Parse(format.Value);
+
+                foreach (var c in confList)
+                    ColorConsole.WriteLine(formatter.Format(parsedFormat, c));
 
                 if (confList.Length == 0 && all.IsSet)
                     ColorConsole.WriteLine("[DarkCyan:Both local and global configuration files are empty.");
