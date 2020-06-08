@@ -224,15 +224,8 @@ namespace GitHubConsole
                     "GitHub commands cannot be executed.";
 
             string token = Config.Default["authentication.token"];
-            if (token == null || token == "")
+            if (string.IsNullOrWhiteSpace(token))
             {
-                CredentialManagement.Credential c = new CredentialManagement.Credential() { Target = "git:https://github.com" };
-                if (c.Load())
-                {
-                    cred = new Credentials(c.Username, c.Password);
-                    return validated = Message.NoError;
-                }
-
                 return validated = "Unable to load GitHub authentication token.\n" +
                     "Run [Yellow:github config --set authentication.token <token>] to set.";
             }
